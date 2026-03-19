@@ -2,7 +2,7 @@
 
 CWE_MAP=(
     "cwe89:CWE-89: SQL Injection"
-    # "cwe79:CWE-79: Cross-Site Scripting (XSS)"
+    "cwe79:CWE-79: Cross-Site Scripting (XSS)"
     # "cwe22:CWE-22: Path Traversal"
 )
 

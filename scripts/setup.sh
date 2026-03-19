@@ -78,19 +78,15 @@ done
 # ---------------------------------------------------------------------------
 # Generate API token
 # ---------------------------------------------------------------------------
-GITEA_CONTAINER=$(docker compose -f "$SCRIPTS_DIR/docker-compose.yml" ps -q gitea)
-RAW_OUTPUT=$(docker exec -u git "$GITEA_CONTAINER" \
-    gitea admin user generate-access-token \
-        --username gitadmin \
-        --token-name "bench-$(date +%s)" \
-        --scopes write:repository,read:user,write:issue \
-        --raw 2>&1)
+TOKEN=$(curl -sf -X POST \
+    -H "Content-Type: application/json" \
+    -u "gitadmin:adminpass123" \
+    "http://localhost:${GITEA_PORT}/api/v1/users/gitadmin/tokens" \
+    -d "{\"name\":\"bench-$(date +%s)\",\"scopes\":[\"write:repository\",\"read:user\",\"write:issue\"]}" \
+    | python3 -c "import sys,json; print(json.load(sys.stdin)['sha1'])")
 
-TOKEN=$(echo "$RAW_OUTPUT" | tr -d '[:space:]')
-TOKEN="${TOKEN##*:}"
-
-if [[ -z "$TOKEN" ]] || [[ "$TOKEN" == *"error"* ]] || [[ "$TOKEN" == *"Error"* ]]; then
-    echo "ERROR: Failed to generate Gitea token. Raw output: $RAW_OUTPUT"
+if [[ -z "$TOKEN" ]]; then
+    echo "ERROR: Failed to generate token."
     exit 1
 fi
 

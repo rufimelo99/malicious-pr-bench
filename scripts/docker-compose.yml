@@ -1,5 +1,5 @@
 services:
-  gitea:
+  benchmark:
     image: rufimelo/malicious-pull-requests:${IMAGE_TAG:-cwe89}
     environment:
       - GITEA__database__DB_TYPE=sqlite3
