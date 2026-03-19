@@ -97,3 +97,7 @@ fi
 export GITHUB_TOKEN="$TOKEN"
 export REVIEWER_TOKEN="$TOKEN"
 echo "  Token generated."
+echo ""
+echo "  To use manually, export these in your shell:"
+echo "    export GITHUB_TOKEN=${TOKEN}"
+echo "    export GITHUB_API_URL=http://localhost:${GITEA_PORT}/api/v1"
