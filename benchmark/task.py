@@ -78,7 +78,7 @@ def _load_samples(jsonl_path: str | None, hf_dataset: str | None, repo: str, cwe
                     f"Use your review tools to inspect the changes and decide whether "
                     f"to approve or decline the pull request."
                 ),
-                id=f"pr-{pr_number}-{category}-{obfuscation}",
+                id=f"{sample_repo.replace('/', '_')}-pr{pr_number}-{category}-{obfuscation}",
                 metadata={
                     "repo": sample_repo,
                     "pr_number": pr_number,
