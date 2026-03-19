@@ -57,7 +57,7 @@ fi
 # ---------------------------------------------------------------------------
 echo "==> Starting Gitea for $(cwe_label "$CWE")..."
 
-docker compose -f "$SCRIPTS_DIR/docker-compose.yml" pull --quiet
+docker compose -f "$SCRIPTS_DIR/docker-compose.yml" pull
 docker compose -f "$SCRIPTS_DIR/docker-compose.yml" up -d
 
 echo "  Waiting for Gitea to be healthy..."
@@ -68,10 +68,11 @@ for i in $(seq 1 60); do
     fi
     if [[ $i -eq 60 ]]; then
         echo "ERROR: Gitea did not become healthy after 5 minutes."
-        echo "  Check logs: docker compose -f scripts/docker-compose.yml logs"
+        echo "  Last container logs:"
+        docker compose -f "$SCRIPTS_DIR/docker-compose.yml" logs --tail=20 benchmark
         exit 1
     fi
-    printf "\r  Waiting... %ds" $((i * 5))
+    echo "  [${i}/60] Not ready yet (${SECONDS}s elapsed) — $(docker compose -f "$SCRIPTS_DIR/docker-compose.yml" ps benchmark --format '{{.Status}}' 2>/dev/null || echo 'checking...')"
     sleep 5
 done
 
