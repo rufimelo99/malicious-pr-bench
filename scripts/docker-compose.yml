@@ -1,0 +1,20 @@
+services:
+  gitea:
+    image: rufimelo/malicious-pull-requests:v0.0.0
+    environment:
+      - GITEA__database__DB_TYPE=sqlite3
+      - GITEA__database__PATH=/data/gitea/gitea.db
+      - GITEA__security__INSTALL_LOCK=true
+      - GITEA__security__SECRET_KEY=localdevonlysecretkey
+      - GITEA__security__INTERNAL_TOKEN=localdevonlyinternaltoken
+      - GITEA__server__ROOT_URL=http://localhost:3001/
+      - GITEA__server__HTTP_PORT=3001
+      - GITEA__service__DISABLE_REGISTRATION=true
+      - GITEA__log__LEVEL=Warn
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
