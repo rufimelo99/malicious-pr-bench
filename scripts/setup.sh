@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
-# setup.sh — pull the Gitea image for a given CWE, start it, and export
-# GITHUB_TOKEN + GITHUB_API_URL ready for run.sh.
+# setup.sh — (re)start the benchmark container from a clean image state.
+# Safe to run before every eval: tears down any existing container first so
+# all PRs are reset to open, then starts fresh and prints a new token.
 #
 # Usage:
-#   CWE=cwe89 ./scripts/setup.sh           # or run standalone (vars lost after exit)
-#
-# Env vars:
-#   CWE          CWE slug (default: cwe89). Must be in cwe_map.sh.
-#   GITEA_PORT   local port (default: 3001)
+#   CWE=cwe79 ./scripts/setup.sh
+#   # export the printed vars, then run inspect eval
 
 set -euo pipefail
 
@@ -19,22 +17,12 @@ source "$SCRIPTS_DIR/cwe_map.sh"
 CWE="${CWE:-cwe89}"
 GITEA_PORT="${GITEA_PORT:-3001}"
 
-# Validate CWE is supported
 if ! cwe_is_supported "$CWE"; then
     echo "ERROR: Unknown CWE '${CWE}'. Supported: ${CWE_SLUGS[*]}"
     exit 1
 fi
 
 export IMAGE_TAG="$CWE"
-export GITHUB_API_URL="http://localhost:${GITEA_PORT}/api/v1"
-
-# ---------------------------------------------------------------------------
-# Prerequisites
-# ---------------------------------------------------------------------------
-if ! command -v docker &>/dev/null; then
-    echo "ERROR: Docker is not installed."
-    exit 1
-fi
 
 PYTHON=$(command -v python3 || command -v python || true)
 if [[ -z "$PYTHON" ]]; then
@@ -52,11 +40,8 @@ if ! command -v inspect &>/dev/null; then
     $PYTHON -m pip install inspect-ai -q
 fi
 
-# ---------------------------------------------------------------------------
-# Pull + start Gitea
-# ---------------------------------------------------------------------------
-echo "==> Starting Gitea for $(cwe_label "$CWE")..."
-
+echo "==> Resetting Gitea for $(cwe_label "$CWE")..."
+docker compose -f "$SCRIPTS_DIR/docker-compose.yml" down --remove-orphans 2>/dev/null || true
 docker compose -f "$SCRIPTS_DIR/docker-compose.yml" pull
 docker compose -f "$SCRIPTS_DIR/docker-compose.yml" up -d
 
@@ -68,33 +53,26 @@ for i in $(seq 1 60); do
     fi
     if [[ $i -eq 60 ]]; then
         echo "ERROR: Gitea did not become healthy after 5 minutes."
-        echo "  Last container logs:"
         docker compose -f "$SCRIPTS_DIR/docker-compose.yml" logs --tail=20 benchmark
         exit 1
     fi
-    echo "  [${i}/60] Not ready yet (${SECONDS}s elapsed) — $(docker compose -f "$SCRIPTS_DIR/docker-compose.yml" ps benchmark --format '{{.Status}}' 2>/dev/null || echo 'checking...')"
+    echo "  [${i}/60] waiting... (${SECONDS}s)"
     sleep 5
 done
 
-# ---------------------------------------------------------------------------
-# Generate API token
-# ---------------------------------------------------------------------------
 TOKEN=$(curl -sf -X POST \
     -H "Content-Type: application/json" \
     -u "gitadmin:adminpass123" \
     "http://localhost:${GITEA_PORT}/api/v1/users/gitadmin/tokens" \
     -d "{\"name\":\"bench-$(date +%s)\",\"scopes\":[\"write:repository\",\"read:user\",\"write:issue\"]}" \
-    | python3 -c "import sys,json; print(json.load(sys.stdin)['sha1'])")
+    | $PYTHON -c "import sys,json; print(json.load(sys.stdin)['sha1'])")
 
 if [[ -z "$TOKEN" ]]; then
     echo "ERROR: Failed to generate token."
     exit 1
 fi
 
-export GITHUB_TOKEN="$TOKEN"
-export REVIEWER_TOKEN="$TOKEN"
-echo "  Token generated."
 echo ""
-echo "  To use manually, export these in your shell:"
+echo "  Export before running:"
 echo "    export GITHUB_TOKEN=${TOKEN}"
 echo "    export GITHUB_API_URL=http://localhost:${GITEA_PORT}/api/v1"

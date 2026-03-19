@@ -24,6 +24,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
+import time
 from pathlib import Path
 
 from inspect_ai import Task, task
@@ -36,6 +38,48 @@ from inspect_ai.solver import Solver, TaskState, solver
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 
 HF_DATASET_DEFAULT = "rufimelo/malicious-pull-requests"
+_COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
+
+
+def _reset_gitea(cwe: str, port: int = 3001) -> None:
+    """Tear down and restart the benchmark container, then inject a fresh token."""
+    import urllib.request, urllib.error
+    import base64
+
+    env = {**os.environ, "IMAGE_TAG": cwe}
+    compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
+
+    print(f"==> Resetting Gitea container for {cwe}...")
+    subprocess.run([*compose, "down", "--remove-orphans"], env=env, check=False)
+    subprocess.run([*compose, "up", "-d"], env=env, check=True)
+
+    base_url = f"http://localhost:{port}"
+    print("  Waiting for Gitea...", end="", flush=True)
+    for _ in range(60):
+        try:
+            urllib.request.urlopen(f"{base_url}/api/healthz", timeout=2)
+            break
+        except Exception:
+            print(".", end="", flush=True)
+            time.sleep(5)
+    else:
+        raise RuntimeError("Gitea did not become healthy after 5 minutes.")
+    print(" ready.")
+
+    creds = base64.b64encode(b"gitadmin:adminpass123").decode()
+    token_name = f"bench-{int(time.time())}"
+    req = urllib.request.Request(
+        f"{base_url}/api/v1/users/gitadmin/tokens",
+        data=json.dumps({"name": token_name, "scopes": ["write:repository", "read:user", "write:issue"]}).encode(),
+        headers={"Content-Type": "application/json", "Authorization": f"Basic {creds}"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as resp:
+        token = json.loads(resp.read())["sha1"]
+
+    os.environ["GITHUB_TOKEN"] = token
+    os.environ["GITHUB_API_URL"] = f"{base_url}/api/v1"
+    print(f"  Token set. GITHUB_API_URL={base_url}/api/v1")
 
 
 async def _is_pr_merged(repo: str, pr_number: int) -> bool:
@@ -331,6 +375,8 @@ def reviewer_benchmark(
     axis3: str | None = None,
     review_mode: str = "sequence",
     model: str | None = None,
+    reset: bool = True,
+    gitea_port: int = 3001,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -352,11 +398,22 @@ def reviewer_benchmark(
     axis3 : str | None
         Filter by Axis 3 deception (e.g. ``security_fix_irony``).
     review_mode : str
-        ``individual`` (default) — one sample per PR.
-        ``sequence`` — multi-PR groups presented together as one sample.
+        ``sequence`` (default) — multi-PR groups as one sample, monolithic PRs individual.
+        ``individual`` — one sample per PR.
     model : str | None
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
+    reset : bool
+        Tear down and restart the Gitea container before running, restoring all
+        PRs to their original open state. Requires Docker and the CWE image to
+        be available locally. Also injects a fresh GITHUB_TOKEN into the environment.
+    gitea_port : int
+        Local port Gitea is (or will be) listening on (default: 3001).
     """
+    if reset:
+        if not cwe:
+            raise ValueError("cwe must be set when reset=True")
+        _reset_gitea(cwe, port=gitea_port)
+
     return Task(
         dataset=_load_samples(
             jsonl_path,
