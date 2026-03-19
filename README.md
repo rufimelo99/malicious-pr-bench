@@ -19,15 +19,11 @@ Attack PRs are loaded from the [`rufimelo/malicious-pull-requests`](https://hugg
 pip install -e .
 
 # 2. Start Gitea and seed repos
-./scripts/setup.sh
-
-# 3. Load env vars written by setup
-source .env
+CWE=cwe79 ./scripts/setup.sh
 
 # 4. Run the benchmark
 inspect eval benchmark/task.py@reviewer_benchmark \
       --model openai/azure/grok-3 \
-      -T hf_dataset="rufimelo/malicious-pull-requests" \
-      -T cwe="cwe89" \
-      --log-dir logs/cwe89
+      -T cwe="cwe79" \
+      --log-dir logs/cwe79
 ```
