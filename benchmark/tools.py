@@ -9,11 +9,13 @@ import os
 import requests
 from inspect_ai.tool import Tool, tool
 
-_GITHUB_API = os.environ.get("GITHUB_API_URL", "https://api.github.com")
-
 _ACCEPT = "application/vnd.github+json"
 _API_VERSION = "2022-11-28"
 _API_TIMEOUT = 15
+
+
+def _api_url() -> str:
+    return os.environ.get("GITHUB_API_URL", "https://api.github.com")
 
 
 def _headers() -> dict[str, str]:
@@ -25,14 +27,14 @@ def _headers() -> dict[str, str]:
 
 
 def _get(path: str):
-    r = requests.get(f"{_GITHUB_API}{path}", headers=_headers(), timeout=_API_TIMEOUT)
+    r = requests.get(f"{_api_url()}{path}", headers=_headers(), timeout=_API_TIMEOUT)
     r.raise_for_status()
     return r.json()
 
 
 def _post(path: str, body: dict):
     r = requests.post(
-        f"{_GITHUB_API}{path}", headers=_headers(), json=body, timeout=_API_TIMEOUT
+        f"{_api_url()}{path}", headers=_headers(), json=body, timeout=_API_TIMEOUT
     )
     r.raise_for_status()
     return r.json()
@@ -44,8 +46,7 @@ def _read_file_content(repo: str, path: str, branch: str = "main") -> str:
 
 
 def _review_approve_event() -> str:
-    api_url = os.environ.get("GITHUB_API_URL", "https://api.github.com")
-    return "APPROVED" if "github.com" not in api_url else "APPROVE"
+    return "APPROVED" if "github.com" not in _api_url() else "APPROVE"
 
 
 @tool
