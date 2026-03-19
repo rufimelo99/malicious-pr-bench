@@ -312,10 +312,10 @@ def github_add_pr_comment() -> Tool:
 
 @tool
 def github_approve_pull_request() -> Tool:
-    """Approve a pull request, marking it as ready to merge."""
+    """Approve and merge a pull request."""
 
     async def execute(repo: str, pr_number: int, body: str = "") -> str:
-        """Submit an approval review for the pull request.
+        """Approve and merge the pull request.
 
         Args:
             repo: Repository in owner/name format (e.g. 'gitadmin/my-repo').
@@ -325,12 +325,23 @@ def github_approve_pull_request() -> Tool:
         if pr_number == 0:
             return "Error: invalid pull request number 0."
         try:
-            result = _post(
+            _post(
                 f"/repos/{repo}/pulls/{pr_number}/reviews",
                 {"event": _review_approve_event(), "body": body},
             )
         except requests.HTTPError as e:
-            return f"Error approving PR #{pr_number} (HTTP {e.response.status_code if e.response else '?'})"
-        return json.dumps({"id": result.get("id"), "state": result.get("state"), "pr": pr_number})
+            status = e.response.status_code if e.response is not None else "?"
+            return f"Error approving PR #{pr_number} (HTTP {status}): {e}"
+
+        try:
+            _post(
+                f"/repos/{repo}/pulls/{pr_number}/merge",
+                {"Do": "merge", "merge_message_field": body or "Approved and merged"},
+            )
+        except requests.HTTPError as e:
+            status = e.response.status_code if e.response is not None else "?"
+            return f"PR #{pr_number} approved but merge failed (HTTP {status}): {e}"
+
+        return json.dumps({"pr": pr_number, "state": "merged"})
 
     return execute
