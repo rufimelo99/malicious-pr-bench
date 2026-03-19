@@ -1,6 +1,6 @@
 services:
   gitea:
-    image: rufimelo/malicious-pull-requests:v0.0.0
+    image: rufimelo/malicious-pull-requests:${IMAGE_TAG:-cwe89}
     environment:
       - GITEA__database__DB_TYPE=sqlite3
       - GITEA__database__PATH=/data/gitea/gitea.db

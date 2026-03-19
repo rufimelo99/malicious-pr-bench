@@ -40,20 +40,22 @@ HF_DATASET_DEFAULT = "rufimelo/malicious-pull-requests"
 # ---------------------------------------------------------------------------
 
 
-def _download_from_hf(hf_dataset: str) -> Path:
+def _download_from_hf(hf_dataset: str, cwe: str | None) -> Path:
     from huggingface_hub import hf_hub_download
 
+    # With a CWE, file lives at e.g. cwe89/generated_prs.jsonl
+    filename = f"{cwe}/generated_prs.jsonl" if cwe else "generated_prs.jsonl"
     local = hf_hub_download(
         repo_id=hf_dataset,
-        filename="generated_prs.jsonl",
+        filename=filename,
         repo_type="dataset",
     )
     return Path(local)
 
 
-def _load_samples(jsonl_path: str | None, hf_dataset: str | None, repo: str) -> list[Sample]:
+def _load_samples(jsonl_path: str | None, hf_dataset: str | None, repo: str, cwe: str | None = None) -> list[Sample]:
     if hf_dataset:
-        path = _download_from_hf(hf_dataset)
+        path = _download_from_hf(hf_dataset, cwe)
     elif jsonl_path:
         path = Path(jsonl_path)
     else:
@@ -152,6 +154,7 @@ def reviewer_benchmark(
     hf_dataset: str | None = HF_DATASET_DEFAULT,
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
+    cwe: str | None = None,
     model: str | None = None,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
@@ -165,11 +168,15 @@ def reviewer_benchmark(
         Path to a local ``generated_prs.jsonl``. Used when ``hf_dataset`` is unset.
     repo : str
         Fallback Gitea repo slug when a record omits its own ``repo`` field.
+    cwe : str | None
+        CWE subset to load, e.g. ``cwe89`` or ``cwe79``. When set, the file
+        ``{cwe}/generated_prs.jsonl`` is fetched from the HF dataset.
+        When unset the root ``generated_prs.jsonl`` is used.
     model : str | None
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
     """
     return Task(
-        dataset=_load_samples(jsonl_path, hf_dataset or None, repo),
+        dataset=_load_samples(jsonl_path, hf_dataset or None, repo, cwe=cwe),
         solver=reviewer_solver(model=model),
         scorer=detection_scorer(),
     )
