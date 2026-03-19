@@ -3,7 +3,6 @@
 # GITHUB_TOKEN + GITHUB_API_URL ready for run.sh.
 #
 # Usage:
-#   CWE=cwe89 source scripts/setup.sh      # source to export vars into shell
 #   CWE=cwe89 ./scripts/setup.sh           # or run standalone (vars lost after exit)
 #
 # Env vars:
