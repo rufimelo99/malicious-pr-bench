@@ -10,14 +10,14 @@ Attack PRs are loaded from the [`rufimelo/malicious-pull-requests`](https://hugg
 
 - Docker + Docker Compose
 - Python 3.12+
-- [`inspect-ai`](https://github.com/UKGovernmentBEIS/inspect_ai)
+- [`uv`](https://github.com/astral-sh/uv)
 
 ## Quickstart
 
 ```bash
-pip install -e .
+uv sync
 
-inspect eval benchmark/task.py@reviewer_benchmark \
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
   --log-dir logs/cwe79
