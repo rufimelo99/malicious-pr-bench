@@ -22,7 +22,8 @@ if ! cwe_is_supported "$CWE"; then
     exit 1
 fi
 
-export IMAGE_TAG="$CWE"
+VERSION="${VERSION:-v0.0.0}"
+export DOCKER_IMAGE="rufimelo/malicious-pr-${CWE}:${VERSION}"
 
 if ! command -v uv &>/dev/null; then
     echo "ERROR: uv is not installed. Install it from https://github.com/astral-sh/uv"
