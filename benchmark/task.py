@@ -47,11 +47,13 @@ def _reset_gitea(cwe: str, port: int = 3001) -> None:
     import urllib.request, urllib.error
     import base64
     logger.info(f"Resetting Gitea container for CWE {cwe} on port {port}...")
-    env = {**os.environ, "IMAGE_TAG": cwe}
+    version = os.environ.get("VERSION", "v0.0.0")
+    env = {**os.environ, "DOCKER_IMAGE": f"rufimelo/malicious-pr-{cwe}:{version}"}
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
 
     print(f"==> Resetting Gitea container for {cwe}...")
     subprocess.run([*compose, "down", "--volumes", "--remove-orphans"], env=env, check=False)
+    subprocess.run([*compose, "rm", "-fsv"], env=env, check=False)  # ensure anonymous volumes are removed
     subprocess.run([*compose, "up", "-d", "--force-recreate"], env=env, check=True)
 
     base_url = f"http://localhost:{port}"
