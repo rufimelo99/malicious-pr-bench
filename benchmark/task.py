@@ -108,10 +108,10 @@ async def _is_pr_merged(repo: str, pr_number: int) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _download_from_hf(hf_dataset: str, cwe: str | None) -> Path:
+def _download_from_hf(hf_dataset: str, cwe: str | None, version: str = "v0.0.0") -> Path:
     from huggingface_hub import hf_hub_download
 
-    filename = f"{cwe}/generated_prs.jsonl" if cwe else "generated_prs.jsonl"
+    filename = f"{cwe}/{version}/generated_prs.jsonl" if cwe else "generated_prs.jsonl"
     local = hf_hub_download(
         repo_id=hf_dataset, filename=filename, repo_type="dataset"
     )
@@ -133,13 +133,14 @@ def _load_samples(
     hf_dataset: str | None,
     repo: str,
     cwe: str | None = None,
+    version: str = "v0.0.0",
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
     review_mode: str = "individual",
 ) -> list[Sample]:
     if hf_dataset:
-        path = _download_from_hf(hf_dataset, cwe)
+        path = _download_from_hf(hf_dataset, cwe, version)
     elif jsonl_path:
         path = Path(jsonl_path)
     else:
@@ -398,6 +399,7 @@ def reviewer_benchmark(
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
+    version: str = "v0.0.0",
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
@@ -420,6 +422,8 @@ def reviewer_benchmark(
         Fallback Gitea repo slug when a record omits its own ``repo`` field.
     cwe : str | None
         CWE subset to load, e.g. ``cwe89`` or ``cwe79``.
+    version : str
+        Dataset version to load, e.g. ``v0.1.0`` (default: ``v0.0.0``).
     axis1 : str | None
         Filter by Axis 1 strategy (e.g. ``precondition_staging``).
     axis2 : str | None
@@ -447,6 +451,7 @@ def reviewer_benchmark(
             hf_dataset or None,
             repo,
             cwe=cwe,
+            version=version,
             axis1=axis1,
             axis2=axis2,
             axis3=axis3,
