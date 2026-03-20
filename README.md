@@ -23,7 +23,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --log-dir logs/cwe79
 ```
 
-The task automatically pulls the Docker image, resets the Gitea container, restores all PRs to their original open state, and injects a fresh API token — no manual setup required.
+The task automatically pulls the Docker image (`rufimelo/malicious-pr-{cwe}:{version}`), resets the Gitea container, restores all PRs to their original open state, and injects a fresh API token — no manual setup required. Override the version with `VERSION=v0.1.0 CWE=cwe79 ./scripts/setup.sh`.
 
 ## Scoring
 
