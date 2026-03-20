@@ -36,6 +36,7 @@ from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import Solver, TaskState, solver
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
+from benchmark.logger import logger
 
 HF_DATASET_DEFAULT = "rufimelo/malicious-pull-requests"
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
@@ -45,13 +46,13 @@ def _reset_gitea(cwe: str, port: int = 3001) -> None:
     """Tear down and restart the benchmark container, then inject a fresh token."""
     import urllib.request, urllib.error
     import base64
-
+    logger.info(f"Resetting Gitea container for CWE {cwe} on port {port}...")
     env = {**os.environ, "IMAGE_TAG": cwe}
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
 
     print(f"==> Resetting Gitea container for {cwe}...")
-    subprocess.run([*compose, "down", "--remove-orphans"], env=env, check=False)
-    subprocess.run([*compose, "up", "-d"], env=env, check=True)
+    subprocess.run([*compose, "down", "--volumes", "--remove-orphans"], env=env, check=False)
+    subprocess.run([*compose, "up", "-d", "--force-recreate"], env=env, check=True)
 
     base_url = f"http://localhost:{port}"
     print("  Waiting for Gitea...", end="", flush=True)
@@ -297,8 +298,33 @@ def _load_sequence_samples(
 
 
 @solver
-def reviewer_solver(model: str | None = None) -> Solver:
+def reviewer_solver(
+    model: str | None = None,
+    cwe: str | None = None,
+    reset: bool = False,
+    gitea_port: int = 3001,
+    pause_after_reset: bool = False,
+) -> Solver:
+    import asyncio as _asyncio
+
+    # Task is created lazily on first solve() call (inside the running event loop).
+    # All concurrent samples await the same task — reset runs exactly once.
+    _reset_task: _asyncio.Task | None = None
+    _pause_done = False
+
     async def solve(state: TaskState, generate) -> TaskState:
+        nonlocal _reset_task, _pause_done
+        if reset and cwe:
+            if _reset_task is None:
+                _reset_task = _asyncio.create_task(
+                    _asyncio.to_thread(_reset_gitea, cwe, gitea_port)
+                )
+            await _reset_task
+
+        if pause_after_reset and not _pause_done:
+            _pause_done = True
+            await _asyncio.to_thread(input, "\n==> Reset complete. Press Enter to start the benchmark...\n")
+
         reviewer = build_reviewer_agent(model=model)
         agent_state = AgentState(messages=[ChatMessageUser(content=state.input_text)])
         await reviewer(agent_state)
@@ -377,6 +403,7 @@ def reviewer_benchmark(
     model: str | None = None,
     reset: bool = True,
     gitea_port: int = 3001,
+    pause_after_reset: bool = False,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -408,12 +435,10 @@ def reviewer_benchmark(
         be available locally. Also injects a fresh GITHUB_TOKEN into the environment.
     gitea_port : int
         Local port Gitea is (or will be) listening on (default: 3001).
+    pause_after_reset : bool
+        If True, pause for user confirmation after reset before starting samples.
+        Useful for verifying container state. Default: False.
     """
-    if reset:
-        if not cwe:
-            raise ValueError("cwe must be set when reset=True")
-        _reset_gitea(cwe, port=gitea_port)
-
     return Task(
         dataset=_load_samples(
             jsonl_path,
@@ -425,6 +450,6 @@ def reviewer_benchmark(
             axis3=axis3,
             review_mode=review_mode,
         ),
-        solver=reviewer_solver(model=model),
+        solver=reviewer_solver(model=model, cwe=cwe, reset=reset, gitea_port=gitea_port, pause_after_reset=pause_after_reset),
         scorer=detection_scorer(),
     )

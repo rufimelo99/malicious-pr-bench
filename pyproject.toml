@@ -12,6 +12,7 @@ dependencies = [
     "inspect-ai>=0.3.188",
     "huggingface_hub>=0.23.0",
     "requests>=2.31.0",
+    "structlog>=22.1.0",
 ]
 
 [tool.setuptools.packages.find]
