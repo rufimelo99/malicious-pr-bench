@@ -24,20 +24,19 @@ fi
 
 export IMAGE_TAG="$CWE"
 
-PYTHON=$(command -v python3 || command -v python || true)
-if [[ -z "$PYTHON" ]]; then
-    echo "ERROR: Python 3 is not installed."
+if ! command -v uv &>/dev/null; then
+    echo "ERROR: uv is not installed. Install it from https://github.com/astral-sh/uv"
     exit 1
 fi
 
-if ! $PYTHON -c "import benchmark" &>/dev/null; then
+if ! uv run python -c "import benchmark" &>/dev/null 2>&1; then
     echo "==> Installing benchmark package..."
-    $PYTHON -m pip install -e "$REPO_ROOT" -q
+    uv sync --quiet
 fi
 
-if ! command -v inspect &>/dev/null; then
+if ! uv run python -c "import inspect_ai" &>/dev/null 2>&1; then
     echo "==> Installing inspect-ai..."
-    $PYTHON -m pip install inspect-ai -q
+    uv sync --quiet
 fi
 
 echo "==> Resetting Gitea for $(cwe_label "$CWE")..."
@@ -65,7 +64,7 @@ TOKEN=$(curl -sf -X POST \
     -u "gitadmin:adminpass123" \
     "http://localhost:${GITEA_PORT}/api/v1/users/gitadmin/tokens" \
     -d "{\"name\":\"bench-$(date +%s)\",\"scopes\":[\"write:repository\",\"read:user\",\"write:issue\"]}" \
-    | $PYTHON -c "import sys,json; print(json.load(sys.stdin)['sha1'])")
+    | uv run python -c "import sys,json; print(json.load(sys.stdin)['sha1'])")
 
 if [[ -z "$TOKEN" ]]; then
     echo "ERROR: Failed to generate token."
