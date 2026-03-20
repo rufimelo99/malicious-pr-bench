@@ -37,7 +37,7 @@ def _post(path: str, body: dict):
         f"{_api_url()}{path}", headers=_headers(), json=body, timeout=_API_TIMEOUT
     )
     r.raise_for_status()
-    return r.json()
+    return r.json() if r.content else {}
 
 
 def _read_file_content(repo: str, path: str, branch: str = "main") -> str:
