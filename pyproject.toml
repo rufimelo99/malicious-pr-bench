@@ -13,6 +13,8 @@ dependencies = [
     "huggingface_hub>=0.23.0",
     "requests>=2.31.0",
     "structlog>=22.1.0",
+    "openai>=2.29.0",
+    "azure-identity>=1.25.3",
 ]
 
 [tool.hatch.build.targets.wheel]
