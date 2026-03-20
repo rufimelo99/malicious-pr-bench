@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "malicious-pr-bench"
@@ -15,5 +15,5 @@ dependencies = [
     "structlog>=22.1.0",
 ]
 
-[tool.setuptools.packages.find]
-include = ["benchmark*"]
+[tool.hatch.build.targets.wheel]
+packages = ["benchmark"]
