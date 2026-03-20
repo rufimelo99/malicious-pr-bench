@@ -41,7 +41,7 @@ if ! command -v inspect &>/dev/null; then
 fi
 
 echo "==> Resetting Gitea for $(cwe_label "$CWE")..."
-docker compose -f "$SCRIPTS_DIR/docker-compose.yml" down --remove-orphans 2>/dev/null || true
+docker compose -f "$SCRIPTS_DIR/docker-compose.yml" down --volumes --remove-orphans 2>/dev/null || true
 docker compose -f "$SCRIPTS_DIR/docker-compose.yml" pull
 docker compose -f "$SCRIPTS_DIR/docker-compose.yml" up -d
 
