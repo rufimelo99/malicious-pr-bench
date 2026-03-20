@@ -53,6 +53,7 @@ def _reset_gitea(cwe: str, port: int = 3001) -> None:
 
     print(f"==> Resetting Gitea container for {cwe}...")
     subprocess.run([*compose, "down", "--volumes", "--remove-orphans"], env=env, check=False)
+    subprocess.run([*compose, "rm", "-fsv"], env=env, check=False)  # ensure anonymous volumes are removed
     subprocess.run([*compose, "up", "-d", "--force-recreate"], env=env, check=True)
 
     base_url = f"http://localhost:{port}"
