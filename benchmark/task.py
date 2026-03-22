@@ -42,12 +42,11 @@ HF_DATASET_DEFAULT = "rufimelo/malicious-pull-requests"
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 
 
-def _reset_gitea(cwe: str, port: int = 3001) -> None:
+def _reset_gitea(cwe: str, port: int = 3001, version: str = "v0.0.0") -> None:
     """Tear down and restart the benchmark container, then inject a fresh token."""
     import urllib.request, urllib.error
     import base64
     logger.info(f"Resetting Gitea container for CWE {cwe} on port {port}...")
-    version = os.environ.get("VERSION", "v0.0.0")
     env = {**os.environ, "DOCKER_IMAGE": f"rufimelo/malicious-pr-{cwe}:{version}"}
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
 
@@ -307,6 +306,7 @@ def reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
+    version: str = "v0.0.0",
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -320,7 +320,7 @@ def reviewer_solver(
         if reset and cwe:
             if _reset_task is None:
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(_reset_gitea, cwe, gitea_port)
+                    _asyncio.to_thread(_reset_gitea, cwe, gitea_port, version)
                 )
             await _reset_task
 
@@ -501,6 +501,6 @@ def reviewer_benchmark(
             axis3=axis3,
             review_mode=review_mode,
         ),
-        solver=reviewer_solver(model=model, cwe=cwe, reset=reset, gitea_port=gitea_port, pause_after_reset=pause_after_reset),
+        solver=reviewer_solver(model=model, cwe=cwe, reset=reset, gitea_port=gitea_port, pause_after_reset=pause_after_reset, version=version),
         scorer=detection_scorer(),
     )
