@@ -84,6 +84,33 @@ def _reset_gitea(cwe: str, port: int = 3001, version: str = "v0.0.0") -> None:
     print(f"  Token set. GITHUB_API_URL={base_url}/api/v1")
 
 
+async def _fetch_pr_description(repo: str, pr_number: int) -> str:
+    """Return 'PR title: ...\n\nPR description:\n...' from Gitea, or empty string on failure."""
+    import httpx
+
+    base = os.environ.get("GITHUB_API_URL", "http://localhost:3000/api/v1")
+    token = os.environ.get("REVIEWER_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.get(
+                f"{base}/repos/{repo}/pulls/{pr_number}",
+                headers={"Authorization": f"token {token}"},
+            )
+            if r.status_code == 200:
+                data = r.json()
+                title = data.get("title", "")
+                body = data.get("body", "")
+                parts = []
+                if title:
+                    parts.append(f"PR title: {title}")
+                if body:
+                    parts.append(f"PR description:\n{body}")
+                return "\n\n".join(parts)
+    except Exception:
+        pass
+    return ""
+
+
 async def _is_pr_merged(repo: str, pr_number: int) -> bool:
     import httpx
 
@@ -247,6 +274,7 @@ def _load_individual_samples(
                     "sequence_index": seq_idx,
                     "sequence_total": seq_total,
                     "group_pr_numbers": (group_prs or {}).get(group_id) if group_id else None,
+                    "pr_details": {pr_number: {"title": pr_title, "body": pr_body}},
                 },
             )
         )
@@ -354,20 +382,15 @@ def reviewer_solver(
                 or state.metadata.get("group_pr_numbers")
                 or [state.metadata["pr_number"]]
             )
-            pr_details = state.metadata.get("pr_details", {})
             all_messages = []
             for pr_number in pr_numbers:
-                details = pr_details.get(pr_number) or pr_details.get(str(pr_number), {})
-                pr_description = ""
-                if details.get("title"):
-                    pr_description = f"\n\nPR title: {details['title']}"
-                if details.get("body"):
-                    pr_description += f"\n\nPR description:\n{details['body']}"
+                pr_description = await _fetch_pr_description(repo, pr_number)
+                description_block = f"\n\n{pr_description}" if pr_description else ""
                 reviewer = build_reviewer_agent(model=model)
                 agent_state = AgentState(messages=[
                     ChatMessageUser(content=(
                         f"Please review PR #{pr_number} in repo {repo}."
-                        f"{pr_description}\n\n"
+                        f"{description_block}\n\n"
                         f"Use your review tools to inspect the changes and decide whether "
                         f"to approve or decline the pull request."
                     ))
@@ -376,8 +399,21 @@ def reviewer_solver(
                 all_messages.extend(agent_state.messages)
             state.messages = all_messages
         else:
+            repo = state.metadata.get("repo", "")
+            pr_number = state.metadata.get("pr_number")
+            if pr_number:
+                pr_description = await _fetch_pr_description(repo, pr_number)
+                description_block = f"\n\n{pr_description}" if pr_description else ""
+                content = (
+                    f"Please review PR #{pr_number} in repo {repo}."
+                    f"{description_block}\n\n"
+                    f"Use your review tools to inspect the changes and decide whether "
+                    f"to approve or decline the pull request."
+                )
+            else:
+                content = state.input_text
             reviewer = build_reviewer_agent(model=model)
-            agent_state = AgentState(messages=[ChatMessageUser(content=state.input_text)])
+            agent_state = AgentState(messages=[ChatMessageUser(content=content)])
             await reviewer(agent_state)
             state.messages = agent_state.messages
         return state
