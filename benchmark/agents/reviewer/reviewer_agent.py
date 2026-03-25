@@ -6,7 +6,7 @@ from pathlib import Path
 
 from inspect_ai.agent import react
 from inspect_ai.agent._types import AgentPrompt
-from inspect_ai.tool import Tool, bash
+from inspect_ai.tool import Tool
 
 from benchmark.tools import (
     github_add_pr_comment,
@@ -20,8 +20,6 @@ from benchmark.tools import (
     github_read_file,
     github_search_code,
 )
-
-BASH_TIMEOUT: int = 30
 
 _SYSTEM_PROMPT: str = (
     Path(__file__).parent / "prompts" / "reviewer_system_prompt.txt"
@@ -44,7 +42,6 @@ def build_reviewer_agent(
         github_search_code(),
         github_add_pr_comment(),
         github_approve_pull_request(),
-        bash(timeout=BASH_TIMEOUT),
     ]
     return react(
         name="reviewer",
