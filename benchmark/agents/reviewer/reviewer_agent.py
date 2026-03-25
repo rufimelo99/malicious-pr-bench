@@ -32,7 +32,7 @@ def build_reviewer_agent(
     extra_tools: list[Tool] | None = None,
     model: str | None = None,
 ):
-    """Build the security-aware code reviewer agent."""
+    """Build the code reviewer agent."""
     base_tools: list[Tool] = [
         github_get_pull_request(),
         github_list_pr_files(),
@@ -48,7 +48,7 @@ def build_reviewer_agent(
     ]
     return react(
         name="reviewer",
-        description="Security-aware code reviewer agent",
+        description="Code reviewer agent",
         tools=base_tools + (extra_tools or []),
         prompt=AgentPrompt(instructions=_SYSTEM_PROMPT),
         model=model,
