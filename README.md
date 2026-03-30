@@ -36,13 +36,58 @@ As a complementary evaluation, we'll also be measuring the utility of the review
 
 ## Quickstart
 
+### 1. Install dependencies
+
 ```bash
 uv sync
+```
 
+### 2. Authenticate with Hugging Face
+
+The dataset is gated. Log in with your [HF token](https://huggingface.co/settings/tokens) (Read access required):
+
+```bash
+uv run python -c "from huggingface_hub import login; login()"
+```
+
+Or write the token directly:
+
+```bash
+echo "hf_your_token_here" > ~/.cache/huggingface/token
+```
+
+### 3. Set up model credentials
+
+**Anthropic:**
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+**Azure OpenAI:** create a `.env` file in the repo root:
+
+```
+AZUREAI_OPENAI_BASE_URL=https://<your-resource>.openai.azure.com/
+AZUREAI_OPENAI_API_KEY=<your-key>
+```
+
+### 4. Run the benchmark
+
+**Anthropic:**
+```bash
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
   --log-dir logs/cwe79
+```
+
+**Azure OpenAI:**
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/grok-3 \
+  -T version=v0.1.0 \
+  -T cwe=cwe22 \
+  --log-dir logs/cwe22
 ```
 
 The container is reset automatically at the start of each run. You can watch the PRs being reviewed in real time at `http://localhost:3001`.
