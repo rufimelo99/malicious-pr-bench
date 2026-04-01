@@ -9,9 +9,19 @@ import os
 import requests
 from inspect_ai.tool import Tool, tool
 
+# Tracks simulated merges when SIMULATE_MERGES env var is set.
+# Keys are repo slugs; values are sets of PR numbers the agent approved.
+_simulated_merges: dict[str, set[int]] = {}
+
+
+def clear_simulated_merges() -> None:
+    """Reset all tracked simulated merges (call before each benchmark run)."""
+    _simulated_merges.clear()
+
 _ACCEPT = "application/vnd.github+json"
 _API_VERSION = "2022-11-28"
 _API_TIMEOUT = 15
+_SIMULATE_MERGES = os.environ.get("SIMULATE_MERGES", True)
 
 
 def _api_url() -> str:
@@ -326,6 +336,13 @@ def github_approve_pull_request() -> Tool:
         """
         if pr_number == 0:
             return "Error: invalid pull request number 0."
+
+        # Simulation mode: record the approval decision without touching Gitea.
+        # Otherwise, merging conflict would happen between different samples from a given benchmark.
+        if _SIMULATE_MERGES:
+            _simulated_merges.setdefault(repo, set()).add(pr_number)
+            return json.dumps({"pr": pr_number, "state": "merged"})
+
         try:
             _post(
                 f"/repos/{repo}/pulls/{pr_number}/reviews",
