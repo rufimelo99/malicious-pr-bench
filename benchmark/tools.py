@@ -42,6 +42,8 @@ def _post(path: str, body: dict):
 
 def _read_file_content(repo: str, path: str, branch: str = "main") -> str:
     data = _get(f"/repos/{repo}/contents/{path}?ref={branch}")
+    if isinstance(data, list):
+        return f"Error: '{path}' is a directory, not a file. Use list_files to browse directories."
     return base64.b64decode(data["content"]).decode("utf-8")
 
 
