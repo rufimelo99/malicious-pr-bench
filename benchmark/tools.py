@@ -9,14 +9,7 @@ import os
 import requests
 from inspect_ai.tool import Tool, tool
 
-# Tracks simulated merges when SIMULATE_MERGES env var is set.
-# Keys are repo slugs; values are sets of PR numbers the agent approved.
-_simulated_merges: dict[str, set[int]] = {}
-
-
-def clear_simulated_merges() -> None:
-    """Reset all tracked simulated merges (call before each benchmark run)."""
-    _simulated_merges.clear()
+from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 _ACCEPT = "application/vnd.github+json"
 _API_VERSION = "2022-11-28"
@@ -121,14 +114,16 @@ def github_get_pull_request() -> Tool:
             data = _get(f"/repos/{repo}/pulls/{pr_number}")
         except requests.HTTPError as e:
             return f"Error: PR #{pr_number} not found ({e})."
-        return json.dumps({
-            "number": data["number"],
-            "title": data["title"],
-            "state": data["state"],
-            "head": data["head"]["ref"],
-            "base": data["base"]["ref"],
-            "url": data["html_url"],
-        })
+        return json.dumps(
+            {
+                "number": data["number"],
+                "title": data["title"],
+                "state": data["state"],
+                "head": data["head"]["ref"],
+                "base": data["base"]["ref"],
+                "url": data["html_url"],
+            }
+        )
 
     return execute
 
@@ -249,11 +244,14 @@ def github_list_recent_prs() -> Tool:
             return f"Error listing PRs: {e}"
         if not isinstance(prs, list):
             return "No PRs found."
-        return "\n".join(
-            f"PR #{pr.get('number','?')} [{pr.get('state','?')}] "
-            f"by {pr.get('user',{}).get('login','?')}: {pr.get('title','')}"
-            for pr in prs[:limit]
-        ) or "No PRs."
+        return (
+            "\n".join(
+                f"PR #{pr.get('number','?')} [{pr.get('state','?')}] "
+                f"by {pr.get('user',{}).get('login','?')}: {pr.get('title','')}"
+                for pr in prs[:limit]
+            )
+            or "No PRs."
+        )
 
     return execute
 
@@ -278,7 +276,9 @@ def github_search_code() -> Tool:
             item["path"]
             for item in (tree.get("tree") or [])
             if item.get("type") == "blob"
-            and not item["path"].endswith((".png", ".jpg", ".gif", ".ico", ".zip", ".lock"))
+            and not item["path"].endswith(
+                (".png", ".jpg", ".gif", ".ico", ".zip", ".lock")
+            )
         ]
         matches = []
         query_lower = query.lower()
@@ -340,7 +340,7 @@ def github_approve_pull_request() -> Tool:
         # Simulation mode: record the approval decision without touching Gitea.
         # Otherwise, merging conflict would happen between different samples from a given benchmark.
         if _SIMULATE_MERGES:
-            _simulated_merges.setdefault(repo, set()).add(pr_number)
+            SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(pr_number)
             return json.dumps({"pr": pr_number, "state": "merged"})
 
         try:
