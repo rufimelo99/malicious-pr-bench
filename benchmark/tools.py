@@ -9,9 +9,12 @@ import os
 import requests
 from inspect_ai.tool import Tool, tool
 
+from benchmark.registry import SIMULATED_MERGES_REGISTRY
+
 _ACCEPT = "application/vnd.github+json"
 _API_VERSION = "2022-11-28"
 _API_TIMEOUT = 15
+_SIMULATE_MERGES = os.environ.get("SIMULATE_MERGES", True)
 
 
 def _api_url() -> str:
@@ -42,6 +45,8 @@ def _post(path: str, body: dict):
 
 def _read_file_content(repo: str, path: str, branch: str = "main") -> str:
     data = _get(f"/repos/{repo}/contents/{path}?ref={branch}")
+    if isinstance(data, list):
+        return f"Error: '{path}' is a directory, not a file. Use list_files to browse directories."
     return base64.b64decode(data["content"]).decode("utf-8")
 
 
@@ -109,24 +114,37 @@ def github_get_pull_request() -> Tool:
             data = _get(f"/repos/{repo}/pulls/{pr_number}")
         except requests.HTTPError as e:
             return f"Error: PR #{pr_number} not found ({e})."
-        return json.dumps({
-            "number": data["number"],
-            "title": data["title"],
-            "state": data["state"],
-            "head": data["head"]["ref"],
-            "base": data["base"]["ref"],
-            "url": data["html_url"],
-        })
+        return json.dumps(
+            {
+                "number": data["number"],
+                "title": data["title"],
+                "state": data["state"],
+                "head": data["head"]["ref"],
+                "base": data["base"]["ref"],
+                "url": data["html_url"],
+            }
+        )
 
     return execute
 
 
+def _get_pr_diff(repo: str, pr_number: int) -> str:
+    """Fetch the unified diff for a PR using Gitea's .diff endpoint."""
+    r = requests.get(
+        f"{_api_url()}/repos/{repo}/pulls/{pr_number}.diff",
+        headers=_headers(),
+        timeout=_API_TIMEOUT,
+    )
+    r.raise_for_status()
+    return r.text
+
+
 @tool
 def github_list_pr_files() -> Tool:
-    """List files changed in a PR with their full code content."""
+    """List files changed in a PR with their unified diff."""
 
     async def execute(repo: str, pr_number: int) -> str:
-        """Return filename and full content of every file modified by the PR.
+        """Return the unified diff of every file modified by the PR.
 
         Args:
             repo: Repository in owner/name format (e.g. 'gitadmin/my-repo').
@@ -135,20 +153,10 @@ def github_list_pr_files() -> Tool:
         if pr_number == 0:
             return "Error: invalid pull request number 0."
         try:
-            pr = _get(f"/repos/{repo}/pulls/{pr_number}")
+            diff = _get_pr_diff(repo, pr_number)
         except requests.HTTPError as e:
             return f"Error: PR #{pr_number} not found ({e})."
-        head_branch = pr["head"]["ref"]
-        files = _get(f"/repos/{repo}/pulls/{pr_number}/files")
-        results = []
-        for f in files:
-            filename = f.get("filename") or f.get("name", "")
-            try:
-                content = _read_file_content(repo, filename, head_branch)
-            except Exception:
-                content = f.get("patch", "<unavailable>")
-            results.append(f"=== {filename} ===\n{content}")
-        return "\n\n".join(results) if results else "No files changed."
+        return diff if diff.strip() else "No files changed."
 
     return execute
 
@@ -237,11 +245,14 @@ def github_list_recent_prs() -> Tool:
             return f"Error listing PRs: {e}"
         if not isinstance(prs, list):
             return "No PRs found."
-        return "\n".join(
-            f"PR #{pr.get('number','?')} [{pr.get('state','?')}] "
-            f"by {pr.get('user',{}).get('login','?')}: {pr.get('title','')}"
-            for pr in prs[:limit]
-        ) or "No PRs."
+        return (
+            "\n".join(
+                f"PR #{pr.get('number','?')} [{pr.get('state','?')}] "
+                f"by {pr.get('user',{}).get('login','?')}: {pr.get('title','')}"
+                for pr in prs[:limit]
+            )
+            or "No PRs."
+        )
 
     return execute
 
@@ -266,7 +277,9 @@ def github_search_code() -> Tool:
             item["path"]
             for item in (tree.get("tree") or [])
             if item.get("type") == "blob"
-            and not item["path"].endswith((".png", ".jpg", ".gif", ".ico", ".zip", ".lock"))
+            and not item["path"].endswith(
+                (".png", ".jpg", ".gif", ".ico", ".zip", ".lock")
+            )
         ]
         matches = []
         query_lower = query.lower()
@@ -324,6 +337,13 @@ def github_approve_pull_request() -> Tool:
         """
         if pr_number == 0:
             return "Error: invalid pull request number 0."
+
+        # Simulation mode: record the approval decision without touching Gitea.
+        # Otherwise, merging conflict would happen between different samples from a given benchmark.
+        if _SIMULATE_MERGES:
+            SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(pr_number)
+            return json.dumps({"pr": pr_number, "state": "merged"})
+
         try:
             _post(
                 f"/repos/{repo}/pulls/{pr_number}/reviews",
