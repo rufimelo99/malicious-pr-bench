@@ -128,12 +128,23 @@ def github_get_pull_request() -> Tool:
     return execute
 
 
+def _get_pr_diff(repo: str, pr_number: int) -> str:
+    """Fetch the unified diff for a PR using Gitea's .diff endpoint."""
+    r = requests.get(
+        f"{_api_url()}/repos/{repo}/pulls/{pr_number}.diff",
+        headers=_headers(),
+        timeout=_API_TIMEOUT,
+    )
+    r.raise_for_status()
+    return r.text
+
+
 @tool
 def github_list_pr_files() -> Tool:
-    """List files changed in a PR with their full code content."""
+    """List files changed in a PR with their unified diff."""
 
     async def execute(repo: str, pr_number: int) -> str:
-        """Return filename and full content of every file modified by the PR.
+        """Return the unified diff of every file modified by the PR.
 
         Args:
             repo: Repository in owner/name format (e.g. 'gitadmin/my-repo').
@@ -142,20 +153,10 @@ def github_list_pr_files() -> Tool:
         if pr_number == 0:
             return "Error: invalid pull request number 0."
         try:
-            pr = _get(f"/repos/{repo}/pulls/{pr_number}")
+            diff = _get_pr_diff(repo, pr_number)
         except requests.HTTPError as e:
             return f"Error: PR #{pr_number} not found ({e})."
-        head_branch = pr["head"]["ref"]
-        files = _get(f"/repos/{repo}/pulls/{pr_number}/files")
-        results = []
-        for f in files:
-            filename = f.get("filename") or f.get("name", "")
-            try:
-                content = _read_file_content(repo, filename, head_branch)
-            except Exception:
-                content = f.get("patch", "<unavailable>")
-            results.append(f"=== {filename} ===\n{content}")
-        return "\n\n".join(results) if results else "No files changed."
+        return diff if diff.strip() else "No files changed."
 
     return execute
 
