@@ -41,7 +41,7 @@ from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
 from benchmark.utils import extract_reviewer_reason, is_pr_merged
 
-HF_DATASET_DEFAULT = "rufimelo/malicious-pull-requests"
+HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 
 
@@ -534,7 +534,7 @@ def reviewer_benchmark(
     Parameters
     ----------
     hf_dataset : str | None
-        HF Hub dataset ID (default: ``rufimelo/malicious-pull-requests``).
+        HF Hub dataset ID (default: ``SocialAITBD/malicious-pull-requests``).
         Set to empty string to use ``jsonl_path`` instead.
     jsonl_path : str | None
         Path to a local ``generated_prs.jsonl``.

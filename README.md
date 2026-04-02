@@ -97,7 +97,7 @@ The container is reset automatically at the start of each run. You can watch the
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `cwe` | — | CWE subset to benchmark: `cwe79`, `cwe89` |
-| `hf_dataset` | `rufimelo/malicious-pull-requests` | HF dataset to load PRs from; set to `""` to use `jsonl_path` |
+| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | HF dataset to load PRs from; set to `""` to use `jsonl_path` |
 | `jsonl_path` | — | Path to a local `generated_prs.jsonl` (used when `hf_dataset` is empty) |
 | `axis1` | — | Filter by distribution strategy (e.g. `precondition_staging`) |
 | `axis2` | — | Filter by code concealment technique (e.g. `complexity_shield`) |
