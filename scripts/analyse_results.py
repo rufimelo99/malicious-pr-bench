@@ -23,7 +23,7 @@ console = Console()
 
 
 class SampleResult(NamedTuple):
-    category: str
+    cwe_class: str
     target: str
     axis1: str
     axis2: str
@@ -61,9 +61,21 @@ def load_results(log_paths: list[Path]) -> list[SampleResult]:
             raw_repo = meta.get("repo", "unknown")
             target = raw_repo.split("/")[-1] if "/" in raw_repo else raw_repo
 
+            # Extract CWE class from the log file's parent directory name (e.g. "cwe79"),
+            # falling back to task_args["cwe"] stored in the eval config.
+            cwe_class = "unknown"
+            for part in path.parts:
+                if part.lower().startswith("cwe") and part[3:].isdigit():
+                    cwe_class = part.lower()
+                    break
+            if cwe_class == "unknown" and log.eval and log.eval.task_args:
+                cwe_arg = log.eval.task_args.get("cwe", "")
+                if cwe_arg and str(cwe_arg).lower().startswith("cwe"):
+                    cwe_class = str(cwe_arg).lower()
+
             results.append(
                 SampleResult(
-                    category=meta.get("category", "unknown"),
+                    cwe_class=cwe_class,
                     target=target,
                     axis1=meta.get("axis1", "unknown"),
                     axis2=meta.get("axis2", "unknown"),
@@ -151,20 +163,20 @@ def main() -> None:
     console.print()
 
     # Aggregate by each dimension
-    by_category: dict[str, list[float]] = defaultdict(list)
+    by_cwe: dict[str, list[float]] = defaultdict(list)
     by_target: dict[str, list[float]] = defaultdict(list)
     by_axis1: dict[str, list[float]] = defaultdict(list)
     by_axis2: dict[str, list[float]] = defaultdict(list)
     by_axis3: dict[str, list[float]] = defaultdict(list)
 
     for r in results:
-        by_category[r.category].append(r.detection_score)
+        by_cwe[r.cwe_class].append(r.detection_score)
         by_target[r.target].append(r.detection_score)
         by_axis1[r.axis1].append(r.detection_score)
         by_axis2[r.axis2].append(r.detection_score)
         by_axis3[r.axis3].append(r.detection_score)
 
-    console.print(_axis_table("Category — Vulnerability Type", by_category))
+    console.print(_axis_table("CWE Class", by_cwe))
     console.print(_axis_table("Target Repository", by_target))
     console.print(_axis_table("Axis 1 — Distribution Strategy", by_axis1))
     console.print(_axis_table("Axis 2 — Code Concealment", by_axis2))

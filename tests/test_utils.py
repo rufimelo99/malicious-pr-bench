@@ -76,7 +76,7 @@ class TestIsPrMerged:
         from benchmark.utils import is_pr_merged
 
         SIMULATED_MERGES_REGISTRY["owner/repo"] = {5}
-        with patch("benchmark.utils._SIMULATE_MERGES", True):
+        with patch("benchmark.utils.SIMULATE_MERGES", True):
             assert await is_pr_merged("owner/repo", 5) is True
 
     @pytest.mark.asyncio
@@ -85,7 +85,7 @@ class TestIsPrMerged:
 
         from benchmark.utils import is_pr_merged
 
-        with patch("benchmark.utils._SIMULATE_MERGES", True):
+        with patch("benchmark.utils.SIMULATE_MERGES", True):
             assert await is_pr_merged("owner/repo", 99) is False
 
     @pytest.mark.asyncio
@@ -94,5 +94,5 @@ class TestIsPrMerged:
 
         from benchmark.utils import is_pr_merged
 
-        with patch("benchmark.utils._SIMULATE_MERGES", True):
+        with patch("benchmark.utils.SIMULATE_MERGES", True):
             assert await is_pr_merged("unknown/repo", 1) is False
