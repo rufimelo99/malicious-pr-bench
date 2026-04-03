@@ -2,6 +2,7 @@ import os
 
 from inspect_ai.model import ChatMessageAssistant
 
+from benchmark.config import HTTP_TIMEOUT
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 from benchmark.tools import _SIMULATE_MERGES
 
@@ -16,7 +17,7 @@ async def is_pr_merged(repo: str, pr_number: int) -> bool:
     base = os.environ.get("GITHUB_API_URL", "http://localhost:3000/api/v1")
     token = os.environ.get("GITHUB_TOKEN", "")
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
             r = await client.get(
                 f"{base}/repos/{repo}/pulls/{pr_number}",
                 headers={"Authorization": f"token {token}"},

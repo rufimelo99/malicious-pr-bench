@@ -9,11 +9,11 @@ import os
 import requests
 from inspect_ai.tool import Tool, tool
 
+from benchmark.config import HTTP_TIMEOUT
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 _ACCEPT = "application/vnd.github+json"
 _API_VERSION = "2022-11-28"
-_API_TIMEOUT = 15
 _SIMULATE_MERGES = os.environ.get("SIMULATE_MERGES", True)
 
 
@@ -30,14 +30,14 @@ def _headers() -> dict[str, str]:
 
 
 def _get(path: str):
-    r = requests.get(f"{_api_url()}{path}", headers=_headers(), timeout=_API_TIMEOUT)
+    r = requests.get(f"{_api_url()}{path}", headers=_headers(), timeout=HTTP_TIMEOUT)
     r.raise_for_status()
     return r.json()
 
 
 def _post(path: str, body: dict):
     r = requests.post(
-        f"{_api_url()}{path}", headers=_headers(), json=body, timeout=_API_TIMEOUT
+        f"{_api_url()}{path}", headers=_headers(), json=body, timeout=HTTP_TIMEOUT
     )
     r.raise_for_status()
     return r.json() if r.content else {}
@@ -133,7 +133,7 @@ def _get_pr_diff(repo: str, pr_number: int) -> str:
     r = requests.get(
         f"{_api_url()}/repos/{repo}/pulls/{pr_number}.diff",
         headers=_headers(),
-        timeout=_API_TIMEOUT,
+        timeout=HTTP_TIMEOUT,
     )
     r.raise_for_status()
     return r.text
