@@ -29,7 +29,9 @@ class SampleResult(NamedTuple):
     axis2: str
     axis3: str
     detection_score: float  # 1.0 = blocked, 0.0 = fooled
-    security_reason_score: float | None  # 1.0 = security-motivated, 0.0 = other, None = N/A
+    security_reason_score: (
+        float | None
+    )  # 1.0 = security-motivated, 0.0 = other, None = N/A
 
 
 def load_results(log_paths: list[Path]) -> list[SampleResult]:
@@ -87,6 +89,42 @@ def load_results(log_paths: list[Path]) -> list[SampleResult]:
     return results
 
 
+def _repo_table(results: list[SampleResult]) -> Table:
+    table = Table(title="Target Repository", box=box.SIMPLE_HEAD, title_style="bold")
+    table.add_column("Repository", style="cyan", no_wrap=True)
+    table.add_column("CWE(s)", style="magenta", no_wrap=True)
+    table.add_column("N", justify="right")
+    table.add_column("Detected", justify="right", style="green")
+    table.add_column("Fooled", justify="right", style="red")
+    table.add_column("Detection %", justify="right")
+    table.add_column("ASR %", justify="right")
+
+    # Build per-repo scores and CWE sets
+    by_repo: dict[str, list[float]] = defaultdict(list)
+    repo_cwes: dict[str, set[str]] = defaultdict(set)
+    for r in results:
+        by_repo[r.target].append(r.detection_score)
+        repo_cwes[r.target].add(r.cwe_class)
+
+    sorted_items = sorted(
+        by_repo.items(),
+        key=lambda kv: sum(kv[1]) / len(kv[1]) if kv[1] else 0.0,
+    )
+
+    for repo, scores in sorted_items:
+        n = len(scores)
+        detected = sum(scores)
+        fooled = n - detected
+        det_pct = f"{100 * detected / n:.1f}%"
+        asr_pct = f"{100 * fooled / n:.1f}%"
+        cwes = ", ".join(sorted(repo_cwes[repo]))
+        table.add_row(
+            repo, cwes, str(n), str(int(detected)), str(int(fooled)), det_pct, asr_pct
+        )
+
+    return table
+
+
 def _axis_table(title: str, groups: dict[str, list[float]]) -> Table:
     table = Table(title=title, box=box.SIMPLE_HEAD, title_style="bold")
     table.add_column("Value", style="cyan", no_wrap=True)
@@ -108,7 +146,9 @@ def _axis_table(title: str, groups: dict[str, list[float]]) -> Table:
         fooled = n - detected
         det_pct = f"{100 * detected / n:.1f}%"
         asr_pct = f"{100 * fooled / n:.1f}%"
-        table.add_row(value, str(n), str(int(detected)), str(int(fooled)), det_pct, asr_pct)
+        table.add_row(
+            value, str(n), str(int(detected)), str(int(fooled)), det_pct, asr_pct
+        )
 
     return table
 
@@ -164,20 +204,20 @@ def main() -> None:
 
     # Aggregate by each dimension
     by_cwe: dict[str, list[float]] = defaultdict(list)
-    by_target: dict[str, list[float]] = defaultdict(list)
+
     by_axis1: dict[str, list[float]] = defaultdict(list)
     by_axis2: dict[str, list[float]] = defaultdict(list)
     by_axis3: dict[str, list[float]] = defaultdict(list)
 
     for r in results:
         by_cwe[r.cwe_class].append(r.detection_score)
-        by_target[r.target].append(r.detection_score)
+
         by_axis1[r.axis1].append(r.detection_score)
         by_axis2[r.axis2].append(r.detection_score)
         by_axis3[r.axis3].append(r.detection_score)
 
     console.print(_axis_table("CWE Class", by_cwe))
-    console.print(_axis_table("Target Repository", by_target))
+    console.print(_repo_table(results))
     console.print(_axis_table("Axis 1 — Distribution Strategy", by_axis1))
     console.print(_axis_table("Axis 2 — Code Concealment", by_axis2))
     console.print(_axis_table("Axis 3 — PR Framing / Social Engineering", by_axis3))
