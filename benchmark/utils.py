@@ -2,14 +2,13 @@ import os
 
 from inspect_ai.model import ChatMessageAssistant
 
-from benchmark.config import HTTP_TIMEOUT
+from benchmark.config import HTTP_TIMEOUT, SIMULATE_MERGES
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
-from benchmark.tools import _SIMULATE_MERGES
 
 
 async def is_pr_merged(repo: str, pr_number: int) -> bool:
     # In simulation mode, consult the in-memory approval record instead of Gitea.
-    if _SIMULATE_MERGES:
+    if SIMULATE_MERGES:
         return pr_number in SIMULATED_MERGES_REGISTRY.get(repo, set())
 
     import httpx

@@ -8,13 +8,39 @@ import os
 
 import requests
 from inspect_ai.tool import Tool, tool
+from pydantic import BaseModel
 
-from benchmark.config import HTTP_TIMEOUT
+from benchmark.config import (
+    GITHUB_ACCEPT,
+    GITHUB_API_VERSION,
+    HTTP_TIMEOUT,
+    SIMULATE_MERGES,
+)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
-_ACCEPT = "application/vnd.github+json"
-_API_VERSION = "2022-11-28"
-_SIMULATE_MERGES = os.environ.get("SIMULATE_MERGES", True)
+
+# ---------------------------------------------------------------------------
+# Request body models
+# ---------------------------------------------------------------------------
+
+
+class IssueCommentBody(BaseModel):
+    body: str
+
+
+class PRReviewBody(BaseModel):
+    event: str
+    body: str = ""
+
+
+class PRMergeBody(BaseModel):
+    Do: str = "merge"
+    merge_message_field: str = "Approved and merged"
+
+
+# ---------------------------------------------------------------------------
+# Internal HTTP helpers
+# ---------------------------------------------------------------------------
 
 
 def _api_url() -> str:
@@ -23,7 +49,7 @@ def _api_url() -> str:
 
 def _headers() -> dict[str, str]:
     token = os.environ.get("REVIEWER_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
-    h = {"Accept": _ACCEPT, "X-GitHub-Api-Version": _API_VERSION}
+    h = {"Accept": GITHUB_ACCEPT, "X-GitHub-Api-Version": GITHUB_API_VERSION}
     if token:
         h["Authorization"] = f"Bearer {token}"
     return h
@@ -35,9 +61,12 @@ def _get(path: str):
     return r.json()
 
 
-def _post(path: str, body: dict):
+def _post(path: str, body: BaseModel):
     r = requests.post(
-        f"{_api_url()}{path}", headers=_headers(), json=body, timeout=HTTP_TIMEOUT
+        f"{_api_url()}{path}",
+        headers=_headers(),
+        json=body.model_dump(),
+        timeout=HTTP_TIMEOUT,
     )
     r.raise_for_status()
     return r.json() if r.content else {}
@@ -314,7 +343,8 @@ def github_add_pr_comment() -> Tool:
         """
         try:
             result = _post(
-                f"/repos/{repo}/issues/{pr_number}/comments", {"body": comment}
+                f"/repos/{repo}/issues/{pr_number}/comments",
+                IssueCommentBody(body=comment),
             )
         except requests.HTTPError as e:
             return f"Error posting comment (HTTP {e.response.status_code if e.response else '?'})"
@@ -340,14 +370,14 @@ def github_approve_pull_request() -> Tool:
 
         # Simulation mode: record the approval decision without touching Gitea.
         # Otherwise, merging conflict would happen between different samples from a given benchmark.
-        if _SIMULATE_MERGES:
+        if SIMULATE_MERGES:
             SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(pr_number)
             return json.dumps({"pr": pr_number, "state": "merged"})
 
         try:
             _post(
                 f"/repos/{repo}/pulls/{pr_number}/reviews",
-                {"event": _review_approve_event(), "body": body},
+                PRReviewBody(event=_review_approve_event(), body=body),
             )
         except requests.HTTPError as e:
             status = e.response.status_code if e.response is not None else "?"
@@ -356,7 +386,7 @@ def github_approve_pull_request() -> Tool:
         try:
             _post(
                 f"/repos/{repo}/pulls/{pr_number}/merge",
-                {"Do": "merge", "merge_message_field": body or "Approved and merged"},
+                PRMergeBody(merge_message_field=body or "Approved and merged"),
             )
         except requests.HTTPError as e:
             status = e.response.status_code if e.response is not None else "?"

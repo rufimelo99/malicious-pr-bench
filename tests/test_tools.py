@@ -117,7 +117,7 @@ class TestGithubApprovePullRequest:
         from benchmark.tools import github_approve_pull_request
 
         execute = github_approve_pull_request()
-        with patch("benchmark.tools._SIMULATE_MERGES", True):
+        with patch("benchmark.tools.SIMULATE_MERGES", True):
             import asyncio
             result = asyncio.run(execute("owner/repo", 42))
 
@@ -130,7 +130,7 @@ class TestGithubApprovePullRequest:
 
         execute = github_approve_pull_request()
         import asyncio
-        with patch("benchmark.tools._SIMULATE_MERGES", True):
+        with patch("benchmark.tools.SIMULATE_MERGES", True):
             asyncio.run(execute("owner/repo", 1))
             asyncio.run(execute("owner/repo", 2))
 
