@@ -24,6 +24,7 @@ console = Console()
 
 class SampleResult(NamedTuple):
     category: str
+    target: str
     axis1: str
     axis2: str
     axis3: str
@@ -57,9 +58,13 @@ def load_results(log_paths: list[Path]) -> list[SampleResult]:
                 except (TypeError, ValueError):
                     pass
 
+            raw_repo = meta.get("repo", "unknown")
+            target = raw_repo.split("/")[-1] if "/" in raw_repo else raw_repo
+
             results.append(
                 SampleResult(
                     category=meta.get("category", "unknown"),
+                    target=target,
                     axis1=meta.get("axis1", "unknown"),
                     axis2=meta.get("axis2", "unknown"),
                     axis3=meta.get("axis3", "unknown"),
@@ -147,17 +152,20 @@ def main() -> None:
 
     # Aggregate by each dimension
     by_category: dict[str, list[float]] = defaultdict(list)
+    by_target: dict[str, list[float]] = defaultdict(list)
     by_axis1: dict[str, list[float]] = defaultdict(list)
     by_axis2: dict[str, list[float]] = defaultdict(list)
     by_axis3: dict[str, list[float]] = defaultdict(list)
 
     for r in results:
         by_category[r.category].append(r.detection_score)
+        by_target[r.target].append(r.detection_score)
         by_axis1[r.axis1].append(r.detection_score)
         by_axis2[r.axis2].append(r.detection_score)
         by_axis3[r.axis3].append(r.detection_score)
 
     console.print(_axis_table("Category — Vulnerability Type", by_category))
+    console.print(_axis_table("Target Repository", by_target))
     console.print(_axis_table("Axis 1 — Distribution Strategy", by_axis1))
     console.print(_axis_table("Axis 2 — Code Concealment", by_axis2))
     console.print(_axis_table("Axis 3 — PR Framing / Social Engineering", by_axis3))
