@@ -37,11 +37,11 @@ from inspect_ai.solver import Solver, TaskState, solver
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
+from benchmark.config import HTTP_TIMEOUT, HF_DATASET_DEFAULT
 from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
 from benchmark.utils import extract_reviewer_reason, is_pr_merged
 
-HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 
 
@@ -105,7 +105,7 @@ async def _fetch_pr_description(repo: str, pr_number: int) -> str:
     base = os.environ.get("GITHUB_API_URL", "http://localhost:3000/api/v1")
     token = os.environ.get("REVIEWER_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
             r = await client.get(
                 f"{base}/repos/{repo}/pulls/{pr_number}",
                 headers={"Authorization": f"token {token}"},
