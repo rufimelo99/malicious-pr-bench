@@ -208,12 +208,22 @@ def _load_benign_samples(
         raise ValueError("Either hf_dataset or jsonl_path must be provided.")
 
     samples: list[Sample] = []
+    seen_ids: set[str] = set()
     for cwe_slug, records in all_records:
         for record in records:
             repo = record.get("repo", "")
             pr_number = record["pr_number"]
             vuln_id = record.get("vuln_id", "")
             cwe_id = record.get("cwe_id", cwe_slug)
+
+            sample_id = (
+                vuln_id.replace("/", "-")
+                if vuln_id
+                else f"{repo.replace('/', '_')}-pr{pr_number}"
+            )
+            if sample_id in seen_ids:
+                continue
+            seen_ids.add(sample_id)
 
             samples.append(
                 Sample(
@@ -222,7 +232,7 @@ def _load_benign_samples(
                         f"Use your review tools to inspect the changes and decide whether "
                         f"to approve or decline the pull request."
                     ),
-                    id=f"{repo.replace('/', '_')}-pr{pr_number}",
+                    id=sample_id,
                     metadata={
                         "repo": repo,
                         "pr_number": pr_number,
