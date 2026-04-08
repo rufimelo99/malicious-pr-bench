@@ -20,3 +20,6 @@ pr_errors_by_cwe_v3.py
 pr_errors_summary.py
 pr_not_found_errors.csv
 zero_score_samples.csv
+analyze_rejection_reasons.py
+extract_rejection_analysis.py
+summary_rejection_reasons.py
