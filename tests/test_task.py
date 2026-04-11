@@ -8,10 +8,10 @@ from pathlib import Path
 
 import pytest
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 @dataclasses.dataclass
 class ScenarioRecord:
@@ -43,7 +43,11 @@ class PRRecord:
             self.scenario.pr_body = f"PR {self.pr_number} body"
 
     def to_dict(self) -> dict:
-        return dataclasses.asdict(self)
+        """Convert to dict with flattened axis fields (not nested under scenario)."""
+        d = dataclasses.asdict(self)
+        scenario = d.pop("scenario")
+        d.update(scenario)
+        return d
 
 
 def _write_jsonl(tmp_path: Path, records: list[PRRecord]) -> Path:
@@ -56,9 +60,11 @@ def _write_jsonl(tmp_path: Path, records: list[PRRecord]) -> Path:
 # _load_samples — individual mode
 # ---------------------------------------------------------------------------
 
+
 class TestLoadSamplesIndividual:
     def _load(self, jsonl_path, **kwargs):
         from benchmark.task import _load_samples
+
         return _load_samples(
             jsonl_path=str(jsonl_path),
             hf_dataset=None,
@@ -93,8 +99,12 @@ class TestLoadSamplesIndividual:
 
     def test_axis1_filter(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis1="single_pr_introduction")),
-            PRRecord(pr_number=2, scenario=ScenarioRecord(axis1="precondition_staging")),
+            PRRecord(
+                pr_number=1, scenario=ScenarioRecord(axis1="single_pr_introduction")
+            ),
+            PRRecord(
+                pr_number=2, scenario=ScenarioRecord(axis1="precondition_staging")
+            ),
         ]
         path = _write_jsonl(tmp_path, records)
         samples = self._load(path, axis1="precondition_staging")
@@ -103,7 +113,9 @@ class TestLoadSamplesIndividual:
 
     def test_axis2_filter(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis2="buried_in_complexity")),
+            PRRecord(
+                pr_number=1, scenario=ScenarioRecord(axis2="buried_in_complexity")
+            ),
             PRRecord(pr_number=2, scenario=ScenarioRecord(axis2="clarity")),
         ]
         path = _write_jsonl(tmp_path, records)
@@ -112,7 +124,9 @@ class TestLoadSamplesIndividual:
 
     def test_axis3_filter(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis3="misleading_hardening")),
+            PRRecord(
+                pr_number=1, scenario=ScenarioRecord(axis3="misleading_hardening")
+            ),
             PRRecord(pr_number=2, scenario=ScenarioRecord(axis3="security_fix_irony")),
         ]
         path = _write_jsonl(tmp_path, records)
@@ -121,12 +135,29 @@ class TestLoadSamplesIndividual:
 
     def test_combined_axis_filter(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis1="single_pr_introduction", axis2="buried_in_complexity")),
-            PRRecord(pr_number=2, scenario=ScenarioRecord(axis1="single_pr_introduction", axis2="clarity")),
-            PRRecord(pr_number=3, scenario=ScenarioRecord(axis1="precondition_staging", axis2="buried_in_complexity")),
+            PRRecord(
+                pr_number=1,
+                scenario=ScenarioRecord(
+                    axis1="single_pr_introduction", axis2="buried_in_complexity"
+                ),
+            ),
+            PRRecord(
+                pr_number=2,
+                scenario=ScenarioRecord(
+                    axis1="single_pr_introduction", axis2="clarity"
+                ),
+            ),
+            PRRecord(
+                pr_number=3,
+                scenario=ScenarioRecord(
+                    axis1="precondition_staging", axis2="buried_in_complexity"
+                ),
+            ),
         ]
         path = _write_jsonl(tmp_path, records)
-        samples = self._load(path, axis1="single_pr_introduction", axis2="buried_in_complexity")
+        samples = self._load(
+            path, axis1="single_pr_introduction", axis2="buried_in_complexity"
+        )
         assert len(samples) == 1
         assert samples[0].metadata["pr_number"] == 1
 
@@ -137,7 +168,9 @@ class TestLoadSamplesIndividual:
         assert samples == []
 
     def test_incomplete_group_excluded(self, tmp_path):
-        records = [PRRecord(pr_number=1, group_id="grp1", sequence_index=0, sequence_total=2)]
+        records = [
+            PRRecord(pr_number=1, group_id="grp1", sequence_index=0, sequence_total=2)
+        ]
         path = _write_jsonl(tmp_path, records)
         samples = self._load(path)
         assert len(samples) == 0
