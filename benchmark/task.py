@@ -28,19 +28,18 @@ import subprocess
 import time
 from pathlib import Path
 
+from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
+from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
+from benchmark.config import HF_DATASET_DEFAULT, HTTP_TIMEOUT
+from benchmark.logger import logger
+from benchmark.registry import clear_simulated_merges
+from benchmark.utils import extract_reviewer_reason, is_pr_merged
 from inspect_ai import Task, task
 from inspect_ai.agent import AgentState
 from inspect_ai.dataset import Sample
 from inspect_ai.model import ChatMessageUser
 from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import Solver, TaskState, solver
-
-from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
-from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
-from benchmark.config import HTTP_TIMEOUT, HF_DATASET_DEFAULT
-from benchmark.logger import logger
-from benchmark.registry import clear_simulated_merges
-from benchmark.utils import extract_reviewer_reason, is_pr_merged
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 
@@ -141,13 +140,13 @@ def _download_from_hf(
 
 
 def _matches_filter(
-    scenario: dict, axis1: str | None, axis2: str | None, axis3: str | None
+    record: dict, axis1: str | None, axis2: str | None, axis3: str | None
 ) -> bool:
-    if axis1 and scenario.get("axis1") != axis1:
+    if axis1 and record.get("axis1") != axis1:
         return False
-    if axis2 and scenario.get("axis2") != axis2:
+    if axis2 and record.get("axis2") != axis2:
         return False
-    if axis3 and scenario.get("axis3") != axis3:
+    if axis3 and record.get("axis3") != axis3:
         return False
     return True
 
@@ -162,6 +161,7 @@ def _load_samples(
     axis2: str | None = None,
     axis3: str | None = None,
     review_mode: str = "individual",
+    skip_undefined: bool = True,
 ) -> list[Sample]:
     if hf_dataset:
         path = _download_from_hf(hf_dataset, cwe, version)
@@ -176,14 +176,20 @@ def _load_samples(
 
     # Apply axis filters
     if axis1 or axis2 or axis3:
+        records = [r for r in records if _matches_filter(r, axis1, axis2, axis3)]
+
+    # Drop records with no axis info (malformed)
+    records = [r for r in records if r.get("axis1")]
+
+    # Drop records with undefined axis values (if skip_undefined is True)
+    if skip_undefined:
         records = [
             r
             for r in records
-            if _matches_filter(r.get("scenario", {}), axis1, axis2, axis3)
+            if r.get("axis1") != "undefined"
+            and r.get("axis2") != "undefined"
+            and r.get("axis3") != "undefined"
         ]
-
-    # Drop records with no axis info (malformed)
-    records = [r for r in records if r.get("scenario", {}).get("axis1")]
 
     # Pre-compute {group_id: {total, [pr_number, ...]}} sorted by sequence_index
     group_prs: dict[str, list[tuple[int, int]]] = {}
@@ -238,14 +244,13 @@ def _load_individual_samples(
 
         sample_repo = record.get("repo") or repo
         pr_number = record["pr_number"]
-        scenario = record.get("scenario", {})
-        category = scenario.get("category", "unknown")
-        axis1 = scenario.get("axis1", "monolithic")
-        axis2 = scenario.get("axis2", "unknown")
-        axis3 = scenario.get("axis3", "unknown")
+        category = record.get("category", "unknown")
+        axis1 = record.get("axis1", "monolithic")
+        axis2 = record.get("axis2", "unknown")
+        axis3 = record.get("axis3", "unknown")
 
-        pr_title = scenario.get("pr_title", "")
-        pr_body = scenario.get("pr_body", "")
+        pr_title = record.get("pr_title", "")
+        pr_body = record.get("pr_body", "")
         pr_description = ""
         if pr_title:
             pr_description = f"\n\nPR title: {pr_title}"
@@ -301,16 +306,15 @@ def _load_sequence_samples(
         group_records.sort(key=lambda r: r.get("sequence_index", 0))
         first = group_records[0]
         sample_repo = first.get("repo") or repo
-        scenario = first.get("scenario", {})
         pr_list = "\n".join(f"  - PR #{r['pr_number']}" for r in group_records)
-        axis1 = scenario.get("axis1", "unknown")
-        axis2 = scenario.get("axis2", "unknown")
-        axis3 = scenario.get("axis3", "unknown")
+        axis1 = first.get("axis1", "unknown")
+        axis2 = first.get("axis2", "unknown")
+        axis3 = first.get("axis3", "unknown")
         pr_numbers = [r["pr_number"] for r in group_records]
         pr_details = {
             r["pr_number"]: {
-                "title": r.get("scenario", {}).get("pr_title", ""),
-                "body": r.get("scenario", {}).get("pr_body", ""),
+                "title": r.get("pr_title", ""),
+                "body": r.get("pr_body", ""),
             }
             for r in group_records
         }
@@ -329,7 +333,7 @@ def _load_sequence_samples(
                     "pr_numbers": pr_numbers,
                     "pr_details": pr_details,
                     "group_id": group_id,
-                    "category": scenario.get("category", "unknown"),
+                    "category": first.get("category", "unknown"),
                     "axis1": axis1,
                     "axis2": axis2,
                     "axis3": axis3,
@@ -518,7 +522,7 @@ def reviewer_benchmark(
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
-    version: str = "v0.0.0",
+    version: str = "gpt5.2-filtered",
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
@@ -528,6 +532,7 @@ def reviewer_benchmark(
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
+    skip_undefined: bool = True,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -569,6 +574,9 @@ def reviewer_benchmark(
         actually merging PRs on Gitea. The scorer reads the in-memory state instead
         of querying the API. Useful for dry runs and repeated testing on the same
         container state. Default: False.
+    skip_undefined : bool
+        If True, exclude records where any axis field (axis1, axis2, or axis3) has
+        the value ``undefined``. Default: True.
     """
     if simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
@@ -587,6 +595,7 @@ def reviewer_benchmark(
             axis2=axis2,
             axis3=axis3,
             review_mode=review_mode,
+            skip_undefined=skip_undefined,
         ),
         solver=reviewer_solver(
             model=model,
