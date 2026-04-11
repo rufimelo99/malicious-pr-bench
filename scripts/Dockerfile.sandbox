@@ -1,0 +1,20 @@
+FROM ubuntu:22.04
+
+# Install essential tools
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    build-essential \
+    python3 \
+    python3-pip \
+    vim \
+    nano \
+    file \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /workspace
+
+# Keep container running
+CMD ["/bin/bash", "-c", "sleep infinity"]

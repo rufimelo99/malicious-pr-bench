@@ -5,19 +5,16 @@ from __future__ import annotations
 import base64
 import json
 import os
+import subprocess
 
 import requests
-from inspect_ai.tool import Tool, tool
+from inspect_ai.tool import Tool, ToolError, tool
+from inspect_ai.util import sandbox
 from pydantic import BaseModel
 
-from benchmark.config import (
-    GITHUB_ACCEPT,
-    GITHUB_API_VERSION,
-    HTTP_TIMEOUT,
-    SIMULATE_MERGES,
-)
+from benchmark.config import (GITHUB_ACCEPT, GITHUB_API_VERSION, HTTP_TIMEOUT,
+                              SIMULATE_MERGES)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
-
 
 # ---------------------------------------------------------------------------
 # Request body models
@@ -393,5 +390,145 @@ def github_approve_pull_request() -> Tool:
             return f"PR #{pr_number} approved but merge failed (HTTP {status}): {e}"
 
         return json.dumps({"pr": pr_number, "state": "merged"})
+
+    return execute
+
+
+# ---------------------------------------------------------------------------
+# Bash execution tools
+# ---------------------------------------------------------------------------
+
+
+@tool
+def bash_run_command() -> Tool:
+    """Execute a bash command in the sandbox (useful for git operations and file inspection)."""
+
+    async def execute(command: str) -> str:
+        """Run a bash command and return its output.
+
+        Args:
+            command: Bash command to execute (e.g., 'git log --oneline -5').
+                     Supported operations: git, grep, find, ls, cat, head, tail, etc.
+        """
+        # Security: only allow safe commands for inspection
+        allowed_prefixes = (
+            "git ",
+            "grep ",
+            "find ",
+            "ls ",
+            "cat ",
+            "head ",
+            "tail ",
+            "wc ",
+            "file ",
+            "stat ",
+            "pwd",
+            "echo ",
+            "which ",
+        )
+
+        if not any(command.strip().startswith(prefix) for prefix in allowed_prefixes):
+            return f"Error: command not allowed. Supported: git, grep, find, ls, cat, head, tail, wc, file, stat, pwd, echo, which"
+
+        try:
+            result = await sandbox().exec(
+                cmd=["bash", "-c", command],
+                timeout=30,
+            )
+            if result.returncode != 0:
+                return f"Command failed (exit {result.returncode}):\n{result.stderr}"
+            return result.stdout or "(no output)"
+        except TimeoutError:
+            return "Error: command timed out after 30 seconds"
+        except Exception as e:
+            return f"Error executing command: {e}"
+
+    return execute
+
+
+@tool
+def bash_list_branches() -> Tool:
+    """List all branches in a cloned repository."""
+
+    async def execute(repo_dir: str = "/workspace/repo") -> str:
+        """List all branches in the repository.
+
+        Args:
+            repo_dir: Path to the cloned repository (default: /workspace/repo).
+        """
+        try:
+            result = await sandbox().exec(
+                cmd=["git", "-C", repo_dir, "branch", "-a"],
+                timeout=10,
+            )
+            if result.returncode != 0:
+                return f"Error listing branches: {result.stderr}"
+            return result.stdout or "No branches found"
+        except TimeoutError:
+            return "Error: command timed out"
+        except Exception as e:
+            return f"Error: {e}"
+
+    return execute
+
+
+@tool
+def bash_checkout_branch() -> Tool:
+    """Checkout a specific branch in a cloned repository."""
+
+    async def execute(branch: str, repo_dir: str = "/workspace/repo") -> str:
+        """Checkout a branch in the repository.
+
+        Args:
+            branch: Branch name to checkout (e.g., 'feature/new-vulnerability').
+            repo_dir: Path to the cloned repository (default: /workspace/repo).
+        """
+        try:
+            result = await sandbox().exec(
+                cmd=["git", "-C", repo_dir, "checkout", branch],
+                timeout=10,
+            )
+            if result.returncode != 0:
+                return f"Checkout failed: {result.stderr}"
+            return f"Successfully checked out branch: {branch}"
+        except TimeoutError:
+            return "Error: command timed out"
+        except Exception as e:
+            return f"Error: {e}"
+
+    return execute
+
+
+@tool
+def bash_git_diff() -> Tool:
+    """Show the diff between two branches or commits in a cloned repository."""
+
+    async def execute(
+        base: str, head: str = "", repo_dir: str = "/workspace/repo"
+    ) -> str:
+        """Show diff between branches or commits.
+
+        Args:
+            base: Base branch or commit (e.g., 'main' or 'abc1234').
+            head: Head branch or commit (empty to compare against working tree).
+            repo_dir: Path to the cloned repository (default: /workspace/repo).
+        """
+        try:
+            if head:
+                cmd = ["git", "-C", repo_dir, "diff", f"{base}..{head}"]
+            else:
+                cmd = ["git", "-C", repo_dir, "diff", base]
+
+            result = await sandbox().exec(
+                cmd=cmd,
+                timeout=30,
+            )
+            if result.returncode != 0:
+                return f"Diff failed: {result.stderr}"
+            return result.stdout or "No differences"
+        except TimeoutError:
+            return "Error: command timed out"
+        except Exception as e:
+            return f"Error: {e}"
 
     return execute
