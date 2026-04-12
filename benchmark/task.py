@@ -55,23 +55,62 @@ _SANDBOX_DOCKERFILE = Path(__file__).parent.parent / "scripts" / "Dockerfile.san
 
 
 def _create_sample_init(repo: str) -> SampleInit:
-    """Create a sample_init function that passes Gitea URL to sandbox.
+    """Create a sample_init function that clones the repo into the sandbox.
 
-    The agent will call bash_git_clone() when ready to clone the repo.
+    This runs automatically when the sandbox initializes, before the agent starts.
     """
 
     async def sample_init(task_name: str, config, environments: dict[str, str]) -> dict:
-        """Initialize sandbox environment with Gitea API URL.
+        """Initialize sandbox by cloning the repository.
 
         Args:
             task_name: Name of the task
             config: Sandbox configuration
-            environments: Environment variables
+            environments: Environment variables dict
 
         Returns:
-            Dictionary of SandboxEnvironment objects
+            Environment dictionary
         """
-        # Just return empty dict - agent will clone on demand via bash_git_clone
+        from inspect_ai.util import sandbox
+
+        logger.info(f"[sample_init] Starting sandbox initialization for {repo}")
+
+        # Determine the Gitea base URL
+        # Use host.docker.internal to access Gitea on the host machine from the container
+        api_url = (
+            environments.get("GITHUB_API_URL")
+            or os.environ.get("GITHUB_API_URL")
+            or "http://host.docker.internal:3001/api/v1"
+        )
+        base_url = api_url.replace("/api/v1", "")
+
+        # Pass Gitea info to the Docker entrypoint script
+        # The entrypoint will clone the repo when the container starts
+        environments["GITEA_REPO"] = repo
+        environments["GITEA_URL"] = base_url
+
+        logger.info(
+            f"[sample_init] Configured Gitea: GITEA_URL={base_url}, GITEA_REPO={repo}"
+        )
+
+        # Verify the repo was cloned (entrypoint should have done it)
+        try:
+            sb = sandbox()
+            logger.info(f"[sample_init] Checking if {repo} was cloned...")
+            result = await sb.exec(cmd=["ls", "-la", "/workspace/repo"], timeout=10)
+            if result.returncode == 0:
+                logger.info(f"[sample_init] ✓ Repo cloned successfully by entrypoint")
+                logger.info(f"[sample_init] Repo contents:\n{result.stdout}")
+            else:
+                logger.error(
+                    f"[sample_init] ✗ Repo not found at /workspace/repo: {result.stderr}"
+                )
+        except Exception as e:
+            logger.error(f"[sample_init] Exception while verifying clone: {e}")
+            import traceback
+
+            logger.error(traceback.format_exc())
+
         return environments
 
     return sample_init

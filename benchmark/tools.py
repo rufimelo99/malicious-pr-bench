@@ -447,6 +447,45 @@ def bash_run_command() -> Tool:
 
 
 @tool
+def bash_git_clone() -> Tool:
+    """Clone a repository from Gitea into the sandbox for direct inspection."""
+
+    async def execute(repo: str, target_dir: str = "/workspace/repo") -> str:
+        """Clone a Gitea repository into the sandbox.
+
+        Args:
+            repo: Repository in owner/name format (e.g. 'gitadmin/test-repo').
+            target_dir: Directory in sandbox to clone into (default: /workspace/repo).
+        """
+        try:
+            api_url = _api_url()
+            base_url = api_url.replace("/api/v1", "")
+            git_url = f"{base_url}/{repo}.git"
+
+            # Remove target dir if it exists
+            await sandbox().exec(
+                cmd=["rm", "-rf", target_dir],
+                timeout=10,
+            )
+
+            result = await sandbox().exec(
+                cmd=["git", "clone", git_url, target_dir],
+                timeout=60,
+            )
+
+            if result.returncode != 0:
+                return f"Clone failed: {result.stderr}"
+
+            return f"Successfully cloned {repo} to {target_dir}"
+        except TimeoutError:
+            return "Error: clone timed out after 60 seconds"
+        except Exception as e:
+            return f"Error cloning repository: {e}"
+
+    return execute
+
+
+@tool
 def bash_list_branches() -> Tool:
     """List all branches in a cloned repository."""
 
