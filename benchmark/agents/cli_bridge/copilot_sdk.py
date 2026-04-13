@@ -19,6 +19,11 @@ def _truncate(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[:limit] + "…"
 
 
+def _escape_newlines(text: str) -> str:
+    """Replace literal newlines so each trace entry stays on one line."""
+    return text.replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "")
+
+
 def _extract_json(text: str) -> str | None:
     """Extract a JSON object from text that may contain markdown fences or prose."""
     # Try the raw text first.
@@ -100,10 +105,10 @@ class CopilotSDKBridge(CLIAgentBridge):
                     # For bash, extract the command string.
                     if name == "bash" and isinstance(raw_args, dict):
                         cmd = raw_args.get("command", "")
-                        trace_lines.append(f"[bash] {_truncate(cmd, 500)}")
+                        trace_lines.append(f"[bash] {_escape_newlines(_truncate(cmd, 500))}")
                     elif name not in ("report_intent",):
                         arg_str = json.dumps(raw_args) if isinstance(raw_args, dict) else str(raw_args or "")
-                        trace_lines.append(f"[tool] {name}: {_truncate(arg_str, 300)}")
+                        trace_lines.append(f"[tool] {name}: {_escape_newlines(_truncate(arg_str, 300))}")
 
                 elif etype == "tool.execution_complete":
                     call_id = getattr(data, "tool_call_id", None) or ""
@@ -115,9 +120,9 @@ class CopilotSDKBridge(CLIAgentBridge):
                     else:
                         content = ""
                     if name == "bash":
-                        trace_lines.append(f"[bash.output] {_truncate(str(content), 1500)}")
+                        trace_lines.append(f"[bash.output] {_escape_newlines(_truncate(str(content), 1500))}")
                     elif name not in ("report_intent",):
-                        trace_lines.append(f"[tool.output] {name}: {_truncate(str(content), 1000)}")
+                        trace_lines.append(f"[tool.output] {name}: {_escape_newlines(_truncate(str(content), 1000))}")
 
                 elif etype == "assistant.message":
                     content = getattr(data, "content", "")
