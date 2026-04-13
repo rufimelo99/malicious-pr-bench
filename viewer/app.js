@@ -1079,20 +1079,26 @@
   function createAgentTrace(rawOutput) {
     if (!rawOutput) return null;
 
+    // Unescape escaped newlines from SDK bridge trace lines.
+    function unescape(s) {
+      return s.replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
+    }
+
     const steps = [];
     for (const line of rawOutput.split('\n')) {
       const trimmed = line.trim();
 
       // --- Copilot SDK trace format ---
       if (trimmed.startsWith('[bash] ')) {
-        steps.push({ type: 'shell', command: trimmed.slice('[bash] '.length), output: '' });
+        steps.push({ type: 'shell', command: unescape(trimmed.slice('[bash] '.length)), output: '' });
         continue;
       }
       if (trimmed.startsWith('[bash.output] ')) {
+        const content = unescape(trimmed.slice('[bash.output] '.length));
         // Attach to the last shell step
         for (let i = steps.length - 1; i >= 0; i--) {
           if (steps[i].type === 'shell' && !steps[i].output) {
-            steps[i].output = trimmed.slice('[bash.output] '.length);
+            steps[i].output = content;
             break;
           }
         }
@@ -1109,7 +1115,7 @@
       if (trimmed.startsWith('[tool.output] ')) {
         const rest = trimmed.slice('[tool.output] '.length);
         const colonIdx = rest.indexOf(':');
-        const toolResult = colonIdx >= 0 ? rest.slice(colonIdx + 1).trim() : rest;
+        const toolResult = unescape(colonIdx >= 0 ? rest.slice(colonIdx + 1).trim() : rest);
         for (let i = steps.length - 1; i >= 0; i--) {
           if (steps[i].type === 'tool-call' && !steps[i].output) {
             steps[i].output = toolResult;
