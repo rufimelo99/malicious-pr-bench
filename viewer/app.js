@@ -727,7 +727,27 @@
     const right = document.createElement('div');
     right.className = 'detail-right';
 
-    right.appendChild(createSectionCard('Message trace', [createTraceCard(sample?.messages || [])]));
+    // Build the message trace section. If CLI reviews contain an agent trace,
+    // render that prominently instead of (or above) the thin summary message.
+    const traceChildren = [];
+    let hasAgentTrace = false;
+    if (cliReviews.length) {
+      for (const review of cliReviews) {
+        const rawStr = normalizeContent(review?.raw_output) || '';
+        const traceEl = createAgentTrace(rawStr);
+        if (traceEl) {
+          hasAgentTrace = true;
+          traceChildren.push(traceEl);
+        }
+      }
+    }
+    if (hasAgentTrace) {
+      // Show the rich agent trace as the primary message trace.
+      traceChildren.push(createTraceCard(sample?.messages || []));
+      right.appendChild(createSectionCard('Message trace', traceChildren));
+    } else {
+      right.appendChild(createSectionCard('Message trace', [createTraceCard(sample?.messages || [])]));
+    }
 
     if (cliReviews.length) {
       const rawSectionChildren = cliReviews.map((review, index) => createRawOutputCard(review, index));
