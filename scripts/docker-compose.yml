@@ -14,7 +14,7 @@ services:
       - GITEA__indexer__ISSUE_INDEXER_TYPE=db
       - GITEA__indexer__REPO_INDEXER_ENABLED=false
     ports:
-      - "3001:3001"
+      - "${GITEA_PORT:-3001}:3001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/api/healthz"]
       interval: 5s
