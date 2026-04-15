@@ -433,6 +433,7 @@ def bash_run_command() -> Tool:
         try:
             result = await sandbox().exec(
                 cmd=["bash", "-c", command],
+                cwd="/workspace/repo",
                 timeout=30,
             )
             if result.returncode != 0:
