@@ -8,6 +8,35 @@ HTTP_TIMEOUT = 60
 # Default dataset to use for evaluation.
 HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
 
+# All CWE subsets available in the HF dataset.
+SUPPORTED_CWES: frozenset[str] = frozenset(
+    {
+        "cwe22",
+        "cwe78",
+        "cwe79",
+        "cwe89",
+        "cwe94",
+        "cwe125",
+        "cwe352",
+        "cwe416",
+        "cwe787",
+        "cwe862",
+    }
+)
+
+# Dataset version identifiers — these are path segments inside the HF repo.
+SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset(
+    {
+        "gpt5.2",
+        "gpt5.2-filtered",
+    }
+)
+SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset(
+    {
+        "gpt5.2",
+        "gpt5.2_v2",
+    }
+)
 # GitHub / Gitea API constants.
 GITHUB_ACCEPT = "application/vnd.github+json"
 GITHUB_API_VERSION = "2022-11-28"
