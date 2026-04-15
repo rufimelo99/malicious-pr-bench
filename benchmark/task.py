@@ -40,8 +40,7 @@ from inspect_ai.dataset import Sample
 from inspect_ai.model import ChatMessageUser
 from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import Solver, TaskState, solver
-from inspect_ai.util._sandbox.environment import (SampleInit,
-                                                  SandboxEnvironmentSpec)
+from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
@@ -51,69 +50,42 @@ from benchmark.registry import clear_simulated_merges
 from benchmark.utils import extract_reviewer_reason, is_pr_merged
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
-_SANDBOX_DOCKERFILE = Path(__file__).parent.parent / "scripts" / "Dockerfile.sandbox"
+_SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
 
 
-def _create_sample_init(repo: str) -> SampleInit:
-    """Create a sample_init function that clones the repo into the sandbox.
+async def _clone_repo_to_sandbox(repo: str) -> None:
+    """Clone *repo* from Gitea into /workspace/repo inside the running sandbox.
 
-    This runs automatically when the sandbox initializes, before the agent starts.
+    Must be called from inside a solve() coroutine so that the per-sample
+    sandbox container is already up and the GITHUB_API_URL env var has been set
+    by the preceding Gitea reset.
     """
+    from inspect_ai.util import sandbox as _sandbox
 
-    async def sample_init(task_name: str, config, environments: dict[str, str]) -> dict:
-        """Initialize sandbox by cloning the repository.
+    api_url = os.environ.get("GITHUB_API_URL", "http://localhost:3001/api/v1")
+    # Inside the sandbox container, localhost refers to the container itself.
+    # The compose file adds "gitea" as an extra_hosts entry pointing to the
+    # Docker host gateway, so port 3001 on the host is reachable as "gitea:3001".
+    base_url = api_url.replace("/api/v1", "").replace("//localhost:", "//gitea:")
+    git_url = f"{base_url}/{repo}.git"
 
-        Args:
-            task_name: Name of the task
-            config: Sandbox configuration
-            environments: Environment variables dict
+    sb = _sandbox()
 
-        Returns:
-            Environment dictionary
-        """
-        from inspect_ai.util import sandbox
+    # Remove any leftover clone from a previous run
+    await sb.exec(cmd=["rm", "-rf", "/workspace/repo"], timeout=10)
 
-        logger.info(f"[sample_init] Starting sandbox initialization for {repo}")
-
-        # Determine the Gitea base URL
-        # Use host.docker.internal to access Gitea on the host machine from the container
-        api_url = (
-            environments.get("GITHUB_API_URL")
-            or os.environ.get("GITHUB_API_URL")
-            or "http://host.docker.internal:3001/api/v1"
+    logger.info(f"[sandbox] Cloning {git_url} → /workspace/repo")
+    print(f"[sandbox] git clone {git_url} /workspace/repo")
+    result = await sb.exec(cmd=["git", "clone", git_url, "/workspace/repo"], timeout=60)
+    if result.returncode != 0:
+        print(
+            f"[sandbox] git clone FAILED (exit {result.returncode}):\n{result.stderr}"
         )
-        base_url = api_url.replace("/api/v1", "")
-
-        # Pass Gitea info to the Docker entrypoint script
-        # The entrypoint will clone the repo when the container starts
-        environments["GITEA_REPO"] = repo
-        environments["GITEA_URL"] = base_url
-
-        logger.info(
-            f"[sample_init] Configured Gitea: GITEA_URL={base_url}, GITEA_REPO={repo}"
-        )
-
-        # Verify the repo was cloned (entrypoint should have done it)
-        try:
-            sb = sandbox()
-            logger.info(f"[sample_init] Checking if {repo} was cloned...")
-            result = await sb.exec(cmd=["ls", "-la", "/workspace/repo"], timeout=10)
-            if result.returncode == 0:
-                logger.info(f"[sample_init] ✓ Repo cloned successfully by entrypoint")
-                logger.info(f"[sample_init] Repo contents:\n{result.stdout}")
-            else:
-                logger.error(
-                    f"[sample_init] ✗ Repo not found at /workspace/repo: {result.stderr}"
-                )
-        except Exception as e:
-            logger.error(f"[sample_init] Exception while verifying clone: {e}")
-            import traceback
-
-            logger.error(traceback.format_exc())
-
-        return environments
-
-    return sample_init
+        logger.error(f"[sandbox] git clone failed: {result.stderr}")
+        raise RuntimeError(f"Failed to clone {repo} into sandbox: {result.stderr}")
+    else:
+        print(f"[sandbox] ✓ Cloned {repo} successfully")
+        logger.info(f"[sandbox] ✓ Cloned {repo} successfully")
 
 
 def _reset_gitea(cwe: str, port: int = 3001, version: str = "v0.0.0") -> None:
@@ -458,6 +430,11 @@ def reviewer_solver(
                 input, "\n==> Reset complete. Press Enter to start the benchmark...\n"
             )
 
+        # Clone the sample's repo into the sandbox so bash tools can inspect it
+        repo = state.metadata.get("repo", "")
+        if repo:
+            await _clone_repo_to_sandbox(repo)
+
         if review_mode == "independent":
             # Run one fresh agent per PR — no shared memory across reviews.
             repo = state.metadata.get("repo", "")
@@ -692,8 +669,7 @@ def reviewer_benchmark(
             review_mode=review_mode,
         ),
         scorer=[detection_scorer(), security_reason_scorer()],
-        sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_DOCKERFILE)),
-        sample_init=_create_sample_init(repo),
+        sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE)),
     )
 
 
@@ -892,6 +868,10 @@ def benign_reviewer_solver(
         repo = state.metadata.get("repo", "")
         pr_number = state.metadata["pr_number"]
 
+        # Clone the sample's repo into the sandbox so bash tools can inspect it
+        if repo:
+            await _clone_repo_to_sandbox(repo)
+
         pr_description = await _fetch_pr_description(repo, pr_number)
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
@@ -1040,6 +1020,5 @@ def benign_benchmark(
             pause_after_reset=pause_after_reset,
         ),
         scorer=benign_false_positive_scorer(),
-        sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_DOCKERFILE)),
-        sample_init=_create_sample_init(repo),
+        sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE)),
     )

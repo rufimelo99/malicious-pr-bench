@@ -1,6 +1,5 @@
 FROM ubuntu:22.04
 
-# Install essential tools
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -13,42 +12,4 @@ RUN apt-get update && apt-get install -y \
     file \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /workspace
-
-# Create a startup script that will clone the repo
-# The repo URL will be passed via environment variable
-RUN cat > /entrypoint.sh << 'EOF'
-#!/bin/bash
-set -e
-
-echo "[entrypoint] Starting sandbox container"
-echo "[entrypoint] GITEA_REPO: $GITEA_REPO"
-echo "[entrypoint] GITEA_URL: $GITEA_URL"
-
-# Clone the repo if both env vars are set
-if [ -n "$GITEA_REPO" ] && [ -n "$GITEA_URL" ]; then
-    echo "[entrypoint] Cloning $GITEA_REPO from $GITEA_URL/$GITEA_REPO.git"
-    git clone "$GITEA_URL/$GITEA_REPO.git" /workspace/repo 2>&1 | sed 's/^/[entrypoint] /'
-
-    if [ -d /workspace/repo ]; then
-        echo "[entrypoint] ✓ Successfully cloned repo to /workspace/repo"
-        ls -la /workspace/repo
-    else
-        echo "[entrypoint] ✗ Repo directory not found after clone"
-        exit 1
-    fi
-else
-    echo "[entrypoint] GITEA_REPO or GITEA_URL not set, skipping clone"
-fi
-
-echo "[entrypoint] Container ready"
-# Keep container running
-exec "$@"
-EOF
-
-RUN chmod +x /entrypoint.sh
-
-# Set the entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/bash", "-c", "sleep infinity"]

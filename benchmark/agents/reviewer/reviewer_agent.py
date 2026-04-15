@@ -38,7 +38,7 @@ def build_reviewer_agent(
         # github_list_recent_prs(),
         # github_search_code(),
         # github_add_pr_comment(),
-        # github_approve_pull_request(),
+        github_approve_pull_request(),
         # Bash sandbox tools only (repo cloned by default via sample_init)
         bash_run_command(),
         # bash_git_clone(),  # Not needed - repo cloned automatically
