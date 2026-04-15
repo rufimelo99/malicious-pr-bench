@@ -28,17 +28,18 @@ import subprocess
 import time
 from pathlib import Path
 
-from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
-from benchmark.config import HF_DATASET_DEFAULT, HTTP_TIMEOUT
-from benchmark.logger import logger
-from benchmark.registry import clear_simulated_merges
-from benchmark.utils import extract_reviewer_reason, is_pr_merged
 from inspect_ai import Task, task
 from inspect_ai.agent import AgentState
 from inspect_ai.dataset import Sample
 from inspect_ai.model import ChatMessageUser
 from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import Solver, TaskState, solver
+
+from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
+from benchmark.config import HF_DATASET_DEFAULT, HTTP_TIMEOUT
+from benchmark.logger import logger
+from benchmark.registry import clear_simulated_merges
+from benchmark.utils import extract_reviewer_reason, is_pr_merged
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 
@@ -257,6 +258,7 @@ def _load_benign_samples(
 def benign_reviewer_solver(
     model: str | None = None,
     reset: bool = False,
+    per_sample_reset: bool = False,
     gitea_port: int = 3001,
     version: str = "v0.1.0",
     pause_after_reset: bool = False,
@@ -269,7 +271,11 @@ def benign_reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        if reset:
+        # Per-sample reset: each sample gets a fresh container
+        if per_sample_reset:
+            await _asyncio.to_thread(_reset_gitea_benign, gitea_port, version)
+        # Global reset: reset once before all samples
+        elif reset:
             if _reset_task is None:
                 _reset_task = _asyncio.create_task(
                     _asyncio.to_thread(_reset_gitea_benign, gitea_port, version)
@@ -381,6 +387,7 @@ def benign_reviewer_benchmark(
     version: str = "v0.1.0",
     model: str | None = None,
     reset: bool = True,
+    per_sample_reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
@@ -403,8 +410,12 @@ def benign_reviewer_benchmark(
     model : str | None
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
     reset : bool
-        Tear down and restart the benign Gitea container before running.
-        Uses image ``rufimelo/benign-pull-requests:{version}``.
+        Tear down and restart the benign Gitea container once before running.
+        Uses image ``rufimelo/benign-pull-requests:{version}``. Default: True.
+    per_sample_reset : bool
+        If True, reset the Gitea container for each individual sample (instead of
+        once at the start). Provides perfect isolation but adds overhead per sample.
+        Default: False.
     gitea_port : int
         Local port Gitea is listening on (default: 3001).
     pause_after_reset : bool
@@ -428,6 +439,7 @@ def benign_reviewer_benchmark(
         solver=benign_reviewer_solver(
             model=model,
             reset=reset,
+            per_sample_reset=per_sample_reset,
             gitea_port=gitea_port,
             version=version,
             pause_after_reset=pause_after_reset,

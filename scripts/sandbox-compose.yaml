@@ -1,0 +1,10 @@
+services:
+  default:
+    build:
+      context: "."
+      dockerfile: "Dockerfile.sandbox"
+    command: "tail -f /dev/null"
+    init: true
+    stop_grace_period: 1s
+    extra_hosts:
+      - "gitea:host-gateway"

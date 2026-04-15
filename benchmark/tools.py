@@ -8,16 +8,13 @@ import os
 
 import requests
 from inspect_ai.tool import Tool, tool
+from inspect_ai.util import sandbox, store
 from pydantic import BaseModel
 
-from benchmark.config import (
-    GITHUB_ACCEPT,
-    GITHUB_API_VERSION,
-    HTTP_TIMEOUT,
-    SIMULATE_MERGES,
-)
+from benchmark.config import (GITEA_STORE_API_URL, GITEA_STORE_TOKEN,
+                              GITHUB_ACCEPT, GITHUB_API_VERSION, HTTP_TIMEOUT,
+                              SIMULATE_MERGES)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
-
 
 # ---------------------------------------------------------------------------
 # Request body models
@@ -44,11 +41,18 @@ class PRMergeBody(BaseModel):
 
 
 def _api_url() -> str:
-    return os.environ.get("GITHUB_API_URL", "https://api.github.com")
+    # Per-sample store() takes precedence (set when per_sample_reset=True).
+    return store().get(GITEA_STORE_API_URL) or os.environ.get(
+        "GITHUB_API_URL", "https://api.github.com"
+    )
 
 
 def _headers() -> dict[str, str]:
-    token = os.environ.get("REVIEWER_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
+    token = (
+        store().get(GITEA_STORE_TOKEN)
+        or os.environ.get("REVIEWER_TOKEN")
+        or os.environ.get("GITHUB_TOKEN", "")
+    )
     h = {"Accept": GITHUB_ACCEPT, "X-GitHub-Api-Version": GITHUB_API_VERSION}
     if token:
         h["Authorization"] = f"Bearer {token}"
@@ -393,5 +397,97 @@ def github_approve_pull_request() -> Tool:
             return f"PR #{pr_number} approved but merge failed (HTTP {status}): {e}"
 
         return json.dumps({"pr": pr_number, "state": "merged"})
+
+    return execute
+
+
+# ---------------------------------------------------------------------------
+# Bash execution tools
+# ---------------------------------------------------------------------------
+
+
+@tool
+def bash_run_command() -> Tool:
+    """Execute a bash command in the sandbox (useful for git operations and file inspection)."""
+
+    async def execute(command: str) -> str:
+        """Run a bash command and return its output.
+
+        Args:
+            command: Bash command to execute (e.g., 'git log --oneline -5').
+                     Supported operations: git, grep, find, ls, cat, head, tail, etc.
+        """
+        # Security: only allow safe commands for inspection
+        allowed_prefixes = (
+            "git ",
+            "grep ",
+            "find ",
+            "ls ",
+            "cat ",
+            "head ",
+            "tail ",
+            "wc ",
+            "file ",
+            "stat ",
+            "pwd",
+            "echo ",
+            "which ",
+        )
+
+        if not any(command.strip().startswith(prefix) for prefix in allowed_prefixes):
+            return f"Error: command not allowed. Supported: git, grep, find, ls, cat, head, tail, wc, file, stat, pwd, echo, which"
+
+        try:
+            result = await sandbox().exec(
+                cmd=["bash", "-c", command],
+                cwd="/workspace/repo",
+                timeout=30,
+            )
+            if result.returncode != 0:
+                return f"Command failed (exit {result.returncode}):\n{result.stderr}"
+            return result.stdout or "(no output)"
+        except TimeoutError:
+            return "Error: command timed out after 30 seconds"
+        except Exception as e:
+            return f"Error executing command: {e}"
+
+    return execute
+
+
+@tool
+def bash_git_clone() -> Tool:
+    """Clone a repository from Gitea into the sandbox for direct inspection."""
+
+    async def execute(repo: str, target_dir: str = "/workspace/repo") -> str:
+        """Clone a Gitea repository into the sandbox.
+
+        Args:
+            repo: Repository in owner/name format (e.g. 'gitadmin/test-repo').
+            target_dir: Directory in sandbox to clone into (default: /workspace/repo).
+        """
+        try:
+            api_url = _api_url()
+            base_url = api_url.replace("/api/v1", "")
+            git_url = f"{base_url}/{repo}.git"
+
+            # Remove target dir if it exists
+            await sandbox().exec(
+                cmd=["rm", "-rf", target_dir],
+                timeout=10,
+            )
+
+            result = await sandbox().exec(
+                cmd=["git", "clone", git_url, target_dir],
+                timeout=60,
+            )
+
+            if result.returncode != 0:
+                return f"Clone failed: {result.stderr}"
+
+            return f"Successfully cloned {repo} to {target_dir}"
+        except TimeoutError:
+            return "Error: clone timed out after 60 seconds"
+        except Exception as e:
+            return f"Error cloning repository: {e}"
 
     return execute

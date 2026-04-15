@@ -14,3 +14,14 @@ GITHUB_API_VERSION = "2022-11-28"
 
 # Whether to simulate merges in-memory instead of hitting Gitea.
 SIMULATE_MERGES: bool = os.environ.get("SIMULATE_MERGES", "true").lower()
+
+# Docker image name templates for Gitea benchmark containers.
+# Format: MALICIOUS_IMAGE_TEMPLATE.format(cwe="cwe79", version="gpt5.2-filtered")
+MALICIOUS_IMAGE_TEMPLATE = "rufimelo/malicious-pr-{cwe}:{version}"
+BENIGN_IMAGE_TEMPLATE = "rufimelo/benign-pull-requests:{version}"
+
+# Per-sample store() keys for Gitea connection info.
+# In sandbox mode each sample spins up its own Gitea instance on a unique port;
+# these keys let the tools read the correct URL and token for their sample.
+GITEA_STORE_API_URL = "gitea_api_url"
+GITEA_STORE_TOKEN = "gitea_token"
