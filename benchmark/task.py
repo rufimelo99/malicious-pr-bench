@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -40,10 +41,13 @@ from inspect_ai.dataset import Sample
 from inspect_ai.model import ChatMessageUser
 from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import Solver, TaskState, solver
+from inspect_ai.util import store
 from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
+from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
+from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HF_DATASET_DEFAULT, HTTP_TIMEOUT
 from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
@@ -51,6 +55,14 @@ from benchmark.utils import extract_reviewer_reason, is_pr_merged
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
+
+
+def _free_port() -> int:
+    """Return an ephemeral free TCP port on localhost."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 
 async def _clone_repo_to_sandbox(repo: str) -> None:
@@ -62,10 +74,14 @@ async def _clone_repo_to_sandbox(repo: str) -> None:
     """
     from inspect_ai.util import sandbox as _sandbox
 
-    api_url = os.environ.get("GITHUB_API_URL", "http://localhost:3001/api/v1")
+    # Read per-sample API URL from store (set by _reset_gitea after Gitea starts).
+    # Fall back to os.environ for the single-container (reset=true) case.
+    api_url = store().get(_STORE_API_URL) or os.environ.get(
+        "GITHUB_API_URL", "http://localhost:3001/api/v1"
+    )
     # Inside the sandbox container, localhost refers to the container itself.
     # The compose file adds "gitea" as an extra_hosts entry pointing to the
-    # Docker host gateway, so port 3001 on the host is reachable as "gitea:3001".
+    # Docker host gateway, so the host port is reachable via "gitea:<port>".
     base_url = api_url.replace("/api/v1", "").replace("//localhost:", "//gitea:")
     git_url = f"{base_url}/{repo}.git"
 
@@ -88,27 +104,38 @@ async def _clone_repo_to_sandbox(repo: str) -> None:
         logger.info(f"[sandbox] ✓ Cloned {repo} successfully")
 
 
-def _reset_gitea(cwe: str, port: int = 3001, version: str = "v0.0.0") -> None:
-    """Tear down and restart the benchmark container, then inject a fresh token."""
+def _reset_gitea(
+    cwe: str, port: int = 3001, version: str = "v0.0.0", project_name: str | None = None
+) -> tuple[str, str]:
+    """Tear down and restart a Gitea container on *port*, return (api_url, token).
+
+    When *port* is unique per sample, multiple containers can run in parallel.
+    The caller is responsible for writing the returned values into store().
+    """
     import base64
     import urllib.error
     import urllib.request
 
     logger.info(f"Resetting Gitea container for CWE {cwe} on port {port}...")
-    env = {**os.environ, "DOCKER_IMAGE": f"rufimelo/malicious-pr-{cwe}:{version}"}
+    env = {
+        **os.environ,
+        "DOCKER_IMAGE": f"rufimelo/malicious-pr-{cwe}:{version}",
+        "GITEA_PORT": str(port),
+    }
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
+    # Use a unique project name per sample so containers don't collide
+    if project_name:
+        compose += ["--project-name", project_name]
 
-    print(f"==> Resetting Gitea container for {cwe}...")
+    print(f"==> Resetting Gitea container for {cwe} on port {port}...")
     subprocess.run(
         [*compose, "down", "--volumes", "--remove-orphans"], env=env, check=False
     )
-    subprocess.run(
-        [*compose, "rm", "-fsv"], env=env, check=False
-    )  # ensure anonymous volumes are removed
+    subprocess.run([*compose, "rm", "-fsv"], env=env, check=False)
     subprocess.run([*compose, "up", "-d", "--force-recreate"], env=env, check=True)
 
     base_url = f"http://localhost:{port}"
-    print("  Waiting for Gitea...", end="", flush=True)
+    print(f"  Waiting for Gitea on port {port}...", end="", flush=True)
     for _ in range(60):
         try:
             urllib.request.urlopen(f"{base_url}/api/healthz", timeout=2)
@@ -117,11 +144,13 @@ def _reset_gitea(cwe: str, port: int = 3001, version: str = "v0.0.0") -> None:
             print(".", end="", flush=True)
             time.sleep(5)
     else:
-        raise RuntimeError("Gitea did not become healthy after 5 minutes.")
+        raise RuntimeError(
+            f"Gitea on port {port} did not become healthy after 5 minutes."
+        )
     print(" ready.")
 
     creds = base64.b64encode(b"gitadmin:adminpass123").decode()
-    token_name = f"bench-{int(time.time())}"
+    token_name = f"bench-{port}-{int(time.time())}"
     req = urllib.request.Request(
         f"{base_url}/api/v1/users/gitadmin/tokens",
         data=json.dumps(
@@ -136,9 +165,9 @@ def _reset_gitea(cwe: str, port: int = 3001, version: str = "v0.0.0") -> None:
     with urllib.request.urlopen(req) as resp:
         token = json.loads(resp.read())["sha1"]
 
-    os.environ["GITHUB_TOKEN"] = token
-    os.environ["GITHUB_API_URL"] = f"{base_url}/api/v1"
-    print(f"  Token set. GITHUB_API_URL={base_url}/api/v1")
+    api_url = f"{base_url}/api/v1"
+    print(f"  Token set. GITHUB_API_URL={api_url}")
+    return api_url, token
 
 
 async def _fetch_pr_description(repo: str, pr_number: int) -> str:
@@ -413,16 +442,33 @@ def reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        # Per-sample reset: each sample gets a fresh container
+        # Per-sample reset: each sample gets its own Gitea container on a unique port.
+        # Results are written to per-sample store() so tools don't share state.
         if per_sample_reset and cwe:
-            await _asyncio.to_thread(_reset_gitea, cwe, gitea_port, version)
-        # Global reset: reset once before all samples
+            port = _free_port()
+            # Docker project names: ≤63 chars, lowercase alphanumeric + hyphens only.
+            # Use a short hash of the sample_id to stay within the limit.
+            import hashlib as _hashlib
+
+            _sid = str(state.sample_id or port)
+            project = "gitea-" + _hashlib.sha1(_sid.encode()).hexdigest()[:8]
+            api_url, token = await _asyncio.to_thread(
+                _reset_gitea, cwe, port, version, project
+            )
+            store().set(_STORE_API_URL, api_url)
+            store().set(_STORE_TOKEN, token)
+        # Global reset: reset once before all samples, write to os.environ as fallback
         elif reset and cwe:
             if _reset_task is None:
                 _reset_task = _asyncio.create_task(
                     _asyncio.to_thread(_reset_gitea, cwe, gitea_port, version)
                 )
-            await _reset_task
+            api_url, token = await _reset_task
+            # Also write to os.environ so tools that haven't migrated yet still work
+            os.environ["GITHUB_API_URL"] = api_url
+            os.environ["GITHUB_TOKEN"] = token
+            store().set(_STORE_API_URL, api_url)
+            store().set(_STORE_TOKEN, token)
 
         if pause_after_reset and not _pause_done:
             _pause_done = True
@@ -678,8 +724,10 @@ def reviewer_benchmark(
 # ---------------------------------------------------------------------------
 
 
-def _reset_gitea_benign(port: int = 3001, version: str = "v0.1.0") -> None:
-    """Tear down and restart the benign benchmark container, then inject a fresh token.
+def _reset_gitea_benign(
+    port: int = 3001, version: str = "v0.1.0", project_name: str | None = None
+) -> tuple[str, str]:
+    """Tear down and restart the benign benchmark container, return (api_url, token).
 
     The benign image is a single image covering all CWEs:
     rufimelo/benign-pull-requests:VERSION
@@ -690,10 +738,12 @@ def _reset_gitea_benign(port: int = 3001, version: str = "v0.1.0") -> None:
 
     image = f"rufimelo/benign-pull-requests:{version}"
     logger.info(f"Resetting benign Gitea container ({image}) on port {port}...")
-    env = {**os.environ, "DOCKER_IMAGE": image}
+    env = {**os.environ, "DOCKER_IMAGE": image, "GITEA_PORT": str(port)}
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
+    if project_name:
+        compose += ["--project-name", project_name]
 
-    print(f"==> Resetting benign Gitea container ({image})...")
+    print(f"==> Resetting benign Gitea container ({image}) on port {port}...")
     subprocess.run(
         [*compose, "down", "--volumes", "--remove-orphans"],
         env=env,
@@ -703,7 +753,7 @@ def _reset_gitea_benign(port: int = 3001, version: str = "v0.1.0") -> None:
     subprocess.run([*compose, "up", "-d", "--force-recreate"], env=env, check=True)
 
     base_url = f"http://localhost:{port}"
-    print("  Waiting for Gitea...", end="", flush=True)
+    print(f"  Waiting for Gitea on port {port}...", end="", flush=True)
     for _ in range(60):
         try:
             urllib.request.urlopen(f"{base_url}/api/healthz", timeout=2)
@@ -712,11 +762,13 @@ def _reset_gitea_benign(port: int = 3001, version: str = "v0.1.0") -> None:
             print(".", end="", flush=True)
             time.sleep(5)
     else:
-        raise RuntimeError("Gitea did not become healthy after 5 minutes.")
+        raise RuntimeError(
+            f"Gitea on port {port} did not become healthy after 5 minutes."
+        )
     print(" ready.")
 
     creds = base64.b64encode(b"gitadmin:adminpass123").decode()
-    token_name = f"bench-benign-{int(time.time())}"
+    token_name = f"bench-benign-{port}-{int(time.time())}"
     req = urllib.request.Request(
         f"{base_url}/api/v1/users/gitadmin/tokens",
         data=json.dumps(
@@ -731,9 +783,9 @@ def _reset_gitea_benign(port: int = 3001, version: str = "v0.1.0") -> None:
     with urllib.request.urlopen(req) as resp:
         token = json.loads(resp.read())["sha1"]
 
-    os.environ["GITHUB_TOKEN"] = token
-    os.environ["GITHUB_API_URL"] = f"{base_url}/api/v1"
-    print(f"  Token set. GITHUB_API_URL={base_url}/api/v1")
+    api_url = f"{base_url}/api/v1"
+    print(f"  Token set. GITHUB_API_URL={api_url}")
+    return api_url, token
 
 
 def _discover_cwe_slugs(hf_dataset: str, version: str) -> list[str]:
@@ -847,16 +899,29 @@ def benign_reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        # Per-sample reset: each sample gets a fresh container
+        # Per-sample reset: each sample gets its own Gitea container on a unique port.
         if per_sample_reset:
-            await _asyncio.to_thread(_reset_gitea_benign, gitea_port, version)
+            port = _free_port()
+            import hashlib as _hashlib
+
+            _sid = str(state.sample_id or port)
+            project = "gitea-b-" + _hashlib.sha1(_sid.encode()).hexdigest()[:8]
+            api_url, token = await _asyncio.to_thread(
+                _reset_gitea_benign, port, version, project
+            )
+            store().set(_STORE_API_URL, api_url)
+            store().set(_STORE_TOKEN, token)
         # Global reset: reset once before all samples
         elif reset:
             if _reset_task is None:
                 _reset_task = _asyncio.create_task(
                     _asyncio.to_thread(_reset_gitea_benign, gitea_port, version)
                 )
-            await _reset_task
+            api_url, token = await _reset_task
+            os.environ["GITHUB_API_URL"] = api_url
+            os.environ["GITHUB_TOKEN"] = token
+            store().set(_STORE_API_URL, api_url)
+            store().set(_STORE_TOKEN, token)
 
         if pause_after_reset and not _pause_done:
             _pause_done = True

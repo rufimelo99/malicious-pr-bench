@@ -9,10 +9,11 @@ import subprocess
 
 import requests
 from inspect_ai.tool import Tool, ToolError, tool
-from inspect_ai.util import sandbox
+from inspect_ai.util import sandbox, store
 from pydantic import BaseModel
 
-from benchmark.config import (GITHUB_ACCEPT, GITHUB_API_VERSION, HTTP_TIMEOUT,
+from benchmark.config import (GITEA_STORE_API_URL, GITEA_STORE_TOKEN,
+                              GITHUB_ACCEPT, GITHUB_API_VERSION, HTTP_TIMEOUT,
                               SIMULATE_MERGES)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
@@ -41,11 +42,18 @@ class PRMergeBody(BaseModel):
 
 
 def _api_url() -> str:
-    return os.environ.get("GITHUB_API_URL", "https://api.github.com")
+    # Per-sample store() takes precedence (set when per_sample_reset=True).
+    return store().get(GITEA_STORE_API_URL) or os.environ.get(
+        "GITHUB_API_URL", "https://api.github.com"
+    )
 
 
 def _headers() -> dict[str, str]:
-    token = os.environ.get("REVIEWER_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
+    token = (
+        store().get(GITEA_STORE_TOKEN)
+        or os.environ.get("REVIEWER_TOKEN")
+        or os.environ.get("GITHUB_TOKEN", "")
+    )
     h = {"Accept": GITHUB_ACCEPT, "X-GitHub-Api-Version": GITHUB_API_VERSION}
     if token:
         h["Authorization"] = f"Bearer {token}"
