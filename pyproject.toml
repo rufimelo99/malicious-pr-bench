@@ -25,6 +25,12 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+addopts = "--cov=benchmark --cov-report=term-missing"
 
 [tool.hatch.build.targets.wheel]
 packages = ["benchmark"]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.1.0",
+]
