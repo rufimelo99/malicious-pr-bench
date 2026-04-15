@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
-from conftest import PRRecord, ScenarioRecord
+from conftest import PRRecord
 from conftest import write_jsonl as _write_jsonl
 
 # ---------------------------------------------------------------------------
@@ -173,7 +173,7 @@ class TestLoadSamplesSkipUndefined:
 
     def test_skips_undefined_axis1_by_default(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis1="undefined")),
+            PRRecord(pr_number=1, axis1="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
@@ -183,7 +183,7 @@ class TestLoadSamplesSkipUndefined:
 
     def test_skips_undefined_axis2_by_default(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis2="undefined")),
+            PRRecord(pr_number=1, axis2="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
@@ -192,7 +192,7 @@ class TestLoadSamplesSkipUndefined:
 
     def test_includes_undefined_when_skip_false(self, tmp_path):
         records = [
-            PRRecord(pr_number=1, scenario=ScenarioRecord(axis1="undefined")),
+            PRRecord(pr_number=1, axis1="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
@@ -254,9 +254,9 @@ class TestLoadIndividualSamplesContent:
         ]
 
     def test_sample_input_includes_pr_title_and_body(self, tmp_path):
-        r = PRRecord(pr_number=3)
-        r.scenario.pr_title = "Add rate limiting"
-        r.scenario.pr_body = "Prevents DoS attacks"
+        r = PRRecord(
+            pr_number=3, pr_title="Add rate limiting", pr_body="Prevents DoS attacks"
+        )
         path = _write_jsonl(tmp_path, [r])
         samples = self._load(path)
         assert "Add rate limiting" in samples[0].input

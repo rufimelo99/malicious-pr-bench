@@ -26,6 +26,9 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "--cov=benchmark --cov-report=term-missing"
+markers = [
+    "network: tests that require a real network connection (HuggingFace, APIs)",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["benchmark"]
