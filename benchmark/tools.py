@@ -5,10 +5,9 @@ from __future__ import annotations
 import base64
 import json
 import os
-import subprocess
 
 import requests
-from inspect_ai.tool import Tool, ToolError, tool
+from inspect_ai.tool import Tool, tool
 from inspect_ai.util import sandbox, store
 from pydantic import BaseModel
 
