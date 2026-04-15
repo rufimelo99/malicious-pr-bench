@@ -61,9 +61,11 @@ from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
+from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
-from benchmark.config import HF_DATASET_DEFAULT, HTTP_TIMEOUT
+from benchmark.config import (HF_DATASET_DEFAULT, HTTP_TIMEOUT,
+                              MALICIOUS_IMAGE_TEMPLATE)
 from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
 from benchmark.utils import extract_reviewer_reason, is_pr_merged
@@ -134,7 +136,7 @@ def _reset_gitea(
     logger.info(f"Resetting Gitea container for CWE {cwe} on port {port}...")
     env = {
         **os.environ,
-        "DOCKER_IMAGE": f"rufimelo/malicious-pr-{cwe}:{version}",
+        "DOCKER_IMAGE": MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version),
         "GITEA_PORT": str(port),
     }
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
@@ -743,13 +745,13 @@ def _reset_gitea_benign(
     """Tear down and restart the benign benchmark container, return (api_url, token).
 
     The benign image is a single image covering all CWEs:
-    rufimelo/benign-pull-requests:VERSION
+    {BENIGN_IMAGE_TEMPLATE}
     """
     import base64
     import urllib.error
     import urllib.request
 
-    image = f"rufimelo/benign-pull-requests:{version}"
+    image = BENIGN_IMAGE_TEMPLATE.format(version=version)
     logger.info(f"Resetting benign Gitea container ({image}) on port {port}...")
     env = {**os.environ, "DOCKER_IMAGE": image, "GITEA_PORT": str(port)}
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
@@ -1046,7 +1048,7 @@ def benign_benchmark(
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
     reset : bool
         Tear down and restart the benign Gitea container once before running.
-        Uses image ``rufimelo/benign-pull-requests:{version}``. Default: True.
+        Uses image from ``BENIGN_IMAGE_TEMPLATE`` in config.py. Default: True.
     per_sample_reset : bool
         If True, reset the Gitea container for each individual sample (instead of
         once at the start). Provides perfect isolation but adds overhead per sample.
