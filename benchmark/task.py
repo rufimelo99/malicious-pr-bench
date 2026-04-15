@@ -719,7 +719,11 @@ def reviewer_benchmark(
             tool_mode=tool_mode,
         ),
         scorer=[detection_scorer(), security_reason_scorer()],
-        sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE)),
+        sandbox=(
+            SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
+            if tool_mode == "sandbox"
+            else None
+        ),
     )
 
 
