@@ -9,8 +9,7 @@ from inspect_ai.agent import react
 from inspect_ai.agent._types import AgentPrompt
 from inspect_ai.tool import Tool
 
-from benchmark.tools import (bash_checkout_branch, bash_git_diff,
-                             bash_list_branches, bash_run_command,
+from benchmark.tools import (bash_run_command,
                              github_add_pr_comment,
                              github_approve_pull_request,
                              github_get_pull_request, github_list_files,
@@ -58,11 +57,13 @@ def build_reviewer_agent(
             github_add_pr_comment(),
             github_approve_pull_request(),
         ]
-    else:  # "sandbox"
+    elif tool_mode == "sandbox":
         tools = [
             bash_run_command(),
             github_approve_pull_request(),
         ]
+    else:
+        raise ValueError(f"Invalid tool_mode: {tool_mode}")
 
     if extra_tools:
         tools.extend(extra_tools)

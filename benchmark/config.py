@@ -15,6 +15,8 @@ GITHUB_API_VERSION = "2022-11-28"
 # Whether to simulate merges in-memory instead of hitting Gitea.
 SIMULATE_MERGES: bool = os.environ.get("SIMULATE_MERGES", "true").lower()
 
-# Per-sample store() keys for Gitea connection info (used with per_sample_reset).
+# Per-sample store() keys for Gitea connection info.
+# In sandbox mode each sample spins up its own Gitea instance on a unique port;
+# these keys let the tools read the correct URL and token for their sample.
 GITEA_STORE_API_URL = "gitea_api_url"
 GITEA_STORE_TOKEN = "gitea_token"
