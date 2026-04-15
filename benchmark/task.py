@@ -444,8 +444,9 @@ def reviewer_solver(
         nonlocal _reset_task, _pause_done
 
         # Per-sample reset: each sample gets its own Gitea container on a unique port.
+        # Only meaningful for sandbox mode — gitea mode shares one instance fine.
         # Results are written to per-sample store() so tools don't share state.
-        if per_sample_reset and cwe:
+        if per_sample_reset and cwe and tool_mode == "sandbox":
             port = _free_port()
             # Docker project names: ≤63 chars, lowercase alphanumeric + hyphens only.
             # Use a short hash of the sample_id to stay within the limit.
