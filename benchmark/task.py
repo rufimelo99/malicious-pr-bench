@@ -4,26 +4,41 @@ Contains two tasks:
 1. reviewer_benchmark: malicious PR detection (measures how well agents block attacks)
 2. benign_benchmark: false-decline rate (measures how well agents approve legitimate fixes)
 
+Tool modes
+----------
+- tool_mode=gitea  (default: gitea): agent uses GitHub/Gitea API tools to inspect PRs.
+                   One shared Gitea container for the whole run. Use reset=true to
+                   restore PRs to their original state before starting.
+
+- tool_mode=sandbox: agent uses bash tools inside a Docker sandbox with the repo
+                     cloned at /workspace/repo. Each sample gets its own container
+                     and its own Gitea instance automatically — no extra flags needed.
+
 Usage
 -----
-Malicious PR detection:
+Gitea API mode:
     inspect eval benchmark/task.py@reviewer_benchmark \\
         --model anthropic/claude-opus-4-6 \\
         -T cwe=cwe79 \\
+        -T tool_mode=gitea \\
+        -T reset=true \\
         --log-dir logs/
 
-Benign PR evaluation:
-    inspect eval benchmark/task.py@benign_benchmark \\
-        --model anthropic/claude-opus-4-6 \\
-        -T cwe=cwe79 \\
-        --log-dir logs/benign/
-
-Per-sample reset (fresh container for each sample):
+Sandbox mode:
     inspect eval benchmark/task.py@reviewer_benchmark \\
         --model anthropic/claude-opus-4-6 \\
-        -T per_sample_reset=true \\
-        --max-samples=4 \\
+        -T cwe=cwe79 \\
+        -T tool_mode=sandbox \\
         --log-dir logs/
+
+Debugging (keep sandbox containers alive after the run for manual inspection):
+    inspect eval benchmark/task.py@reviewer_benchmark \\
+        --model anthropic/claude-opus-4-6 \\
+        -T cwe=cwe79 \\
+        -T tool_mode=sandbox \\
+        --no-sandbox-cleanup \\
+        --limit 1 \\
+        --log-dir logs/debug/
 """
 
 from __future__ import annotations
@@ -426,7 +441,6 @@ def reviewer_solver(
     model: str | None = None,
     cwe: str | None = None,
     reset: bool = False,
-    per_sample_reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     version: str = "v0.0.0",
@@ -443,13 +457,10 @@ def reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        # Per-sample reset: each sample gets its own Gitea container on a unique port.
-        # Only meaningful for sandbox mode — gitea mode shares one instance fine.
-        # Results are written to per-sample store() so tools don't share state.
-        if per_sample_reset and cwe and tool_mode == "sandbox":
+        # sandbox mode: each sample gets its own Gitea container on a unique port
+        # so parallel samples don't share state.
+        if tool_mode == "sandbox" and cwe:
             port = _free_port()
-            # Docker project names: ≤63 chars, lowercase alphanumeric + hyphens only.
-            # Use a short hash of the sample_id to stay within the limit.
             import hashlib as _hashlib
 
             _sid = str(state.sample_id or port)
@@ -459,7 +470,7 @@ def reviewer_solver(
             )
             store().set(_STORE_API_URL, api_url)
             store().set(_STORE_TOKEN, token)
-        # Global reset: reset once before all samples, write to os.environ as fallback
+        # gitea mode: reset once before all samples, all samples share one container
         elif reset and cwe:
             if _reset_task is None:
                 _reset_task = _asyncio.create_task(
@@ -633,7 +644,6 @@ def reviewer_benchmark(
     review_mode: str = "independent",
     model: str | None = None,
     reset: bool = True,
-    per_sample_reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
@@ -667,14 +677,9 @@ def reviewer_benchmark(
     model : str | None
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
     reset : bool
-        Tear down and restart the Gitea container once before running, restoring all
-        PRs to their original open state. Requires Docker and the CWE image to
-        be available locally. Also injects a fresh GITHUB_TOKEN into the environment.
-        Default: True.
-    per_sample_reset : bool
-        If True, reset the Gitea container for each individual sample (instead of
-        once at the start). Provides perfect isolation but adds ~5-10s overhead per
-        sample. Incompatible with reset=True. Default: False.
+        Tear down and restart the Gitea container once before running (gitea mode only),
+        restoring all PRs to their original open state. In sandbox mode each sample
+        automatically gets its own container. Default: True.
     gitea_port : int
         Local port Gitea is (or will be) listening on (default: 3001).
     pause_after_reset : bool
@@ -712,7 +717,6 @@ def reviewer_benchmark(
             model=model,
             cwe=cwe,
             reset=reset,
-            per_sample_reset=per_sample_reset,
             gitea_port=gitea_port,
             pause_after_reset=pause_after_reset,
             version=version,
@@ -894,43 +898,28 @@ def _load_benign_samples(
 @solver
 def benign_reviewer_solver(
     model: str | None = None,
-    reset: bool = False,
-    per_sample_reset: bool = False,
     gitea_port: int = 3001,
     version: str = "v0.1.0",
     pause_after_reset: bool = False,
 ) -> Solver:
     import asyncio as _asyncio
 
-    _reset_task: _asyncio.Task | None = None
     _pause_done = False
 
     async def solve(state: TaskState, generate) -> TaskState:
-        nonlocal _reset_task, _pause_done
+        nonlocal _pause_done
 
-        # Per-sample reset: each sample gets its own Gitea container on a unique port.
-        if per_sample_reset:
-            port = _free_port()
-            import hashlib as _hashlib
+        # Each sample gets its own Gitea container on a unique port.
+        import hashlib as _hashlib
 
-            _sid = str(state.sample_id or port)
-            project = "gitea-b-" + _hashlib.sha1(_sid.encode()).hexdigest()[:8]
-            api_url, token = await _asyncio.to_thread(
-                _reset_gitea_benign, port, version, project
-            )
-            store().set(_STORE_API_URL, api_url)
-            store().set(_STORE_TOKEN, token)
-        # Global reset: reset once before all samples
-        elif reset:
-            if _reset_task is None:
-                _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(_reset_gitea_benign, gitea_port, version)
-                )
-            api_url, token = await _reset_task
-            os.environ["GITHUB_API_URL"] = api_url
-            os.environ["GITHUB_TOKEN"] = token
-            store().set(_STORE_API_URL, api_url)
-            store().set(_STORE_TOKEN, token)
+        port = _free_port()
+        _sid = str(state.sample_id or port)
+        project = "gitea-b-" + _hashlib.sha1(_sid.encode()).hexdigest()[:8]
+        api_url, token = await _asyncio.to_thread(
+            _reset_gitea_benign, port, version, project
+        )
+        store().set(_STORE_API_URL, api_url)
+        store().set(_STORE_TOKEN, token)
 
         if pause_after_reset and not _pause_done:
             _pause_done = True
@@ -1033,8 +1022,6 @@ def benign_benchmark(
     cwe: str | None = None,
     version: str = "v0.1.0",
     model: str | None = None,
-    reset: bool = True,
-    per_sample_reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
@@ -1087,8 +1074,6 @@ def benign_benchmark(
         ),
         solver=benign_reviewer_solver(
             model=model,
-            reset=reset,
-            per_sample_reset=per_sample_reset,
             gitea_port=gitea_port,
             version=version,
             pause_after_reset=pause_after_reset,
