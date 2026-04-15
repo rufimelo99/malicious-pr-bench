@@ -431,6 +431,7 @@ def reviewer_solver(
     pause_after_reset: bool = False,
     version: str = "v0.0.0",
     review_mode: str = "independent",
+    tool_mode: str = "sandbox",
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -476,9 +477,10 @@ def reviewer_solver(
                 input, "\n==> Reset complete. Press Enter to start the benchmark...\n"
             )
 
-        # Clone the sample's repo into the sandbox so bash tools can inspect it
+        # Clone the sample's repo into the sandbox so bash tools can inspect it.
+        # Skip when tool_mode="gitea" — no sandbox tools, no need to clone.
         repo = state.metadata.get("repo", "")
-        if repo:
+        if repo and tool_mode != "gitea":
             await _clone_repo_to_sandbox(repo)
 
         if review_mode == "independent":
@@ -493,7 +495,7 @@ def reviewer_solver(
             for pr_number in pr_numbers:
                 pr_description = await _fetch_pr_description(repo, pr_number)
                 description_block = f"\n\n{pr_description}" if pr_description else ""
-                reviewer = build_reviewer_agent(model=model)
+                reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
                 agent_state = AgentState(
                     messages=[
                         ChatMessageUser(
@@ -523,7 +525,7 @@ def reviewer_solver(
                 )
             else:
                 content = state.input_text
-            reviewer = build_reviewer_agent(model=model)
+            reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
             agent_state = AgentState(messages=[ChatMessageUser(content=content)])
             await reviewer(agent_state)
             state.messages = agent_state.messages
@@ -635,6 +637,7 @@ def reviewer_benchmark(
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
     skip_undefined: bool = True,
+    tool_mode: str = "sandbox",
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -713,6 +716,7 @@ def reviewer_benchmark(
             pause_after_reset=pause_after_reset,
             version=version,
             review_mode=review_mode,
+            tool_mode=tool_mode,
         ),
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE)),
@@ -940,7 +944,7 @@ def benign_reviewer_solver(
         pr_description = await _fetch_pr_description(repo, pr_number)
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
-        reviewer = build_reviewer_agent(model=model)
+        reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
         agent_state = AgentState(
             messages=[
                 ChatMessageUser(
