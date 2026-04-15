@@ -1389,6 +1389,8 @@ dev = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
     { name = "pytest-cov" },
 ]
 
@@ -1399,14 +1401,18 @@ requires-dist = [
     { name = "inspect-ai", specifier = ">=0.3.188" },
     { name = "openai", specifier = ">=2.29.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=1.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.21" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "structlog", specifier = ">=22.1.0" },
 ]
 provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest-cov", specifier = ">=7.1.0" }]
+dev = [
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-asyncio", specifier = ">=0.21" },
+    { name = "pytest-cov", specifier = ">=7.1.0" },
+]
 
 [[package]]
 name = "markdown-it-py"
