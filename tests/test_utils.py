@@ -96,3 +96,45 @@ class TestIsPrMerged:
 
         with patch("benchmark.utils.SIMULATE_MERGES", True):
             assert await is_pr_merged("unknown/repo", 1) is False
+
+
+# ---------------------------------------------------------------------------
+# PR metadata helpers
+# ---------------------------------------------------------------------------
+
+
+class TestPrMetadataHelpers:
+    def test_format_pr_description_omits_empty_parts(self):
+        from benchmark.utils import format_pr_description
+
+        assert format_pr_description("", "") == ""
+        assert format_pr_description("Title", "") == "PR title: Title"
+        assert format_pr_description("", "Body") == "PR description:\nBody"
+
+    def test_store_pr_details_sets_single_pr_fields(self):
+        from benchmark.utils import store_pr_details
+
+        metadata: dict[str, object] = {"repo": "owner/repo", "pr_number": 7}
+        store_pr_details(metadata, 7, "Fix bug", "Adds a guard.")
+
+        assert metadata["pr_title"] == "Fix bug"
+        assert metadata["pr_body"] == "Adds a guard."
+        assert metadata["pr_details"] == {
+            "7": {"title": "Fix bug", "body": "Adds a guard."}
+        }
+
+    def test_store_pr_details_preserves_existing_entries_and_normalizes_keys(self):
+        from benchmark.utils import store_pr_details
+
+        metadata: dict[str, object] = {
+            "pr_details": {1: {"title": "First", "body": "One"}},
+            "pr_numbers": [1, 2],
+        }
+        store_pr_details(metadata, 2, "Second", "Two")
+
+        assert metadata["pr_details"] == {
+            "1": {"title": "First", "body": "One"},
+            "2": {"title": "Second", "body": "Two"},
+        }
+        assert "pr_title" not in metadata
+        assert "pr_body" not in metadata

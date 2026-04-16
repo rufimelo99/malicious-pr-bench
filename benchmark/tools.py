@@ -13,7 +13,7 @@ from pydantic import BaseModel
 
 from benchmark.config import (GITEA_STORE_API_URL, GITEA_STORE_TOKEN,
                               GITHUB_ACCEPT, GITHUB_API_VERSION, HTTP_TIMEOUT,
-                              SIMULATE_MERGES)
+                              SANDBOX_REPO_PATH, SIMULATE_MERGES)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 # ---------------------------------------------------------------------------
@@ -440,7 +440,7 @@ def bash_run_command() -> Tool:
         try:
             result = await sandbox().exec(
                 cmd=["bash", "-c", command],
-                cwd="/workspace/repo",
+                cwd=SANDBOX_REPO_PATH,
                 timeout=30,
             )
             if result.returncode != 0:
@@ -458,12 +458,12 @@ def bash_run_command() -> Tool:
 def bash_git_clone() -> Tool:
     """Clone a repository from Gitea into the sandbox for direct inspection."""
 
-    async def execute(repo: str, target_dir: str = "/workspace/repo") -> str:
+    async def execute(repo: str, target_dir: str = SANDBOX_REPO_PATH) -> str:
         """Clone a Gitea repository into the sandbox.
 
         Args:
             repo: Repository in owner/name format (e.g. 'gitadmin/test-repo').
-            target_dir: Directory in sandbox to clone into (default: /workspace/repo).
+            target_dir: Directory in sandbox to clone into (default: SANDBOX_REPO_PATH).
         """
         try:
             api_url = _api_url()

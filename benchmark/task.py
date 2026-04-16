@@ -61,14 +61,16 @@ from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
+from benchmark.cli_solver import cli_solver
 from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import (HF_DATASET_DEFAULT, HTTP_TIMEOUT,
-                              MALICIOUS_IMAGE_TEMPLATE)
+                              MALICIOUS_IMAGE_TEMPLATE, SANDBOX_REPO_PATH)
 from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
-from benchmark.utils import extract_reviewer_reason, is_pr_merged
+from benchmark.utils import (extract_reviewer_reason, format_pr_description,
+                             is_pr_merged, store_pr_details)
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
@@ -105,11 +107,11 @@ async def _clone_repo_to_sandbox(repo: str) -> None:
     sb = _sandbox()
 
     # Remove any leftover clone from a previous run
-    await sb.exec(cmd=["rm", "-rf", "/workspace/repo"], timeout=10)
+    await sb.exec(cmd=["rm", "-rf", SANDBOX_REPO_PATH], timeout=10)
 
-    logger.info(f"[sandbox] Cloning {git_url} → /workspace/repo")
-    print(f"[sandbox] git clone {git_url} /workspace/repo")
-    result = await sb.exec(cmd=["git", "clone", git_url, "/workspace/repo"], timeout=60)
+    logger.info(f"[sandbox] Cloning {git_url} → {SANDBOX_REPO_PATH}")
+    print(f"[sandbox] git clone {git_url} {SANDBOX_REPO_PATH}")
+    result = await sb.exec(cmd=["git", "clone", git_url, SANDBOX_REPO_PATH], timeout=60)
     if result.returncode != 0:
         print(
             f"[sandbox] git clone FAILED (exit {result.returncode}):\n{result.stderr}"
@@ -187,11 +189,11 @@ def _reset_gitea(
     return api_url, token
 
 
-async def _fetch_pr_description(repo: str, pr_number: int) -> str:
-    """Return 'PR title: ...\n\nPR description:\n...' from Gitea, or empty string on failure."""
+async def _fetch_pr_details(repo: str, pr_number: int) -> tuple[str, str]:
+    """Return the PR title and body from Gitea, or empty strings on failure."""
     import httpx
 
-    base = os.environ.get("GITHUB_API_URL", "http://localhost:3000/api/v1")
+    base = os.environ.get("GITHUB_API_URL", "http://localhost:3001/api/v1")
     token = os.environ.get("REVIEWER_TOKEN") or os.environ.get("GITHUB_TOKEN", "")
     try:
         async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
@@ -201,17 +203,10 @@ async def _fetch_pr_description(repo: str, pr_number: int) -> str:
             )
             if r.status_code == 200:
                 data = r.json()
-                title = data.get("title", "")
-                body = data.get("body", "")
-                parts = []
-                if title:
-                    parts.append(f"PR title: {title}")
-                if body:
-                    parts.append(f"PR description:\n{body}")
-                return "\n\n".join(parts)
+                return str(data.get("title") or ""), str(data.get("body") or "")
     except Exception:
         pass
-    return ""
+    return "", ""
 
 
 # ---------------------------------------------------------------------------
@@ -507,7 +502,9 @@ def reviewer_solver(
             )
             all_messages = []
             for pr_number in pr_numbers:
-                pr_description = await _fetch_pr_description(repo, pr_number)
+                pr_title, pr_body = await _fetch_pr_details(repo, int(pr_number))
+                store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
+                pr_description = format_pr_description(pr_title, pr_body)
                 description_block = f"\n\n{pr_description}" if pr_description else ""
                 reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
                 agent_state = AgentState(
@@ -529,7 +526,9 @@ def reviewer_solver(
             repo = state.metadata.get("repo", "")
             pr_number = state.metadata.get("pr_number")
             if pr_number:
-                pr_description = await _fetch_pr_description(repo, pr_number)
+                pr_title, pr_body = await _fetch_pr_details(repo, int(pr_number))
+                store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
+                pr_description = format_pr_description(pr_title, pr_body)
                 description_block = f"\n\n{pr_description}" if pr_description else ""
                 content = (
                     f"Please review PR #{pr_number} in repo {repo}."
@@ -538,6 +537,16 @@ def reviewer_solver(
                     f"to approve or decline the pull request."
                 )
             else:
+                for grouped_pr_number in state.metadata.get("pr_numbers", []):
+                    pr_title, pr_body = await _fetch_pr_details(
+                        repo, int(grouped_pr_number)
+                    )
+                    store_pr_details(
+                        state.metadata,
+                        int(grouped_pr_number),
+                        pr_title,
+                        pr_body,
+                    )
                 content = state.input_text
             reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
             agent_state = AgentState(messages=[ChatMessageUser(content=content)])
@@ -645,6 +654,7 @@ def reviewer_benchmark(
     axis3: str | None = None,
     review_mode: str = "independent",
     model: str | None = None,
+    agent: str | None = None,
     reset: bool = True,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
@@ -678,6 +688,9 @@ def reviewer_benchmark(
         ``individual`` — one sample per PR.
     model : str | None
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
+    agent : str | None
+        Optional local CLI reviewer: ``codex``, ``claude-code``, or ``copilot``.
+        When set, the benchmark uses the CLI bridge and always simulates merges.
     reset : bool
         Tear down and restart the Gitea container once before running (gitea mode only),
         restoring all PRs to their original open state. In sandbox mode each sample
@@ -696,11 +709,39 @@ def reviewer_benchmark(
         If True, exclude records where any axis field (axis1, axis2, or axis3) has
         the value ``undefined``. Default: True.
     """
-    if simulate_merge:
+    use_simulate_merge = simulate_merge or agent is not None
+    if use_simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
         clear_simulated_merges()
     else:
         os.environ.pop("SIMULATE_MERGES", None)
+
+    solver_impl = (
+        reviewer_solver(
+            model=model,
+            cwe=cwe,
+            reset=reset,
+            gitea_port=gitea_port,
+            pause_after_reset=pause_after_reset,
+            version=version,
+            review_mode=review_mode,
+            tool_mode=tool_mode,
+        )
+        if agent is None
+        else cli_solver(
+            agent=agent,
+            model=model,
+            cwe=cwe,
+            reset=reset,
+            gitea_port=gitea_port,
+            timeout=600,
+            version=version,
+        )
+    )
+
+    # CLI agents always run inside a sandbox; API agents only need one in
+    # sandbox tool_mode.
+    use_sandbox = agent is not None or tool_mode == "sandbox"
 
     return Task(
         dataset=_load_samples(
@@ -715,20 +756,11 @@ def reviewer_benchmark(
             review_mode=review_mode,
             skip_undefined=skip_undefined,
         ),
-        solver=reviewer_solver(
-            model=model,
-            cwe=cwe,
-            reset=reset,
-            gitea_port=gitea_port,
-            pause_after_reset=pause_after_reset,
-            version=version,
-            review_mode=review_mode,
-            tool_mode=tool_mode,
-        ),
+        solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=(
             SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-            if tool_mode == "sandbox"
+            if use_sandbox
             else None
         ),
     )

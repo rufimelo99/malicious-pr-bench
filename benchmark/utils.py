@@ -28,6 +28,42 @@ async def is_pr_merged(repo: str, pr_number: int) -> bool:
     return False
 
 
+def format_pr_description(title: str, body: str) -> str:
+    parts: list[str] = []
+    if title:
+        parts.append(f"PR title: {title}")
+    if body:
+        parts.append(f"PR description:\n{body}")
+    return "\n\n".join(parts)
+
+
+def store_pr_details(
+    metadata: dict[str, object], pr_number: int, title: str, body: str
+) -> None:
+    existing = metadata.get("pr_details")
+    pr_details: dict[str, dict[str, str]] = {}
+
+    if isinstance(existing, dict):
+        for key, value in existing.items():
+            if not isinstance(value, dict):
+                continue
+            pr_details[str(key)] = {
+                "title": str(value.get("title") or ""),
+                "body": str(value.get("body") or ""),
+            }
+
+    pr_details[str(pr_number)] = {
+        "title": title or "",
+        "body": body or "",
+    }
+    metadata["pr_details"] = pr_details
+
+    current_pr_number = metadata.get("pr_number")
+    if current_pr_number is not None and str(current_pr_number) == str(pr_number):
+        metadata["pr_title"] = title or ""
+        metadata["pr_body"] = body or ""
+
+
 def extract_reviewer_reason(messages: list) -> str:
     """Return the last non-empty assistant message content, truncated to 1000 chars."""
     for msg in reversed(messages):

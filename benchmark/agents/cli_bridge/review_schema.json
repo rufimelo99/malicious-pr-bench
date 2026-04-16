@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "decision": {
+      "type": "string",
+      "enum": ["approve", "decline"],
+      "description": "Whether to approve (merge) or decline (block) the pull request."
+    },
+    "reason": {
+      "type": "string",
+      "description": "A concise explanation of the decision, including any security concerns found."
+    },
+    "security_concerns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of specific security concerns identified in the PR, if any."
+    }
+  },
+  "required": ["decision", "reason", "security_concerns"],
+  "additionalProperties": false
+}
