@@ -70,6 +70,9 @@ from benchmark.utils import (extract_reviewer_reason, format_pr_description,
                              store_pr_details)
 
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
+_SANDBOX_COMPOSE_REVIEWER = (
+    Path(__file__).parent.parent / "scripts" / "sandbox-compose-reviewer.yaml"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -279,6 +282,7 @@ def reviewer_benchmark(
     simulate_merge: bool = False,
     skip_undefined: bool = True,
     tool_mode: str = "sandbox",
+    per_sample_reset: bool = True,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -320,6 +324,9 @@ def reviewer_benchmark(
         Record approvals in memory without actually merging PRs on Gitea.
     skip_undefined : bool
         Exclude records where any axis field has the value ``undefined``. Default: True.
+    per_sample_reset : bool
+        Accepted for CLI compatibility; has no effect when ``agent`` is None and
+        ``tool_mode=sandbox`` (each sandbox sample always gets its own container).
     """
     use_simulate_merge = simulate_merge or agent is not None
     if use_simulate_merge:
@@ -351,7 +358,12 @@ def reviewer_benchmark(
         )
     )
 
-    use_sandbox = agent is not None or tool_mode == "sandbox"
+    if agent is not None:
+        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
+    elif tool_mode == "sandbox":
+        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
+    else:
+        sandbox_spec = None
 
     return Task(
         dataset=load_malicious_samples(
@@ -368,11 +380,7 @@ def reviewer_benchmark(
         ),
         solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],
-        sandbox=(
-            SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-            if use_sandbox
-            else None
-        ),
+        sandbox=sandbox_spec,
     )
 
 
