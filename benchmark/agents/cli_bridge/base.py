@@ -14,13 +14,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
 
+from benchmark.config import SANDBOX_OUTPUT_FILE, SANDBOX_REPO_PATH
+
 logger = logging.getLogger(__name__)
 
 _TIMEOUT_EXIT_CODE = 124
-
-# Fixed paths inside every sandbox container.
-SANDBOX_REPO_PATH = "/workspace/repo"
-SANDBOX_OUTPUT_FILE = "/workspace/review.json"
 
 
 @dataclass

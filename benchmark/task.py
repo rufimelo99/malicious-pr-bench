@@ -66,7 +66,7 @@ from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import (HF_DATASET_DEFAULT, HTTP_TIMEOUT,
-                              MALICIOUS_IMAGE_TEMPLATE)
+                              MALICIOUS_IMAGE_TEMPLATE, SANDBOX_REPO_PATH)
 from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
 from benchmark.utils import (extract_reviewer_reason, format_pr_description,
@@ -107,11 +107,11 @@ async def _clone_repo_to_sandbox(repo: str) -> None:
     sb = _sandbox()
 
     # Remove any leftover clone from a previous run
-    await sb.exec(cmd=["rm", "-rf", "/workspace/repo"], timeout=10)
+    await sb.exec(cmd=["rm", "-rf", SANDBOX_REPO_PATH], timeout=10)
 
-    logger.info(f"[sandbox] Cloning {git_url} → /workspace/repo")
-    print(f"[sandbox] git clone {git_url} /workspace/repo")
-    result = await sb.exec(cmd=["git", "clone", git_url, "/workspace/repo"], timeout=60)
+    logger.info(f"[sandbox] Cloning {git_url} → {SANDBOX_REPO_PATH}")
+    print(f"[sandbox] git clone {git_url} {SANDBOX_REPO_PATH}")
+    result = await sb.exec(cmd=["git", "clone", git_url, SANDBOX_REPO_PATH], timeout=60)
     if result.returncode != 0:
         print(
             f"[sandbox] git clone FAILED (exit {result.returncode}):\n{result.stderr}"
