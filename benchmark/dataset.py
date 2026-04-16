@@ -7,6 +7,9 @@ from pathlib import Path
 
 from inspect_ai.dataset import Sample
 
+from benchmark.metadata import (BenignSampleMetadata, MaliciousSampleMetadata,
+                                PRDetails, SequenceSampleMetadata)
+
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
@@ -155,23 +158,23 @@ def _load_individual_samples(
             Sample(
                 input=_build_pr_input(pr_number, sample_repo, pr_title, pr_body),
                 id=f"{sample_repo.replace('/', '_')}-pr{pr_number}-{axis1}-{axis2}-{axis3}",
-                metadata={
-                    "repo": sample_repo,
-                    "pr_number": pr_number,
-                    "category": category,
-                    "axis1": axis1,
-                    "axis2": axis2,
-                    "axis3": axis3,
-                    "branch": record.get("branch", ""),
-                    "files_changed": record.get("files_changed", []),
-                    "group_id": group_id,
-                    "sequence_index": seq_idx,
-                    "sequence_total": seq_total,
-                    "group_pr_numbers": (
+                metadata=MaliciousSampleMetadata(
+                    repo=sample_repo,
+                    pr_number=pr_number,
+                    category=category,
+                    axis1=axis1,
+                    axis2=axis2,
+                    axis3=axis3,
+                    branch=record.get("branch", ""),
+                    files_changed=record.get("files_changed", []),
+                    group_id=group_id,
+                    sequence_index=seq_idx,
+                    sequence_total=seq_total,
+                    group_pr_numbers=(
                         (group_prs or {}).get(group_id) if group_id else None
                     ),
-                    "pr_details": {pr_number: {"title": pr_title, "body": pr_body}},
-                },
+                    pr_details={pr_number: PRDetails(title=pr_title, body=pr_body)},
+                ).to_dict(),
             )
         )
     return samples
@@ -200,10 +203,9 @@ def _load_sequence_samples(
         axis3 = first.get("axis3", "unknown")
         pr_numbers = [r["pr_number"] for r in group_records]
         pr_details = {
-            r["pr_number"]: {
-                "title": r.get("pr_title", ""),
-                "body": r.get("pr_body", ""),
-            }
+            r["pr_number"]: PRDetails(
+                title=r.get("pr_title", ""), body=r.get("pr_body", "")
+            )
             for r in group_records
         }
 
@@ -216,16 +218,16 @@ def _load_sequence_samples(
                     f"each one is safe to merge."
                 ),
                 id=f"{sample_repo.replace('/', '_')}-group-{group_id[:8]}-{axis1}",
-                metadata={
-                    "repo": sample_repo,
-                    "pr_numbers": pr_numbers,
-                    "pr_details": pr_details,
-                    "group_id": group_id,
-                    "category": first.get("category", "unknown"),
-                    "axis1": axis1,
-                    "axis2": axis2,
-                    "axis3": axis3,
-                },
+                metadata=SequenceSampleMetadata(
+                    repo=sample_repo,
+                    pr_numbers=pr_numbers,
+                    pr_details=pr_details,
+                    group_id=group_id,
+                    category=first.get("category", "unknown"),
+                    axis1=axis1,
+                    axis2=axis2,
+                    axis3=axis3,
+                ).to_dict(),
             )
         )
     return samples
@@ -326,15 +328,15 @@ def load_benign_samples(
                         f"to approve or decline the pull request."
                     ),
                     id=sample_id,
-                    metadata={
-                        "repo": repo,
-                        "pr_number": pr_number,
-                        "vuln_id": vuln_id,
-                        "cwe_id": cwe_id,
-                        "cwe_slug": cwe_slug,
-                        "branch": record.get("branch", ""),
-                        "files_changed": record.get("files_changed", []),
-                    },
+                    metadata=BenignSampleMetadata(
+                        repo=repo,
+                        pr_number=pr_number,
+                        vuln_id=vuln_id,
+                        cwe_id=cwe_id,
+                        cwe_slug=cwe_slug,
+                        branch=record.get("branch", ""),
+                        files_changed=record.get("files_changed", []),
+                    ).to_dict(),
                 )
             )
 
