@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import logging
 import os
 
 from inspect_ai.model import ChatMessageAssistant
@@ -15,11 +14,10 @@ from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT
+from benchmark.logger import logger
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 from benchmark.tools import _api_url, _headers
 from benchmark.utils import store_pr_details
-
-logger = logging.getLogger(__name__)
 
 
 async def _fetch_pr_data(repo: str, pr_number: int) -> dict:
@@ -114,7 +112,7 @@ def cli_solver(
                 )
                 store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
             except Exception as exc:
-                logger.exception("CLI review failed for %s PR #%s", repo, pr_number)
+                logger.error("CLI review failed", repo=repo, pr_number=pr_number)
                 result = CLIReviewResult(
                     decision="error",
                     reason=f"Failed to review PR #{pr_number}: {exc}",
