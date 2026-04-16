@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 from benchmark.agents.cli_bridge.base import CLIAgentBridge
-
-if TYPE_CHECKING:
-    from inspect_ai.util._sandbox.environment import SandboxEnvironment
 
 logger = logging.getLogger(__name__)
 
@@ -70,19 +68,45 @@ def _extract_json(text: str) -> str | None:
     return None
 
 
+async def _run_host_bash(command: str, cwd: Path, timeout: float = 30.0) -> str:
+    """Execute *command* as a host subprocess, return combined stdout+stderr."""
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "bash",
+            "-c",
+            command,
+            cwd=cwd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+        out = "\n".join(
+            p
+            for p in (
+                stdout.decode(errors="replace").strip(),
+                stderr.decode(errors="replace").strip(),
+            )
+            if p
+        )
+        return out or "(no output)"
+    except asyncio.TimeoutError:
+        return f"Error: command timed out after {timeout}s"
+    except Exception as exc:
+        return f"Error: {exc}"
+
+
 class CopilotSDKBridge(CLIAgentBridge):
     """Bridge that uses the copilot Python SDK.
 
-    The Copilot session runs in-process on the host, but every bash tool
-    call is routed into the sandbox container via ``sb.exec()``.
+    The Copilot session runs in-process on the host. Every bash tool call
+    is executed as a host subprocess inside *workdir*.
     """
 
-    async def _invoke_in_sandbox(
+    async def _invoke_locally(
         self,
         prompt: str,
-        workdir: str,
-        output_file: str,
-        sb: "SandboxEnvironment",
+        workdir: Path,
+        output_file: Path,
     ) -> tuple[int, str]:
         try:
             from copilot import CopilotClient
@@ -100,18 +124,8 @@ class CopilotSDKBridge(CLIAgentBridge):
         async def _bash_handler(
             params: _BashParams, invocation: ToolInvocation
         ) -> ToolResult:
-            try:
-                res = await sb.exec(
-                    cmd=["bash", "-c", params.command],
-                    cwd=workdir,
-                    timeout=30,
-                )
-                out = "\n".join(p for p in (res.stdout, res.stderr) if p).strip()
-                return ToolResult(text_result_for_llm=out or "(no output)")
-            except Exception as exc:
-                return ToolResult(
-                    text_result_for_llm=f"Error: {exc}", result_type="failure"
-                )
+            out = await _run_host_bash(params.command, cwd=workdir)
+            return ToolResult(text_result_for_llm=out)
 
         sandbox_bash = define_tool(
             name="bash",
@@ -128,7 +142,7 @@ class CopilotSDKBridge(CLIAgentBridge):
             else SubprocessConfig()
         )
 
-        client: CopilotClient | None = None
+        client = None
         session = None
         try:
             client = CopilotClient(config)
@@ -137,7 +151,7 @@ class CopilotSDKBridge(CLIAgentBridge):
             session = await client.create_session(
                 model=self.model or "gpt-5.3-codex",
                 on_permission_request=PermissionHandler.approve_all,
-                working_directory=workdir,
+                working_directory=str(workdir),
                 tools=[sandbox_bash],
             )
 
@@ -147,7 +161,7 @@ class CopilotSDKBridge(CLIAgentBridge):
                 return 1, raw_output or "No response received from Copilot SDK session."
 
             extracted = _extract_json(content)
-            await sb.write_file(output_file, extracted or content)
+            output_file.write_text(extracted or content, encoding="utf-8")
             return 0, raw_output or content
 
         except TimeoutError:

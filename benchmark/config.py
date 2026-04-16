@@ -55,6 +55,5 @@ BENIGN_IMAGE_TEMPLATE = "rufimelo/benign-pull-requests:{version}"
 GITEA_STORE_API_URL = "gitea_api_url"
 GITEA_STORE_TOKEN = "gitea_token"
 
-# Fixed paths inside every sandbox container.
+# Fixed repo path inside the API-agent sandbox container.
 SANDBOX_REPO_PATH = "/workspace/repo"
-SANDBOX_OUTPUT_FILE = "/workspace/review.json"

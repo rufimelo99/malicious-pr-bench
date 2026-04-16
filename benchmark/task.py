@@ -351,7 +351,8 @@ def reviewer_benchmark(
         )
     )
 
-    use_sandbox = agent is not None or tool_mode == "sandbox"
+    # CLI agents run as host subprocesses — no sandbox container needed.
+    use_sandbox = agent is None and tool_mode == "sandbox"
 
     return Task(
         dataset=load_malicious_samples(

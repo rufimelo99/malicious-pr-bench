@@ -4,17 +4,18 @@ from __future__ import annotations
 
 import asyncio
 import os
+import tempfile
+from pathlib import Path
 
 from inspect_ai.model import ChatMessageAssistant
 from inspect_ai.solver import Solver, TaskState, solver
-from inspect_ai.util import sandbox as _sandbox
 from inspect_ai.util import store
 
 from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
-from benchmark.gitea import clone_repo_to_sandbox, reset_gitea
+from benchmark.gitea import clone_repo_locally, reset_gitea
 from benchmark.logger import logger
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 from benchmark.tools import _api_url, _headers
@@ -48,8 +49,8 @@ def cli_solver(
 ) -> Solver:
     """Inspect solver that dispatches PR reviews to a local CLI coding agent.
 
-    CLI agents always run inside the per-sample sandbox container.
-    Each sample gets its own Gitea instance on an ephemeral port.
+    CLI agents run as host subprocesses. The repo is cloned into a temporary
+    local directory for each sample; no sandbox container is required.
     """
     import asyncio as _asyncio
 
@@ -88,51 +89,54 @@ def cli_solver(
             or [state.metadata["pr_number"]]
         )
 
-        await clone_repo_to_sandbox(repo)
-        sb = _sandbox()
-
         reviews: list[dict[str, object]] = []
 
-        for pr_number in pr_numbers:
-            try:
-                pr_data = await _fetch_pr_data(repo, int(pr_number))
-                pr_title = str(pr_data.get("title") or "")
-                pr_body = str(pr_data.get("body") or "")
-                result = await bridge.run_review(
-                    repo_slug=repo,
-                    pr_number=int(pr_number),
-                    pr_title=pr_title,
-                    pr_body=pr_body,
-                    base_sha=str(pr_data["base"]["sha"]),
-                    head_sha=str(pr_data["head"]["sha"]),
-                    sandbox=sb,
-                )
-                store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
-            except Exception as exc:
-                logger.error("CLI review failed", repo=repo, pr_number=pr_number)
-                result = CLIReviewResult(
-                    decision="error",
-                    reason=f"Failed to review PR #{pr_number}: {exc}",
-                    security_concerns=[],
-                    run_status="error",
-                    raw_output=str(exc),
-                    duration_seconds=0.0,
+        with tempfile.TemporaryDirectory(prefix="malicious-pr-") as tmpdir:
+            workdir = Path(tmpdir) / "repo"
+            await clone_repo_locally(repo, workdir)
+
+            for pr_number in pr_numbers:
+                try:
+                    pr_data = await _fetch_pr_data(repo, int(pr_number))
+                    pr_title = str(pr_data.get("title") or "")
+                    pr_body = str(pr_data.get("body") or "")
+                    result = await bridge.run_review(
+                        repo_slug=repo,
+                        pr_number=int(pr_number),
+                        pr_title=pr_title,
+                        pr_body=pr_body,
+                        base_sha=str(pr_data["base"]["sha"]),
+                        head_sha=str(pr_data["head"]["sha"]),
+                        workdir=workdir,
+                    )
+                    store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
+                except Exception as exc:
+                    logger.error("CLI review failed", repo=repo, pr_number=pr_number)
+                    result = CLIReviewResult(
+                        decision="error",
+                        reason=f"Failed to review PR #{pr_number}: {exc}",
+                        security_concerns=[],
+                        run_status="error",
+                        raw_output=str(exc),
+                        duration_seconds=0.0,
+                    )
+
+                reviews.append(
+                    {
+                        "pr_number": int(pr_number),
+                        "decision": result.decision,
+                        "run_status": result.run_status,
+                        "reason": result.reason,
+                        "security_concerns": result.security_concerns,
+                        "raw_output": result.raw_output,
+                        "duration_seconds": result.duration_seconds,
+                    }
                 )
 
-            reviews.append(
-                {
-                    "pr_number": int(pr_number),
-                    "decision": result.decision,
-                    "run_status": result.run_status,
-                    "reason": result.reason,
-                    "security_concerns": result.security_concerns,
-                    "raw_output": result.raw_output,
-                    "duration_seconds": result.duration_seconds,
-                }
-            )
-
-            if result.decision == "approve":
-                SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(int(pr_number))
+                if result.decision == "approve":
+                    SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(
+                        int(pr_number)
+                    )
 
         decisions = [str(r["decision"]) for r in reviews]
         state.metadata["cli_reviews"] = reviews

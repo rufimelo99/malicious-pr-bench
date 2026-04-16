@@ -4,17 +4,12 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from inspect_ai.util._sandbox.environment import SandboxEnvironment
-
-from benchmark.config import SANDBOX_OUTPUT_FILE, SANDBOX_REPO_PATH
+from benchmark.config import SANDBOX_REPO_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +29,8 @@ class CLIReviewResult:
 class CLIAgentBridge(ABC):
     """Abstract base for CLI agent bridges.
 
-    CLI bridges always run inside an inspect_ai sandbox container.
-    The repo is pre-cloned at ``SANDBOX_REPO_PATH`` by the solver before
+    CLI bridges run the agent as a local subprocess on the host.
+    The repo is pre-cloned into a local directory by the solver before
     ``run_review`` is called.
     """
 
@@ -52,6 +47,8 @@ class CLIAgentBridge(ABC):
     @staticmethod
     def _load_dotenv() -> None:
         """Source .env from the project root if present."""
+        import os
+
         env_file = Path(__file__).resolve().parents[2] / ".env"
         if not env_file.exists():
             return
@@ -66,14 +63,13 @@ class CLIAgentBridge(ABC):
                 os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
 
     @abstractmethod
-    async def _invoke_in_sandbox(
+    async def _invoke_locally(
         self,
         prompt: str,
-        workdir: str,
-        output_file: str,
-        sb: "SandboxEnvironment",
+        workdir: Path,
+        output_file: Path,
     ) -> tuple[int, str]:
-        """Invoke the agent inside *sb*. Return (exit_code, raw_output)."""
+        """Invoke the agent as a local subprocess. Return (exit_code, raw_output)."""
 
     async def run_review(
         self,
@@ -83,15 +79,16 @@ class CLIAgentBridge(ABC):
         pr_body: str,
         base_sha: str,
         head_sha: str,
-        sandbox: "SandboxEnvironment",
+        workdir: Path,
     ) -> CLIReviewResult:
-        """Run a security review inside the sandbox container.
+        """Run a security review on the locally-cloned repo.
 
-        The repo must already be cloned at ``SANDBOX_REPO_PATH`` before
-        this method is called (the solver is responsible for that).
+        The repo must already be cloned at *workdir* before this method is called
+        (the solver is responsible for that).
         """
         start_time = time.perf_counter()
         raw_output = ""
+        output_file = workdir / "review.json"
 
         prompt = self._build_prompt(
             repo_slug=repo_slug,
@@ -103,11 +100,10 @@ class CLIAgentBridge(ABC):
         )
 
         try:
-            exit_code, raw_output = await self._invoke_in_sandbox(
+            exit_code, raw_output = await self._invoke_locally(
                 prompt=prompt,
-                workdir=SANDBOX_REPO_PATH,
-                output_file=SANDBOX_OUTPUT_FILE,
-                sb=sandbox,
+                workdir=workdir,
+                output_file=output_file,
             )
             duration = time.perf_counter() - start_time
 
@@ -126,16 +122,14 @@ class CLIAgentBridge(ABC):
                     duration_seconds=duration,
                 )
 
-            try:
-                review_text = await sandbox.read_file(SANDBOX_OUTPUT_FILE, text=True)
-            except Exception as exc:
+            if not output_file.exists():
                 return self._error_result(
-                    reason=f"Could not read review output from sandbox: {exc}",
+                    reason="CLI agent produced no output file.",
                     raw_output=raw_output,
                     duration_seconds=time.perf_counter() - start_time,
                 )
 
-            parsed = self._parse_review_text(review_text)
+            parsed = self._parse_review_text(output_file.read_text(encoding="utf-8"))
             if parsed is None:
                 return self._error_result(
                     reason="Failed to parse structured review output as JSON.",

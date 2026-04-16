@@ -96,9 +96,9 @@ def reset_gitea(
 async def clone_repo_to_sandbox(repo: str) -> None:
     """Clone *repo* from Gitea into ``SANDBOX_REPO_PATH`` inside the running sandbox.
 
-    Must be called from inside a solve() coroutine so that the per-sample
-    sandbox container is already up and the store has been populated by
-    ``reset_gitea``.
+    Used by the API agent (tool_mode=sandbox). Must be called from inside a
+    solve() coroutine so that the per-sample sandbox container is already up
+    and the store has been populated by ``reset_gitea``.
     """
     from inspect_ai.util import sandbox as _sandbox
     from inspect_ai.util import store
@@ -122,6 +122,39 @@ async def clone_repo_to_sandbox(repo: str) -> None:
         logger.error("[sandbox] git clone failed", stderr=result.stderr)
         raise RuntimeError(f"Failed to clone {repo} into sandbox: {result.stderr}")
     print(f"[sandbox] ✓ Cloned {repo} successfully")
+
+
+async def clone_repo_locally(repo: str, dest: Path) -> None:
+    """Clone *repo* from Gitea into a local *dest* directory on the host.
+
+    Used by CLI agent bridges. The Gitea URL is read from the environment
+    (set by ``reset_gitea`` before the solver runs).
+    """
+    import asyncio
+
+    api_url = os.environ.get("GITHUB_API_URL", "http://localhost:3001/api/v1")
+    git_url = f"{api_url.replace('/api/v1', '')}/{repo}.git"
+
+    if dest.exists():
+        import shutil
+
+        shutil.rmtree(dest)
+
+    logger.info(f"[local] Cloning {git_url} → {dest}")
+    proc = await asyncio.create_subprocess_exec(
+        "git",
+        "clone",
+        git_url,
+        str(dest),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    _, stderr = await asyncio.wait_for(proc.communicate(), timeout=60)
+    if proc.returncode != 0:
+        err = stderr.decode(errors="replace").strip()
+        logger.error("[local] git clone failed", stderr=err)
+        raise RuntimeError(f"Failed to clone {repo} locally: {err}")
+    print(f"[local] ✓ Cloned {repo} → {dest}")
 
 
 async def fetch_pr_details(repo: str, pr_number: int) -> tuple[str, str]:
