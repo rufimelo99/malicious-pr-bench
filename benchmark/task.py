@@ -736,9 +736,12 @@ def reviewer_benchmark(
             gitea_port=gitea_port,
             timeout=600,
             version=version,
-            tool_mode=tool_mode,
         )
     )
+
+    # CLI agents always run inside a sandbox; API agents only need one in
+    # sandbox tool_mode.
+    use_sandbox = agent is not None or tool_mode == "sandbox"
 
     return Task(
         dataset=_load_samples(
@@ -757,7 +760,7 @@ def reviewer_benchmark(
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=(
             SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-            if tool_mode == "sandbox" and agent is None
+            if use_sandbox
             else None
         ),
     )

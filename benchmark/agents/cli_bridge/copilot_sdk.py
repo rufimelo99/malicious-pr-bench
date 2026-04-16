@@ -2,17 +2,32 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import re
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from benchmark.agents.cli_bridge.base import CLIAgentBridge
+
+if TYPE_CHECKING:
+    from inspect_ai.util._sandbox.environment import SandboxEnvironment
 
 logger = logging.getLogger(__name__)
 
 _TIMEOUT_EXIT_CODE = 124
+
+try:
+    from copilot.tools import ToolInvocation, ToolResult, define_tool
+    from pydantic import BaseModel, Field
+
+    class _BashParams(BaseModel):
+        command: str = Field(description="The shell command to execute")
+
+except ImportError:
+    ToolInvocation = None  # type: ignore[assignment,misc]
+    ToolResult = None  # type: ignore[assignment,misc]
+    define_tool = None  # type: ignore[assignment,misc]
+    _BashParams = None  # type: ignore[assignment,misc]
 
 
 def _truncate(text: str, limit: int) -> str:
@@ -26,7 +41,6 @@ def _escape_newlines(text: str) -> str:
 
 def _extract_json(text: str) -> str | None:
     """Extract a JSON object from text that may contain markdown fences or prose."""
-    # Try the raw text first.
     text = text.strip()
     try:
         obj = json.loads(text)
@@ -35,7 +49,6 @@ def _extract_json(text: str) -> str | None:
     except json.JSONDecodeError:
         pass
 
-    # Strip markdown code fences and retry.
     fenced = re.search(r"```(?:json)?\s*\n?(.*?)\n?```", text, re.DOTALL)
     if fenced:
         try:
@@ -45,7 +58,6 @@ def _extract_json(text: str) -> str | None:
         except json.JSONDecodeError:
             pass
 
-    # Last resort: find the first `{...}` block containing "decision".
     brace_match = re.search(r"\{[^{}]*\"decision\"[^{}]*\}", text, re.DOTALL)
     if brace_match:
         try:
@@ -59,13 +71,22 @@ def _extract_json(text: str) -> str | None:
 
 
 class CopilotSDKBridge(CLIAgentBridge):
-    """Bridge that uses the copilot Python SDK instead of shelling out."""
+    """Bridge that uses the copilot Python SDK.
 
-    async def _invoke(
-        self, prompt: str, workdir: Path, output_file: Path
+    The Copilot session runs in-process on the host, but every bash tool
+    call is routed into the sandbox container via ``sb.exec()``.
+    """
+
+    async def _invoke_in_sandbox(
+        self,
+        prompt: str,
+        workdir: str,
+        output_file: str,
+        sb: "SandboxEnvironment",
     ) -> tuple[int, str]:
         try:
-            from copilot import CopilotClient  # noqa: F811
+            from copilot import CopilotClient
+            from copilot.client import SubprocessConfig
             from copilot.session import PermissionHandler
         except ImportError as exc:
             return 1, (
@@ -73,16 +94,37 @@ class CopilotSDKBridge(CLIAgentBridge):
                 "Install it with: pip install github-copilot-sdk"
             )
 
-        import os
+        if define_tool is None:
+            return 1, "The copilot Python SDK is not installed."
 
-        from copilot.client import SubprocessConfig
+        async def _bash_handler(
+            params: _BashParams, invocation: ToolInvocation
+        ) -> ToolResult:
+            try:
+                res = await sb.exec(
+                    cmd=["bash", "-c", params.command],
+                    cwd=workdir,
+                    timeout=30,
+                )
+                out = "\n".join(p for p in (res.stdout, res.stderr) if p).strip()
+                return ToolResult(text_result_for_llm=out or "(no output)")
+            except Exception as exc:
+                return ToolResult(
+                    text_result_for_llm=f"Error: {exc}", result_type="failure"
+                )
 
-        github_token = os.environ.get("GITHUB_TOKEN") or os.environ.get(
-            "REVIEWER_TOKEN"
+        sandbox_bash = define_tool(
+            name="bash",
+            description="Execute a shell command in the repository checkout",
+            handler=_bash_handler,
+            params_type=_BashParams,
+            overrides_built_in_tool=True,
+            skip_permission=True,
         )
+
         config = (
-            SubprocessConfig(github_token=github_token)
-            if github_token
+            SubprocessConfig(github_token=self.github_token)
+            if self.github_token
             else SubprocessConfig()
         )
 
@@ -95,119 +137,17 @@ class CopilotSDKBridge(CLIAgentBridge):
             session = await client.create_session(
                 model=self.model or "gpt-5.3-codex",
                 on_permission_request=PermissionHandler.approve_all,
-                working_directory=str(workdir),
+                working_directory=workdir,
+                tools=[sandbox_bash],
             )
 
-            # Collect the full event trace for the viewer.
-            trace_lines: list[str] = []
-            # Map tool_call_id → tool_name for pairing start/complete events.
-            _pending_tools: dict[str, str] = {}
-
-            def _trace_handler(event) -> None:
-                etype = (
-                    event.type.value
-                    if hasattr(event.type, "value")
-                    else str(event.type)
-                )
-                data = event.data if hasattr(event, "data") else None
-                if data is None:
-                    return
-
-                if etype == "tool.execution_start":
-                    name = getattr(data, "tool_name", None) or "?"
-                    call_id = getattr(data, "tool_call_id", None) or ""
-                    raw_args = getattr(data, "arguments", None)
-                    if call_id and name:
-                        _pending_tools[call_id] = name
-                    # For bash, extract the command string.
-                    if name == "bash" and isinstance(raw_args, dict):
-                        cmd = raw_args.get("command", "")
-                        trace_lines.append(
-                            f"[bash] {_escape_newlines(_truncate(cmd, 500))}"
-                        )
-                    elif name not in ("report_intent",):
-                        arg_str = (
-                            json.dumps(raw_args)
-                            if isinstance(raw_args, dict)
-                            else str(raw_args or "")
-                        )
-                        trace_lines.append(
-                            f"[tool] {name}: {_escape_newlines(_truncate(arg_str, 300))}"
-                        )
-
-                elif etype == "tool.execution_complete":
-                    call_id = getattr(data, "tool_call_id", None) or ""
-                    name = (
-                        _pending_tools.pop(call_id, None)
-                        or getattr(data, "tool_name", None)
-                        or "?"
-                    )
-                    result_obj = getattr(data, "result", None)
-                    # Extract content from Result object.
-                    if result_obj is not None:
-                        content = getattr(result_obj, "content", None) or str(
-                            result_obj
-                        )
-                    else:
-                        content = ""
-                    if name == "bash":
-                        trace_lines.append(
-                            f"[bash.output] {_escape_newlines(_truncate(str(content), 1500))}"
-                        )
-                    elif name not in ("report_intent",):
-                        trace_lines.append(
-                            f"[tool.output] {name}: {_escape_newlines(_truncate(str(content), 1000))}"
-                        )
-
-                elif etype == "assistant.message":
-                    content = getattr(data, "content", "")
-                    if content:
-                        trace_lines.append(
-                            f"[assistant] {_truncate(str(content), 2000)}"
-                        )
-
-                elif etype == "assistant.reasoning":
-                    content = getattr(data, "content", "")
-                    if content:
-                        trace_lines.append(
-                            f"[reasoning] {_truncate(str(content), 1000)}"
-                        )
-
-                elif etype == "session.error":
-                    msg = getattr(data, "message", str(data))
-                    trace_lines.append(f"[error] {msg}")
-
-            session.on(_trace_handler)
-
-            response = await session.send_and_wait(prompt, timeout=float(self.timeout))
-
-            raw_output = "\n".join(trace_lines) if trace_lines else ""
-
-            # Extract the structured review from the last assistant message.
-            content: str | None = None
-            if (
-                response
-                and hasattr(response, "data")
-                and hasattr(response.data, "content")
-            ):
-                content = response.data.content
-
-            if not content:
-                # Fallback: scan trace for last assistant message.
-                for line in reversed(trace_lines):
-                    if line.startswith("[assistant]"):
-                        content = line[len("[assistant] ") :]
-                        break
+            _, raw_output, content = await self._run_session(session, prompt)
 
             if not content:
                 return 1, raw_output or "No response received from Copilot SDK session."
 
             extracted = _extract_json(content)
-            if extracted:
-                output_file.write_text(extracted, encoding="utf-8")
-            else:
-                output_file.write_text(content, encoding="utf-8")
-
+            await sb.write_file(output_file, extracted or content)
             return 0, raw_output or content
 
         except TimeoutError:
@@ -229,3 +169,90 @@ class CopilotSDKBridge(CLIAgentBridge):
                     await client.stop()
                 except Exception:
                     pass
+
+    async def _run_session(
+        self, session, prompt: str
+    ) -> tuple[list[str], str, str | None]:
+        """Send *prompt* to an open session and collect trace + final content."""
+        trace_lines: list[str] = []
+        _pending_tools: dict[str, str] = {}
+
+        def _trace_handler(event) -> None:
+            etype = (
+                event.type.value if hasattr(event.type, "value") else str(event.type)
+            )
+            data = event.data if hasattr(event, "data") else None
+            if data is None:
+                return
+
+            if etype == "tool.execution_start":
+                name = getattr(data, "tool_name", None) or "?"
+                call_id = getattr(data, "tool_call_id", None) or ""
+                raw_args = getattr(data, "arguments", None)
+                if call_id and name:
+                    _pending_tools[call_id] = name
+                if name == "bash" and isinstance(raw_args, dict):
+                    cmd = raw_args.get("command", "")
+                    trace_lines.append(
+                        f"[bash] {_escape_newlines(_truncate(cmd, 500))}"
+                    )
+                elif name not in ("report_intent",):
+                    arg_str = (
+                        json.dumps(raw_args)
+                        if isinstance(raw_args, dict)
+                        else str(raw_args or "")
+                    )
+                    trace_lines.append(
+                        f"[tool] {name}: {_escape_newlines(_truncate(arg_str, 300))}"
+                    )
+
+            elif etype == "tool.execution_complete":
+                call_id = getattr(data, "tool_call_id", None) or ""
+                name = (
+                    _pending_tools.pop(call_id, None)
+                    or getattr(data, "tool_name", None)
+                    or "?"
+                )
+                result_obj = getattr(data, "result", None)
+                content = (
+                    getattr(result_obj, "content", None) or str(result_obj)
+                    if result_obj is not None
+                    else ""
+                )
+                if name == "bash":
+                    trace_lines.append(
+                        f"[bash.output] {_escape_newlines(_truncate(str(content), 1500))}"
+                    )
+                elif name not in ("report_intent",):
+                    trace_lines.append(
+                        f"[tool.output] {name}: {_escape_newlines(_truncate(str(content), 1000))}"
+                    )
+
+            elif etype == "assistant.message":
+                content = getattr(data, "content", "")
+                if content:
+                    trace_lines.append(f"[assistant] {_truncate(str(content), 2000)}")
+
+            elif etype == "assistant.reasoning":
+                content = getattr(data, "content", "")
+                if content:
+                    trace_lines.append(f"[reasoning] {_truncate(str(content), 1000)}")
+
+            elif etype == "session.error":
+                msg = getattr(data, "message", str(data))
+                trace_lines.append(f"[error] {msg}")
+
+        session.on(_trace_handler)
+        response = await session.send_and_wait(prompt, timeout=float(self.timeout))
+        raw_output = "\n".join(trace_lines) if trace_lines else ""
+
+        content: str | None = None
+        if response and hasattr(response, "data") and hasattr(response.data, "content"):
+            content = response.data.content
+        if not content:
+            for line in reversed(trace_lines):
+                if line.startswith("[assistant]"):
+                    content = line[len("[assistant] ") :]
+                    break
+
+        return trace_lines, raw_output, content

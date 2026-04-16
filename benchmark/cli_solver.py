@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import logging
 import os
 
 from inspect_ai.model import ChatMessageAssistant
 from inspect_ai.solver import Solver, TaskState, solver
+from inspect_ai.util import sandbox as _sandbox
 from inspect_ai.util import store
 
 from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
@@ -37,18 +37,6 @@ async def _fetch_pr_data(repo: str, pr_number: int) -> dict:
     return await asyncio.to_thread(_request)
 
 
-def _clone_url_from_api(api_url: str, repo: str) -> str:
-    """Derive a Gitea clone URL from the per-sample API URL and repo slug.
-
-    e.g. http://localhost:12345/api/v1 + gitadmin/test-repo
-         → http://localhost:12345/gitadmin/test-repo.git
-    """
-    base = api_url.rstrip("/")
-    if base.endswith("/api/v1"):
-        base = base[: -len("/api/v1")]
-    return f"{base}/{repo}.git"
-
-
 @solver
 def cli_solver(
     agent: str = "codex",
@@ -58,17 +46,11 @@ def cli_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     version: str = "v0.0.0",
-    tool_mode: str = "gitea",
 ) -> Solver:
     """Inspect solver that dispatches PR reviews to a local CLI coding agent.
 
-    Parameters
-    ----------
-    tool_mode : str
-        ``"gitea"`` (default) — one shared Gitea container; ``reset=True``
-        restarts it once before the run starts.
-        ``"sandbox"`` — each sample gets its own Gitea container on an
-        ephemeral port, matching the behaviour of ``reviewer_solver``.
+    CLI agents always run inside the per-sample sandbox container.
+    Each sample gets its own Gitea instance on an ephemeral port.
     """
     import asyncio as _asyncio
 
@@ -79,37 +61,27 @@ def cli_solver(
         )
 
     os.environ["SIMULATE_MERGES"] = "1"
-    bridge = BRIDGES[agent](timeout=timeout, model=model)
+    # Capture the real GitHub token now, before Gitea reset can overwrite it.
+    _github_token = os.environ.get("GITHUB_TOKEN", "")
+    bridge = BRIDGES[agent](timeout=timeout, model=model, github_token=_github_token)
     _reset_task: _asyncio.Task | None = None
 
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task
 
-        if tool_mode == "sandbox" and cwe:
-            # Per-sample: spin up a dedicated Gitea container on a unique port.
-            from benchmark.task import _free_port, _reset_gitea
+        # Reset Gitea once before the first sample; all samples share it.
+        if cwe:
+            from benchmark.task import _reset_gitea
 
-            port = _free_port()
-            sid = str(state.sample_id or port)
-            project = "gitea-cli-" + hashlib.sha1(sid.encode()).hexdigest()[:8]
-            api_url, token = await _asyncio.to_thread(
-                _reset_gitea, cwe, port, version, project
-            )
-            store().set(_STORE_API_URL, api_url)
-            store().set(_STORE_TOKEN, token)
-        elif reset and cwe:
-            # Shared container: reset once before the first sample.
             if _reset_task is None:
-                from benchmark.task import _reset_gitea
-
                 _reset_task = _asyncio.create_task(
                     _asyncio.to_thread(_reset_gitea, cwe, gitea_port, version)
                 )
-            api_url, token = await _reset_task
+            api_url, gitea_token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url
-            os.environ["GITHUB_TOKEN"] = token
+            os.environ["REVIEWER_TOKEN"] = gitea_token
             store().set(_STORE_API_URL, api_url)
-            store().set(_STORE_TOKEN, token)
+            store().set(_STORE_TOKEN, gitea_token)
 
         repo = str(state.metadata.get("repo", ""))
         pr_numbers = (
@@ -118,13 +90,13 @@ def cli_solver(
             or [state.metadata["pr_number"]]
         )
 
-        reviews: list[dict[str, object]] = []
+        # Clone the repo into the sandbox container then grab the sandbox handle.
+        from benchmark.task import _clone_repo_to_sandbox
 
-        # Derive clone URL from the per-sample API URL so it always uses the
-        # correct host port even in sandbox mode (where each sample gets its
-        # own Gitea on an ephemeral port).
-        current_api_url = _api_url()
-        clone_url = _clone_url_from_api(current_api_url, repo)
+        await _clone_repo_to_sandbox(repo)
+        sb = _sandbox()
+
+        reviews: list[dict[str, object]] = []
 
         for pr_number in pr_numbers:
             try:
@@ -138,7 +110,7 @@ def cli_solver(
                     pr_body=pr_body,
                     base_sha=str(pr_data["base"]["sha"]),
                     head_sha=str(pr_data["head"]["sha"]),
-                    clone_url=clone_url,
+                    sandbox=sb,
                 )
                 store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
             except Exception as exc:
@@ -167,7 +139,6 @@ def cli_solver(
             if result.decision == "approve":
                 SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(int(pr_number))
 
-        # Store results for the viewer and scorer
         decisions = [str(r["decision"]) for r in reviews]
         state.metadata["cli_reviews"] = reviews
         state.metadata["cli_decision"] = (
@@ -188,7 +159,6 @@ def cli_solver(
             str(r.get("reason", "")) for r in reviews
         )
 
-        # Scorer reads the last assistant message
         summary = "\n\n".join(
             f"PR #{r['pr_number']}\nDecision: {r['decision']}\n"
             f"Reason: {r['reason']}"
