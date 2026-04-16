@@ -15,15 +15,7 @@ dependencies = [
     "structlog>=22.1.0",
     "openai>=2.29.0",
     "azure-identity>=1.25.3",
-]
-
-[project.optional-dependencies]
-copilot-sdk = [
-    "github-copilot-sdk",
-]
-dev = [
-    "pytest>=8.0",
-    "pytest-asyncio>=0.21",
+    "github-copilot-sdk>=0.1.25",
 ]
 
 [tool.pytest.ini_options]

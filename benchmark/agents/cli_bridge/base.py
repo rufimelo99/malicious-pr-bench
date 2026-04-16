@@ -51,7 +51,7 @@ class CLIAgentBridge(ABC):
             if not line or line.startswith("#"):
                 continue
             if line.startswith("export "):
-                line = line[len("export "):]
+                line = line[len("export ") :]
             key, _, val = line.partition("=")
             if key and val:
                 os.environ.setdefault(key.strip(), val.strip().strip('"').strip("'"))
@@ -110,8 +110,12 @@ class CLIAgentBridge(ABC):
                 head_sha=head_sha,
             )
 
-            exit_code, invoke_output = await self._invoke(prompt, worktree_path, output_file)
-            raw_output = "\n".join(part for part in (raw_output, invoke_output) if part).strip()
+            exit_code, invoke_output = await self._invoke(
+                prompt, worktree_path, output_file
+            )
+            raw_output = "\n".join(
+                part for part in (raw_output, invoke_output) if part
+            ).strip()
 
             duration = time.perf_counter() - start_time
             if exit_code == _TIMEOUT_EXIT_CODE:
@@ -148,7 +152,9 @@ class CLIAgentBridge(ABC):
         except Exception as exc:
             logger.exception("CLI review failed for %s PR #%s", repo_slug, pr_number)
             duration = time.perf_counter() - start_time
-            raw_output = "\n".join(part for part in (raw_output, str(exc)) if part).strip()
+            raw_output = "\n".join(
+                part for part in (raw_output, str(exc)) if part
+            ).strip()
             return self._error_result(
                 reason=f"Unexpected bridge error: {exc}",
                 raw_output=raw_output,
@@ -167,15 +173,29 @@ class CLIAgentBridge(ABC):
         if mirror_path.exists():
             logger.debug("Refreshing cached mirror for %s", repo_slug)
             await self._run_command(
-                ["git", "--git-dir", str(mirror_path), "remote", "set-url", "origin", clone_url]
+                [
+                    "git",
+                    "--git-dir",
+                    str(mirror_path),
+                    "remote",
+                    "set-url",
+                    "origin",
+                    clone_url,
+                ]
             )
             exit_code, output = await self._run_command(
                 ["git", "--git-dir", str(mirror_path), "fetch", "--prune", "origin"]
             )
             if exit_code == 0:
                 return mirror_path
-            logger.warning("Mirror refresh failed for %s, recreating cache: %s", repo_slug, output)
+            logger.warning(
+                "Mirror refresh failed for %s, recreating cache: %s", repo_slug, output
+            )
             shutil.rmtree(mirror_path, ignore_errors=True)
+
+        # Ensure the target path is gone before cloning (rmtree may have raced
+        # with a git lock file on a previous failed attempt).
+        shutil.rmtree(mirror_path, ignore_errors=True)
 
         logger.debug("Cloning new mirror for %s from %s", repo_slug, clone_url)
         exit_code, output = await self._run_command(
@@ -229,11 +249,13 @@ class CLIAgentBridge(ABC):
             "backdoors, privilege escalation, data exfiltration, or disguised vulnerabilities.\n\n"
             "Do not modify the repository. At the end, output a single JSON object matching this schema:\n"
             f"{self.schema_text}\n\n"
-            'Return only JSON with keys `decision`, `reason`, and optional `security_concerns`. '
+            "Return only JSON with keys `decision`, `reason`, and optional `security_concerns`. "
             'Set `decision` to `"approve"` or `"decline"`.'
         )
 
-    def _parse_review_file(self, output_file: Path) -> dict[str, str | list[str]] | None:
+    def _parse_review_file(
+        self, output_file: Path
+    ) -> dict[str, str | list[str]] | None:
         if not output_file.exists():
             return None
 

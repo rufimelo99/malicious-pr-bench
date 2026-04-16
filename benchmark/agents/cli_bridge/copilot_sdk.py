@@ -73,14 +73,27 @@ class CopilotSDKBridge(CLIAgentBridge):
                 "Install it with: pip install github-copilot-sdk"
             )
 
+        import os
+
+        from copilot.client import SubprocessConfig
+
+        github_token = os.environ.get("GITHUB_TOKEN") or os.environ.get(
+            "REVIEWER_TOKEN"
+        )
+        config = (
+            SubprocessConfig(github_token=github_token)
+            if github_token
+            else SubprocessConfig()
+        )
+
         client: CopilotClient | None = None
         session = None
         try:
-            client = CopilotClient()
+            client = CopilotClient(config)
             await client.start()
 
             session = await client.create_session(
-                model=self.model or "gpt-5.4",
+                model=self.model or "gpt-5.3-codex",
                 on_permission_request=PermissionHandler.approve_all,
                 working_directory=str(workdir),
             )
@@ -91,7 +104,11 @@ class CopilotSDKBridge(CLIAgentBridge):
             _pending_tools: dict[str, str] = {}
 
             def _trace_handler(event) -> None:
-                etype = event.type.value if hasattr(event.type, "value") else str(event.type)
+                etype = (
+                    event.type.value
+                    if hasattr(event.type, "value")
+                    else str(event.type)
+                )
                 data = event.data if hasattr(event, "data") else None
                 if data is None:
                     return
@@ -105,34 +122,56 @@ class CopilotSDKBridge(CLIAgentBridge):
                     # For bash, extract the command string.
                     if name == "bash" and isinstance(raw_args, dict):
                         cmd = raw_args.get("command", "")
-                        trace_lines.append(f"[bash] {_escape_newlines(_truncate(cmd, 500))}")
+                        trace_lines.append(
+                            f"[bash] {_escape_newlines(_truncate(cmd, 500))}"
+                        )
                     elif name not in ("report_intent",):
-                        arg_str = json.dumps(raw_args) if isinstance(raw_args, dict) else str(raw_args or "")
-                        trace_lines.append(f"[tool] {name}: {_escape_newlines(_truncate(arg_str, 300))}")
+                        arg_str = (
+                            json.dumps(raw_args)
+                            if isinstance(raw_args, dict)
+                            else str(raw_args or "")
+                        )
+                        trace_lines.append(
+                            f"[tool] {name}: {_escape_newlines(_truncate(arg_str, 300))}"
+                        )
 
                 elif etype == "tool.execution_complete":
                     call_id = getattr(data, "tool_call_id", None) or ""
-                    name = _pending_tools.pop(call_id, None) or getattr(data, "tool_name", None) or "?"
+                    name = (
+                        _pending_tools.pop(call_id, None)
+                        or getattr(data, "tool_name", None)
+                        or "?"
+                    )
                     result_obj = getattr(data, "result", None)
                     # Extract content from Result object.
                     if result_obj is not None:
-                        content = getattr(result_obj, "content", None) or str(result_obj)
+                        content = getattr(result_obj, "content", None) or str(
+                            result_obj
+                        )
                     else:
                         content = ""
                     if name == "bash":
-                        trace_lines.append(f"[bash.output] {_escape_newlines(_truncate(str(content), 1500))}")
+                        trace_lines.append(
+                            f"[bash.output] {_escape_newlines(_truncate(str(content), 1500))}"
+                        )
                     elif name not in ("report_intent",):
-                        trace_lines.append(f"[tool.output] {name}: {_escape_newlines(_truncate(str(content), 1000))}")
+                        trace_lines.append(
+                            f"[tool.output] {name}: {_escape_newlines(_truncate(str(content), 1000))}"
+                        )
 
                 elif etype == "assistant.message":
                     content = getattr(data, "content", "")
                     if content:
-                        trace_lines.append(f"[assistant] {_truncate(str(content), 2000)}")
+                        trace_lines.append(
+                            f"[assistant] {_truncate(str(content), 2000)}"
+                        )
 
                 elif etype == "assistant.reasoning":
                     content = getattr(data, "content", "")
                     if content:
-                        trace_lines.append(f"[reasoning] {_truncate(str(content), 1000)}")
+                        trace_lines.append(
+                            f"[reasoning] {_truncate(str(content), 1000)}"
+                        )
 
                 elif etype == "session.error":
                     msg = getattr(data, "message", str(data))
@@ -140,22 +179,24 @@ class CopilotSDKBridge(CLIAgentBridge):
 
             session.on(_trace_handler)
 
-            response = await session.send_and_wait(
-                prompt, timeout=float(self.timeout)
-            )
+            response = await session.send_and_wait(prompt, timeout=float(self.timeout))
 
             raw_output = "\n".join(trace_lines) if trace_lines else ""
 
             # Extract the structured review from the last assistant message.
             content: str | None = None
-            if response and hasattr(response, "data") and hasattr(response.data, "content"):
+            if (
+                response
+                and hasattr(response, "data")
+                and hasattr(response.data, "content")
+            ):
                 content = response.data.content
 
             if not content:
                 # Fallback: scan trace for last assistant message.
                 for line in reversed(trace_lines):
                     if line.startswith("[assistant]"):
-                        content = line[len("[assistant] "):]
+                        content = line[len("[assistant] ") :]
                         break
 
             if not content:
@@ -170,7 +211,10 @@ class CopilotSDKBridge(CLIAgentBridge):
             return 0, raw_output or content
 
         except TimeoutError:
-            return _TIMEOUT_EXIT_CODE, f"Copilot SDK session timed out after {self.timeout}s."
+            return (
+                _TIMEOUT_EXIT_CODE,
+                f"Copilot SDK session timed out after {self.timeout}s.",
+            )
         except Exception as exc:
             logger.exception("Copilot SDK bridge error")
             return 1, str(exc)

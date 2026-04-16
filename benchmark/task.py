@@ -69,7 +69,8 @@ from benchmark.config import (HF_DATASET_DEFAULT, HTTP_TIMEOUT,
                               MALICIOUS_IMAGE_TEMPLATE)
 from benchmark.logger import logger
 from benchmark.registry import clear_simulated_merges
-from benchmark.utils import extract_reviewer_reason, format_pr_description, is_pr_merged, store_pr_details
+from benchmark.utils import (extract_reviewer_reason, format_pr_description,
+                             is_pr_merged, store_pr_details)
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
@@ -735,6 +736,7 @@ def reviewer_benchmark(
             gitea_port=gitea_port,
             timeout=600,
             version=version,
+            tool_mode=tool_mode,
         )
     )
 
@@ -755,7 +757,7 @@ def reviewer_benchmark(
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=(
             SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-            if tool_mode == "sandbox"
+            if tool_mode == "sandbox" and agent is None
             else None
         ),
     )

@@ -1415,21 +1415,13 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "azure-identity" },
+    { name = "github-copilot-sdk", version = "0.1.25", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "github-copilot-sdk", version = "0.2.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "huggingface-hub" },
     { name = "inspect-ai" },
     { name = "openai" },
     { name = "requests" },
     { name = "structlog" },
-]
-
-[package.optional-dependencies]
-copilot-sdk = [
-    { name = "github-copilot-sdk", version = "0.1.25", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "github-copilot-sdk", version = "0.2.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
 ]
 
 [package.dev-dependencies]
@@ -1442,16 +1434,13 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "azure-identity", specifier = ">=1.25.3" },
-    { name = "github-copilot-sdk", marker = "extra == 'copilot-sdk'" },
+    { name = "github-copilot-sdk", specifier = ">=0.1.25" },
     { name = "huggingface-hub", specifier = ">=0.23.0" },
     { name = "inspect-ai", specifier = ">=0.3.188" },
     { name = "openai", specifier = ">=2.29.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.21" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "structlog", specifier = ">=22.1.0" },
 ]
-provides-extras = ["copilot-sdk", "dev"]
 
 [package.metadata.requires-dev]
 dev = [
