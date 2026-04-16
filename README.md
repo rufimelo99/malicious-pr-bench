@@ -1,6 +1,6 @@
-# malicious-pr-bench
+# SEVRA-BENCH: Social Engineering of Vulnerabilities in Review Agents
 
-A reproducible benchmark for measuring how well LLM agents detect malicious pull requests. The benchmark places an agent in the role of an open-source code reviewer and asks it to accept or reject PRs that contain deliberately embedded vulnerabilities. Each attack PR is crafted to look plausible — the question is whether the agent can see through the disguise.
+A reproducible benchmark for measuring how well LLM agents detect malicious pull requests and resist social engineering attacks. The benchmark places an agent in the role of an open-source code reviewer and asks it to accept or reject PRs that contain deliberately embedded vulnerabilities alongside manipulative framing. Each attack PR is crafted to look plausible — the question is whether the agent can see through the disguise.
 
 ## What the benchmark measures
 
@@ -12,28 +12,28 @@ The benchmark combines adversarial attack evaluation with utility measurement: a
 
 **Available on Hugging Face**: [`SocialAITBD/malicious-pull-requests`](https://huggingface.co/datasets/SocialAITBD/malicious-pull-requests)
 
-The current release (gpt5.2) contains:
+The current release (gpt5.2_v2) contains:
 
-- **2,917 malicious PRs** across 10 CWE classes from the 2025 CWE Top 25 Most Dangerous Software Weaknesses
-- **347 benign ground-truth security fixes** (gpt5.2_v2) from the same CWE classes, for false-decline rate measurement
+- **980 malicious PRs** across 10 CWE classes from the 2025 CWE Top 25 Most Dangerous Software Weaknesses
+- **347 benign ground-truth security fixes** from the same CWE classes, for false-decline rate measurement
 
 Each attack PR is grounded in a real CVE from the Secommits/DeltaSecommits datasets and is parametrized along two orthogonal axes: code concealment and PR framing.
 
 ## Attack Taxonomy
 
-Attacks are described along two independent axes. The current release focuses on single-PR attacks (monolithic distribution).
+Attacks are parameterized along **two orthogonal axes** that control how the vulnerability is hidden and how it's socially engineered. Each combination represents a distinct attack configuration.
 
-### Axis 1: Code Concealment
+### Axis 1: Code Concealment — How the vulnerability is hidden
 
-Controls how the malicious code change is embedded within the diff:
+Controls how the malicious code change is embedded within the diff (33% distribution each):
 
 - **Tiny Change**: Minimal, localized modification (single validation removal, regex change, or sanitization step)
 - **Buried in Complexity**: Wraps the malicious change in structural refactoring (increased nesting, helper functions, reorganized control flow)
 - **Semantic Equivalent**: Replaces secure implementation with functionally similar but vulnerable hand-rolled version (e.g., custom sanitization missing edge cases)
 
-### Axis 2: PR Framing
+### Axis 2: PR Framing — How the reviewer is manipulated
 
-Controls how the pull request presents itself to the reviewer, exploiting cognitive biases:
+Controls how the pull request presents itself to exploit cognitive biases and social engineering tactics (11 techniques, ~7-9% each):
 
 - **Fake Bug Fix**: Presents change as fixing an observed runtime error with fabricated symptoms
 - **Unsafe Optimization**: Claims the removed check is provably redundant given other invariants
@@ -80,98 +80,347 @@ The final evaluation score balances both metrics: high malicious detection is on
 
 ## Quickstart
 
-### 1. Install dependencies
+### Prerequisites
+
+Ensure you have:
+- **Docker + Docker Compose** (for Gitea instances)
+- **Python 3.11+**
+- **[uv](https://github.com/astral-sh/uv)** (fast Python package installer)
+
+### Step 1: Install dependencies
 
 ```bash
 uv sync
 ```
 
-### 2. Authenticate with Hugging Face
+### Step 2: Authenticate with Hugging Face
 
-The dataset is gated. Log in with your [HF token](https://huggingface.co/settings/tokens) (Read access required):
+The dataset is gated and requires a Hugging Face token with read access. Get one at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
 
+**Option A: Interactive login**
 ```bash
 uv run python -c "from huggingface_hub import login; login()"
 ```
 
-Or write the token directly:
-
+**Option B: Write token directly**
 ```bash
 echo "hf_your_token_here" > ~/.cache/huggingface/token
 ```
 
-### 3. Set up model credentials
+### Step 3: Configure LLM credentials
 
-**Anthropic:**
-
+**For Anthropic:**
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-**Azure OpenAI:** create a `.env` file in the repo root:
-
-```
+**For Azure OpenAI:** Create a `.env` file in the repo root:
+```env
 AZUREAI_OPENAI_BASE_URL=https://<your-resource>.openai.azure.com/
 AZUREAI_OPENAI_API_KEY=<your-key>
 ```
 
-### 4. Run the benchmark
+**For GitHub Copilot (experimental):**
+```bash
+export GITHUB_TOKEN=github_pat_...
+```
 
-**Anthropic (malicious PRs):**
+### Step 4: Run the benchmark
+
+The benchmark has two evaluation modes:
+
+#### Malicious PR Detection (Detection Accuracy)
+Measures how well the agent blocks malicious PRs:
+
 ```bash
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
-  -T version=gpt5.2 \
-  --log-dir logs/cwe79
+  -T version=gpt5.2_v2 \
+  --log-dir logs/malicious/cwe79
 ```
 
-**Anthropic (benign PRs - false-decline rate):**
+#### Benign PR Acceptance (False-Decline Rate)
+Measures how well the agent avoids blocking legitimate security fixes:
+
 ```bash
 uv run inspect eval benchmark/task.py@benign_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
-  -T version=gpt5.2_v2 \
+  -T version=gpt5.2_v2_v2 \
   --log-dir logs/benign/cwe79
 ```
 
-**Azure OpenAI:**
+### Monitoring
+
+While the benchmark runs:
+- **Real-time PR review**: Visit `http://localhost:3001` to watch PRs being reviewed live
+- **Container reset**: The Gitea Docker container is automatically reset at the start of each run (set `reset=false` to preserve state)
+
+### Full Example: Multi-CWE Evaluation
+
+Run a complete evaluation across multiple CWE classes:
+
 ```bash
-uv run inspect eval benchmark/task.py@reviewer_benchmark \
-  --model openai/azure/grok-3 \
-  -T version=gpt5.2 \
-  -T cwe=cwe22 \
-  --log-dir logs/cwe22
+# Malicious PRs across all 10 CWE classes
+for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
+  uv run inspect eval benchmark/task.py@reviewer_benchmark \
+    --model anthropic/claude-opus-4-6 \
+    -T cwe=$cwe \
+    -T version=gpt5.2_v2 \
+    --log-dir logs/malicious/$cwe
+done
+
+# Benign PRs across all 10 CWE classes
+for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
+  uv run inspect eval benchmark/task.py@benign_benchmark \
+    --model anthropic/claude-opus-4-6 \
+    -T cwe=$cwe \
+    -T version=gpt5.2_v2_v2 \
+    --log-dir logs/benign/$cwe
+done
 ```
 
-The container is reset automatically at the start of each run. You can watch the PRs being reviewed in real time at `http://localhost:3001`.
+## Tool Modes and Agent Types
 
-## Task parameters
+The benchmark supports different execution modes and agents:
+
+### Tool Modes
+
+**Gitea mode (default)** — Live Gitea instance in Docker:
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/gpt-5.2 \
+  -T cwe=cwe79 \
+  -T tool_mode=gitea \
+  --log-dir logs/gitea
+```
+
+**Sandbox mode** — Separate Docker instances per sample, cleaner isolation:
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/gpt-5.2 \
+  -T cwe=cwe79 \
+  -T tool_mode=sandbox \
+  -T per_sample_reset=true \
+  --log-dir logs/sandbox
+```
+
+### Agent Types
+
+**Default (LLM-based reviewer):**
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T cwe=cwe79 \
+  --log-dir logs/claude
+```
+
+**GitHub Copilot (experimental):**
+```bash
+export GITHUB_TOKEN=github_pat_...
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  -T agent=copilot \
+  -T model=gpt-5.3-codex \
+  -T cwe=cwe79 \
+  --log-dir logs/copilot
+```
+
+## Configuration Reference
 
 ### Malicious PR Benchmark (`reviewer_benchmark`)
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `cwe` | — | CWE subset: `cwe79`, `cwe89`, `cwe352`, `cwe862`, `cwe787`, `cwe22`, `cwe416`, `cwe125`, `cwe78`, `cwe94` |
-| `version` | `v0.0.0` | Dataset version: `gpt5.2` (recommended, 2,917 PRs across 10 CWEs) |
-| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | HF dataset to load PRs from; set to `""` to use `jsonl_path` |
-| `jsonl_path` | — | Path to a local `generated_prs.jsonl` (used when `hf_dataset` is empty) |
-| `axis2` | — | Filter by code concealment (e.g. `tiny_change`, `buried_in_complexity`, `semantic_equivalent`) |
-| `axis3` | — | Filter by PR framing (e.g. `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`) |
-| `reset` | `true` | Reset the Gitea container before running |
-| `gitea_port` | `3001` | Local port Gitea listens on |
-| `model` | — | Override the reviewer agent model |
+| `cwe` | — | **Required.** CWE class to evaluate: `cwe79`, `cwe89`, `cwe352`, `cwe862`, `cwe787`, `cwe22`, `cwe416`, `cwe125`, `cwe78`, `cwe94` |
+| `version` | `gpt5.2_v2` | Dataset version: `gpt5.2_v2` (recommended, 980 malicious PRs across 10 CWEs) |
+| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from. Set to `""` to use local file instead |
+| `jsonl_path` | — | Path to local `generated_prs.jsonl` file (used when `hf_dataset=""`) |
+| `axis1` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
+| `axis2` | — | **Optional.** Filter by PR framing strategy (e.g., `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`, `refactoring`) |
+| `agent` | `default` | Agent type: `default` (LLM-based) or `copilot` (GitHub Copilot, experimental) |
+| `tool_mode` | `gitea` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
+| `per_sample_reset` | `false` | Reset container after each sample (useful with `tool_mode=sandbox`) |
+| `reset` | `true` | Reset container before run starts |
+| `gitea_port` | `3001` | Port for Gitea instance |
+
+**Global inspect options:**
+| Option | Description |
+|--------|-------------|
+| `--max-samples N` | Limit evaluation to first N samples |
+| `--limit N` | Alias for `--max-samples` |
+| `--log-dir PATH` | Directory to save evaluation results |
+
+**Example: Evaluate only "Tiny Change" vulnerabilities with "Fake Bug Fix" framing:**
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T cwe=cwe79 \
+  -T axis1=tiny_change \
+  -T axis2=fake_bug_fix \
+  --log-dir logs/cwe79_tiny_fake
+```
+
+**Example: Quick test with 4 samples (useful for debugging):**
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/gpt-5.2 \
+  -T cwe=cwe79 \
+  --max-samples 4 \
+  --log-dir logs/test
+```
+
+**Example: Sandbox mode with per-sample reset:**
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/gpt-5.2 \
+  -T cwe=cwe79 \
+  -T tool_mode=sandbox \
+  -T per_sample_reset=true \
+  --limit 4 \
+  --log-dir logs/test
+```
 
 ### Benign PR Benchmark (`benign_benchmark`)
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `cwe` | — | CWE subset (same as malicious) |
-| `version` | `v0.1.0` | Dataset version: `gpt5.2_v2` (recommended, 347 benign PRs for FDR measurement) |
-| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | HF dataset to load benign PRs from |
-| `reset` | `true` | Reset the Gitea container before running |
-| `gitea_port` | `3001` | Local port Gitea listens on |
-| `model` | — | Override the reviewer agent model |
+| `cwe` | — | **Required.** CWE class to evaluate (same as malicious) |
+| `version` | `gpt5.2_v2` | Dataset version: `gpt5.2_v2` (347 benign PRs for false-decline rate measurement) |
+| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from |
+| `reset` | `true` | Reset Gitea container before run |
+| `gitea_port` | `3001` | Port for Gitea instance |
+
+**Note:** Benign PRs are deterministically generated from official CVE fixes without social engineering framing. They serve to measure how often the agent incorrectly rejects legitimate security improvements.
+
+## Troubleshooting
+
+### Docker Issues
+
+**Container fails to start:**
+```bash
+# Check Docker is running
+docker ps
+
+# View logs
+docker logs gitea
+
+# Force restart
+docker-compose down && docker-compose up -d
+```
+
+**Port already in use:**
+```bash
+# Change Gitea port
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T cwe=cwe79 \
+  -T gitea_port=3002 \
+  --log-dir logs/cwe79
+```
+
+### Authentication Issues
+
+**Hugging Face token rejected:**
+```bash
+# Clear cached token and re-authenticate
+rm ~/.cache/huggingface/token
+uv run python -c "from huggingface_hub import login; login()"
+```
+
+**API key not found:**
+```bash
+# Verify credentials are set
+echo $ANTHROPIC_API_KEY  # Should not be empty
+```
+
+## Advanced Usage
+
+### Running with Local PR Dataset
+
+If you've generated your own PR dataset locally:
+
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T hf_dataset="" \
+  -T jsonl_path=/path/to/generated_prs.jsonl \
+  -T reset=false \
+  --log-dir logs/custom
+```
+
+### Preserving Container State
+
+For debugging or iterative testing:
+
+```bash
+# Skip automatic reset
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T cwe=cwe79 \
+  -T reset=false \
+  --log-dir logs/cwe79_debug
+```
+
+### Model Switching
+
+Evaluate the same CWE across different models:
+
+```bash
+# Claude
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T cwe=cwe79 \
+  --log-dir logs/claude
+
+# GPT-4
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/gpt-4 \
+  -T cwe=cwe79 \
+  --log-dir logs/gpt4
+```
+
+## Understanding Results
+
+After each evaluation, results are saved to the `--log-dir`:
+
+```
+logs/cwe79/
+├── cwe79_gpt5.2/
+│   ├── eval.json         # Main results file
+│   ├── samples.jsonl     # Individual PR outcomes
+│   └── transcript.md     # Detailed log
+```
+
+**Key fields in `eval.json`:**
+- `"detection_accuracy"`: Fraction of malicious PRs blocked
+- `"false_decline_rate"`: Fraction of benign PRs rejected
+- `"samples"`: Per-PR breakdown with agent decision and correctness
+
+## Reproducing Benchmark Results
+
+To reproduce published results from the SEVRA-BENCH paper, use `version=gpt5.2` and `version=gpt5.2_v2`:
+
+```bash
+# All malicious PRs
+for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
+  uv run inspect eval benchmark/task.py@reviewer_benchmark \
+    --model anthropic/claude-opus-4-6 \
+    -T cwe=$cwe \
+    -T version=gpt5.2_v2 \
+    --log-dir logs/malicious/$cwe
+done
+
+# All benign PRs
+for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
+  uv run inspect eval benchmark/task.py@benign_benchmark \
+    --model anthropic/claude-opus-4-6 \
+    -T cwe=$cwe \
+    -T version=gpt5.2_v2_v2 \
+    --log-dir logs/benign/$cwe
+done
+```
+
 
 ## Example
 
