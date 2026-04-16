@@ -13,7 +13,8 @@ from inspect_ai.util import store
 from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
-from benchmark.config import HTTP_TIMEOUT
+from benchmark.config import HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
+from benchmark.gitea import clone_repo_to_sandbox, reset_gitea
 from benchmark.logger import logger
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 from benchmark.tools import _api_url, _headers
@@ -69,11 +70,10 @@ def cli_solver(
 
         # Reset Gitea once before the first sample; all samples share it.
         if cwe:
-            from benchmark.task import _reset_gitea
-
             if _reset_task is None:
+                image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(_reset_gitea, cwe, gitea_port, version)
+                    _asyncio.to_thread(reset_gitea, image, gitea_port)
                 )
             api_url, gitea_token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url
@@ -88,10 +88,7 @@ def cli_solver(
             or [state.metadata["pr_number"]]
         )
 
-        # Clone the repo into the sandbox container then grab the sandbox handle.
-        from benchmark.task import _clone_repo_to_sandbox
-
-        await _clone_repo_to_sandbox(repo)
+        await clone_repo_to_sandbox(repo)
         sb = _sandbox()
 
         reviews: list[dict[str, object]] = []
