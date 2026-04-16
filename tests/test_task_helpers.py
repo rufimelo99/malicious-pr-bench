@@ -1,4 +1,4 @@
-"""Unit tests for pure helper functions in benchmark/task.py and benchmark/benign_task.py."""
+"""Unit tests for pure helper functions in benchmark/dataset.py and benchmark/gitea.py."""
 
 from __future__ import annotations
 
@@ -16,19 +16,19 @@ from conftest import write_jsonl as _write_jsonl
 
 class TestFreePort:
     def test_returns_integer_port(self):
-        from benchmark.task import _free_port
+        from benchmark.gitea import _free_port
 
         port = _free_port()
         assert isinstance(port, int)
 
     def test_port_is_in_valid_range(self):
-        from benchmark.task import _free_port
+        from benchmark.gitea import _free_port
 
         port = _free_port()
         assert 1024 < port <= 65535
 
     def test_returns_unique_ports(self):
-        from benchmark.task import _free_port
+        from benchmark.gitea import _free_port
 
         ports = {_free_port() for _ in range(5)}
         # At least 2 different ports (extremely unlikely to all collide)
@@ -42,49 +42,49 @@ class TestFreePort:
 
 class TestMatchesFilter:
     def test_no_filters_matches_anything(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "a", "axis2": "b", "axis3": "c"}
         assert _matches_filter(record, None, None, None) is True
 
     def test_axis1_match(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "single_pr_introduction", "axis2": "x", "axis3": "y"}
         assert _matches_filter(record, "single_pr_introduction", None, None) is True
 
     def test_axis1_no_match(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "precondition_staging", "axis2": "x", "axis3": "y"}
         assert _matches_filter(record, "single_pr_introduction", None, None) is False
 
     def test_axis2_match(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "a", "axis2": "buried_in_complexity", "axis3": "c"}
         assert _matches_filter(record, None, "buried_in_complexity", None) is True
 
     def test_axis3_match(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "a", "axis2": "b", "axis3": "misleading_hardening"}
         assert _matches_filter(record, None, None, "misleading_hardening") is True
 
     def test_all_axes_match(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "A", "axis2": "B", "axis3": "C"}
         assert _matches_filter(record, "A", "B", "C") is True
 
     def test_partial_mismatch_returns_false(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "A", "axis2": "B", "axis3": "C"}
         assert _matches_filter(record, "A", "X", "C") is False
 
     def test_missing_field_treated_as_no_match(self):
-        from benchmark.task import _matches_filter
+        from benchmark.dataset import _matches_filter
 
         record = {"axis1": "A"}
         assert _matches_filter(record, None, "B", None) is False
@@ -97,9 +97,9 @@ class TestMatchesFilter:
 
 class TestLoadSamplesSequence:
     def _load(self, jsonl_path, **kwargs):
-        from benchmark.task import _load_samples
+        from benchmark.dataset import load_malicious_samples
 
-        return _load_samples(
+        return load_malicious_samples(
             jsonl_path=str(jsonl_path),
             hf_dataset=None,
             repo="gitadmin/test-repo",
@@ -161,9 +161,9 @@ class TestLoadSamplesSequence:
 
 class TestLoadSamplesSkipUndefined:
     def _load(self, jsonl_path, **kwargs):
-        from benchmark.task import _load_samples
+        from benchmark.dataset import load_malicious_samples
 
-        return _load_samples(
+        return load_malicious_samples(
             jsonl_path=str(jsonl_path),
             hf_dataset=None,
             repo="gitadmin/test-repo",
@@ -200,10 +200,10 @@ class TestLoadSamplesSkipUndefined:
         assert len(samples) == 2
 
     def test_no_hf_or_jsonl_raises(self):
-        from benchmark.task import _load_samples
+        from benchmark.dataset import load_malicious_samples
 
         with pytest.raises(ValueError, match="Either hf_dataset or jsonl_path"):
-            _load_samples(
+            load_malicious_samples(
                 jsonl_path=None,
                 hf_dataset=None,
                 repo="gitadmin/test-repo",
@@ -217,9 +217,9 @@ class TestLoadSamplesSkipUndefined:
 
 class TestLoadIndividualSamplesContent:
     def _load(self, jsonl_path):
-        from benchmark.task import _load_samples
+        from benchmark.dataset import load_malicious_samples
 
-        return _load_samples(
+        return load_malicious_samples(
             jsonl_path=str(jsonl_path),
             hf_dataset=None,
             repo="gitadmin/test-repo",
@@ -270,7 +270,7 @@ class TestLoadIndividualSamplesContent:
 
 class TestRecordsFromPath:
     def test_parses_jsonl_file(self, tmp_path):
-        from benchmark.benign_task import _records_from_path
+        from benchmark.dataset import _records_from_path
 
         lines = [
             json.dumps({"pr_number": 1, "repo": "owner/repo"}),
@@ -283,7 +283,7 @@ class TestRecordsFromPath:
         assert records[0]["pr_number"] == 1
 
     def test_skips_blank_lines(self, tmp_path):
-        from benchmark.benign_task import _records_from_path
+        from benchmark.dataset import _records_from_path
 
         p = tmp_path / "data.jsonl"
         p.write_text('{"pr_number": 1}\n\n{"pr_number": 2}\n')
@@ -305,7 +305,8 @@ class TestLoadBenignSamples:
         return p
 
     def test_basic_load(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         p = self._make_benign_jsonl(
             tmp_path,
@@ -315,7 +316,8 @@ class TestLoadBenignSamples:
         assert len(samples) == 1
 
     def test_metadata_fields(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         record = {
             "pr_number": 5,
@@ -334,7 +336,8 @@ class TestLoadBenignSamples:
         assert meta["branch"] == "fix/sqli"
 
     def test_deduplicates_by_vuln_id(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         records = [
             {"pr_number": 1, "repo": "owner/repo", "vuln_id": "CVE-2024-0001"},
@@ -349,7 +352,8 @@ class TestLoadBenignSamples:
         assert len(samples) == 1
 
     def test_uses_repo_pr_as_id_when_no_vuln_id(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         record = {"pr_number": 7, "repo": "owner/repo"}
         p = self._make_benign_jsonl(tmp_path, [record])
@@ -357,13 +361,15 @@ class TestLoadBenignSamples:
         assert "pr7" in samples[0].id
 
     def test_raises_when_no_source(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         with pytest.raises((ValueError, TypeError)):
             _load_benign_samples(None, hf_dataset=None, cwe="cwe89")
 
     def test_glob_pattern_loads_multiple_files(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         self._make_benign_jsonl(
             tmp_path,
@@ -380,7 +386,8 @@ class TestLoadBenignSamples:
         assert len(samples) == 2
 
     def test_sample_input_mentions_pr_number(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         record = {"pr_number": 99, "repo": "owner/repo", "vuln_id": "CVE-2024-0099"}
         p = self._make_benign_jsonl(tmp_path, [record])
@@ -388,7 +395,8 @@ class TestLoadBenignSamples:
         assert "PR #99" in samples[0].input
 
     def test_slug_inferred_from_filename(self, tmp_path):
-        from benchmark.benign_task import _load_benign_samples
+        from benchmark.dataset import \
+            load_benign_samples as _load_benign_samples
 
         record = {"pr_number": 1, "repo": "owner/repo", "vuln_id": "CVE-2024-0001"}
         p = self._make_benign_jsonl(
