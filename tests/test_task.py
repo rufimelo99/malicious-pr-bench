@@ -1,4 +1,4 @@
-"""Unit tests for dataset loading in benchmark/task.py."""
+"""Unit tests for dataset loading in benchmark/dataset.py."""
 
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ from conftest import PRRecord
 from conftest import write_jsonl as _write_jsonl
 
 # ---------------------------------------------------------------------------
-# _load_samples — individual mode
+# load_malicious_samples — individual mode
 # ---------------------------------------------------------------------------
 
 
 class TestLoadSamplesIndividual:
     def _load(self, jsonl_path, **kwargs):
-        from benchmark.task import _load_samples
+        from benchmark.dataset import load_malicious_samples
 
-        return _load_samples(
+        return load_malicious_samples(
             jsonl_path=str(jsonl_path),
             hf_dataset=None,
             repo="gitadmin/test-repo",
