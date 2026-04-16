@@ -99,19 +99,8 @@ def reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        if tool_mode == "sandbox" and cwe:
-            # Each sample gets its own Gitea container on a unique port.
-            import hashlib as _hashlib
-
-            port = _free_port()
-            _sid = str(state.sample_id or port)
-            project = "gitea-" + _hashlib.sha1(_sid.encode()).hexdigest()[:8]
-            image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
-            api_url, token = await _asyncio.to_thread(reset_gitea, image, port, project)
-            store().set(_STORE_API_URL, api_url)
-            store().set(_STORE_TOKEN, token)
-        elif reset and cwe:
-            # gitea mode: reset once before all samples, all samples share one container.
+        if (tool_mode == "sandbox" or reset) and cwe:
+            # Spin up Gitea once; all samples share the same container.
             if _reset_task is None:
                 image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
                 _reset_task = _asyncio.create_task(
