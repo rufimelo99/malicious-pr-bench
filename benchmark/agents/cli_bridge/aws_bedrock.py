@@ -15,13 +15,29 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    from anthropic import BedrockConverse
+    from anthropic import AnthropicBedrock
 except ImportError:
-    BedrockConverse = None  # type: ignore[assignment,misc]
+    AnthropicBedrock = None  # type: ignore[assignment,misc]
 
 
 def _truncate(text: str, limit: int) -> str:
     return text if len(text) <= limit else text[:limit] + "…"
+
+
+_MODEL_ALIASES: dict[str, str] = {
+    # Short aliases → Bedrock inference profile IDs
+    "sonnet": "global.anthropic.claude-sonnet-4-6",
+    "opus": "global.anthropic.claude-opus-4-7",
+    "haiku": "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+}
+
+_DEFAULT_BEDROCK_MODEL = "global.anthropic.claude-sonnet-4-6"
+
+
+def _to_bedrock_model(model: str | None) -> str:
+    if not model:
+        return _DEFAULT_BEDROCK_MODEL
+    return _MODEL_ALIASES.get(model, model)
 
 
 def _extract_json_from_response(text: str) -> dict | None:
@@ -76,16 +92,16 @@ class AWSBedrockBridge(CLIAgentBridge):
     ) -> tuple[int, str]:
         import os
 
-        if BedrockConverse is None:
+        if AnthropicBedrock is None:
             return 1, "Anthropic SDK not installed: pip install anthropic"
 
         try:
             # Create Bedrock client - AWS credentials are read from environment/IAM role
-            client = BedrockConverse(region="us-east-1")
+            client = AnthropicBedrock()
             logger.debug("Calling Claude via AWS Bedrock for PR review")
 
-            # Map model names - default to Opus on Bedrock
-            bedrock_model = self.model or "anthropic.claude-3-5-sonnet-20241022-v2:0"
+            # Map inspect-ai / short model names to Bedrock model IDs
+            bedrock_model = _to_bedrock_model(self.model)
 
             # Call Claude through Bedrock
             response = client.messages.create(
