@@ -1,10 +1,13 @@
 """CLI agent bridge registry for local PR reviewers."""
 
+from benchmark.agents.cli_bridge.anthropic_api import AnthropicAPIBridge
 from benchmark.agents.cli_bridge.base import CLIAgentBridge, CLIReviewResult
 from benchmark.agents.cli_bridge.claude_code import ClaudeCodeBridge
 from benchmark.agents.cli_bridge.codex import CodexBridge
 
 BRIDGES: dict[str, type[CLIAgentBridge]] = {
+    "anthropic": AnthropicAPIBridge,
+    "claude": AnthropicAPIBridge,
     "codex": CodexBridge,
     "claude-code": ClaudeCodeBridge,
 }
