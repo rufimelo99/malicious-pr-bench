@@ -78,6 +78,7 @@ class AnthropicAPIBridge(CLIAgentBridge):
 
         try:
             client = Anthropic()
+            logger.debug("Calling Claude API for PR review")
 
             # Call Claude with the review prompt and JSON schema
             schema = json.loads(self.schema_text)
@@ -97,29 +98,39 @@ class AnthropicAPIBridge(CLIAgentBridge):
                     raw_output = content
 
             if not content:
+                logger.error("Claude returned no response")
                 return 1, "Claude returned no response"
+
+            logger.debug("Claude response received, extracting JSON")
 
             # Try to extract structured JSON from the response
             extracted = _extract_json_from_response(content)
             if extracted:
                 payload = json.dumps(extracted)
+                logger.debug("Extracted valid JSON from response")
             else:
-                # Fallback: return the raw response for debugging
+                # Fallback: treat raw response as potential JSON
                 payload = content
+                logger.debug("No JSON found in response, using raw content")
 
             # Validate extracted JSON matches schema
             try:
                 parsed = json.loads(payload)
-                if self._validate_parsed(parsed) is None:
-                    logger.warning(
-                        "Extracted JSON does not match review schema: %s", payload
+                validation = self._validate_parsed(parsed)
+                if validation is None:
+                    logger.error(
+                        "Extracted JSON does not match review schema: %s",
+                        _truncate(payload, 200),
                     )
                     return 1, f"Invalid review format: {payload[:500]}"
-            except json.JSONDecodeError:
+                logger.debug("JSON validation passed")
+            except json.JSONDecodeError as e:
+                logger.error("Failed to parse JSON: %s", e)
                 return 1, f"Failed to parse extracted JSON: {payload[:500]}"
 
             # Write result to sandbox
             await sb.write_file(output_file, payload)
+            logger.debug("Review written to sandbox")
             return 0, raw_output
 
         except Exception as exc:
