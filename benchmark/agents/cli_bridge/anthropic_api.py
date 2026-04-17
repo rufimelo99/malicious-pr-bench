@@ -73,8 +73,13 @@ class AnthropicAPIBridge(CLIAgentBridge):
         output_file: str,
         sb: "SandboxEnvironment",
     ) -> tuple[int, str]:
+        import os
+
         if Anthropic is None:
             return 1, "Anthropic SDK not installed: pip install anthropic"
+
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            return 1, "ANTHROPIC_API_KEY environment variable not set"
 
         try:
             client = Anthropic()
