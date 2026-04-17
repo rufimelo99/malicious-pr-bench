@@ -37,11 +37,15 @@ class ClaudeCodeBridge(CLIAgentBridge):
             if res.returncode == 0:
                 try:
                     envelope = json.loads(res.stdout)
-                    payload = (
-                        json.dumps(envelope["result"])
-                        if isinstance(envelope, dict) and "result" in envelope
-                        else res.stdout
-                    )
+                    if isinstance(envelope, dict):
+                        if "structured_output" in envelope:
+                            payload = json.dumps(envelope["structured_output"])
+                        elif "result" in envelope:
+                            payload = json.dumps(envelope["result"])
+                        else:
+                            payload = res.stdout
+                    else:
+                        payload = res.stdout
                 except json.JSONDecodeError:
                     payload = res.stdout
                 await sb.write_file(output_file, payload)
