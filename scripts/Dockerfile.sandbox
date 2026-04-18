@@ -12,4 +12,16 @@ RUN apt-get update && apt-get install -y \
     file \
     && rm -rf /var/lib/apt/lists/*
 
+# Install Node.js 20 and Claude Code CLI
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm install -g @anthropic-ai/claude-code
+
+# Claude Code refuses --dangerously-skip-permissions when running as root
+RUN useradd -m -s /bin/bash sandbox \
+    && mkdir -p /workspace \
+    && chown sandbox:sandbox /workspace
+
+USER sandbox
 WORKDIR /workspace

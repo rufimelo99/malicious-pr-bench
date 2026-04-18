@@ -5,8 +5,8 @@ from benchmark.agents.cli_bridge.claude_code import ClaudeCodeBridge
 from benchmark.agents.cli_bridge.codex import CodexBridge
 
 BRIDGES: dict[str, type[CLIAgentBridge]] = {
-    "codex": CodexBridge,
     "claude-code": ClaudeCodeBridge,
+    "codex": CodexBridge,
 }
 
 # Register the SDK-backed Copilot bridge only when the optional package is
