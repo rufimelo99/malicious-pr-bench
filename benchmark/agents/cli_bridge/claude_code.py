@@ -3,12 +3,29 @@
 from __future__ import annotations
 
 import json
+import os
 from typing import TYPE_CHECKING
 
 from benchmark.agents.cli_bridge.base import CLIAgentBridge
 
 if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
+
+_FORWARDED_ENV_VARS = [
+    # Anthropic direct
+    "ANTHROPIC_API_KEY",
+    # AWS Bedrock
+    "CLAUDE_CODE_USE_BEDROCK",
+    "AWS_REGION",
+    "AWS_DEFAULT_REGION",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
+    "AWS_PROFILE",
+    "AWS_BEARER_TOKEN_BEDROCK",
+    # Claude Pro OAuth
+    "CLAUDE_CODE_OAUTH_TOKEN",
+]
 
 
 class ClaudeCodeBridge(CLIAgentBridge):
@@ -21,7 +38,8 @@ class ClaudeCodeBridge(CLIAgentBridge):
             "-p",
             prompt,
             "--output-format",
-            "json",
+            "stream-json",
+            "--verbose",
             "--dangerously-skip-permissions",
             "--add-dir",
             workdir,
@@ -31,20 +49,40 @@ class ClaudeCodeBridge(CLIAgentBridge):
         if self.model:
             args.extend(["--model", self.model])
 
+        env = {k: v for k in _FORWARDED_ENV_VARS if (v := os.environ.get(k))}
+
         try:
-            res = await sb.exec(cmd=args, cwd=workdir, timeout=self.timeout)
+            res = await sb.exec(cmd=args, cwd=workdir, timeout=self.timeout, env=env)
             raw = "\n".join(p for p in (res.stdout, res.stderr) if p).strip()
             if res.returncode == 0:
-                try:
-                    envelope = json.loads(res.stdout)
-                    payload = (
-                        json.dumps(envelope["result"])
-                        if isinstance(envelope, dict) and "result" in envelope
-                        else res.stdout
-                    )
-                except json.JSONDecodeError:
-                    payload = res.stdout
+                payload = self._extract_structured_output(res.stdout)
                 await sb.write_file(output_file, payload)
             return res.returncode, raw
         except TimeoutError:
             return 124, f"claude timed out after {self.timeout}s"
+
+    @staticmethod
+    def _extract_structured_output(stream_json: str) -> str:
+        """Extract structured_output (or result) from the final result event in stream-json output."""
+        result_event = None
+        for line in stream_json.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+                if isinstance(event, dict) and event.get("type") == "result":
+                    result_event = event
+            except json.JSONDecodeError:
+                continue
+        if result_event is None:
+            return stream_json
+        structured = result_event.get("structured_output")
+        if structured is not None:
+            return json.dumps(structured)
+        result = result_event.get("result")
+        if isinstance(result, dict):
+            return json.dumps(result)
+        if isinstance(result, str) and result.strip().startswith("{"):
+            return result
+        return stream_json

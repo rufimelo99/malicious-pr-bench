@@ -50,6 +50,19 @@ def _download_malicious_from_hf(hf_dataset: str, cwe: str | None, version: str) 
     return _download_from_hf(hf_dataset, filename)
 
 
+def _normalize_record(record: dict) -> dict:
+    """Flatten scenario-nested axis fields to top-level for uniform access."""
+    scenario = record.get("scenario")
+    if isinstance(scenario, dict) and "axis1" not in record:
+        record = {
+            **record,
+            **{k: v for k, v in scenario.items() if k != "target_files"},
+        }
+        if "category" not in record and "category" in scenario:
+            record["category"] = scenario["category"]
+    return record
+
+
 def _matches_filter(
     record: dict, axis1: str | None, axis2: str | None, axis3: str | None
 ) -> bool:
@@ -81,7 +94,7 @@ def load_malicious_samples(
     else:
         raise ValueError("Either hf_dataset or jsonl_path must be provided.")
 
-    records = _records_from_path(path)
+    records = [_normalize_record(r) for r in _records_from_path(path)]
 
     if axis1 or axis2 or axis3:
         records = [r for r in records if _matches_filter(r, axis1, axis2, axis3)]

@@ -1188,10 +1188,62 @@
         continue;
       }
 
-      // --- Codex JSONL format ---
+      // --- Claude Code stream-json / Codex JSONL format ---
       if (!trimmed.startsWith('{')) continue;
       try {
         const event = JSON.parse(trimmed);
+
+        // Claude Code stream-json events
+        if (event.type === 'assistant' && event.message) {
+          const msg = event.message;
+          for (const part of (msg.content || [])) {
+            if (part.type === 'text' && part.text) {
+              steps.push({ type: 'message', text: part.text, _toolUseId: null });
+            } else if (part.type === 'thinking' && part.thinking) {
+              steps.push({ type: 'reasoning', text: part.thinking });
+            } else if (part.type === 'tool_use') {
+              const name = part.name || '';
+              let argsStr = '';
+              if (part.input) {
+                if (name === 'Bash' && part.input.command) {
+                  argsStr = part.input.command;
+                } else {
+                  try { argsStr = JSON.stringify(part.input); } catch { argsStr = String(part.input); }
+                }
+              }
+              const stepType = name === 'Bash' ? 'shell' : 'tool-call';
+              steps.push({ type: stepType, command: argsStr, name, args: argsStr, output: '', _toolUseId: part.id });
+            }
+          }
+          continue;
+        }
+        if (event.type === 'user' && event.message) {
+          for (const part of (event.message.content || [])) {
+            if (part.type === 'tool_result') {
+              const output = Array.isArray(part.content)
+                ? part.content.map((c) => (typeof c === 'string' ? c : c.text || '')).join('\n')
+                : (part.content || '');
+              for (let i = steps.length - 1; i >= 0; i--) {
+                if ((steps[i].type === 'shell' || steps[i].type === 'tool-call') && steps[i]._toolUseId === part.tool_use_id) {
+                  steps[i].output = output;
+                  break;
+                }
+              }
+            }
+          }
+          continue;
+        }
+        if (event.type === 'result') {
+          const u = event.usage || {};
+          steps.push({
+            type: 'usage',
+            text: `Tokens: ${u.input_tokens || 0} input, ${u.cache_read_input_tokens || 0} cached-read, ${u.cache_creation_input_tokens || 0} cache-write, ${u.output_tokens || 0} output` +
+              (event.total_cost_usd != null ? ` · $${event.total_cost_usd.toFixed(4)}` : ''),
+          });
+          continue;
+        }
+
+        // Codex JSONL events
         const item = event.item || {};
         if (event.type === 'item.completed' && item.type === 'command_execution') {
           steps.push({ type: 'shell', command: item.command || '', output: item.output || '' });
