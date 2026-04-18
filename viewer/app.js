@@ -1099,61 +1099,6 @@
   function createAgentTrace(rawOutput) {
     if (!rawOutput) return null;
 
-    // --- Claude Code JSON envelope format ---
-    // Claude Code --output-format json emits a single JSON object with type="result".
-    // Per-turn tool calls are not exposed, so we synthesize summary steps.
-    try {
-      const envelope = JSON.parse(rawOutput.trim());
-      if (envelope && typeof envelope === 'object' && envelope.type === 'result' && typeof envelope.num_turns === 'number') {
-        const trace = document.createElement('div');
-        trace.className = 'agent-trace';
-
-        const heading = document.createElement('div');
-        heading.className = 'agent-trace-heading';
-        const durationSec = envelope.duration_ms ? (envelope.duration_ms / 1000).toFixed(1) : '?';
-        heading.textContent = `Agent trace (${envelope.num_turns} turns, ${durationSec}s)`;
-        trace.appendChild(heading);
-
-        // Cost + duration summary step
-        const summaryDetails = document.createElement('details');
-        summaryDetails.className = 'trace-step';
-        summaryDetails.open = true;
-        const summarySummary = document.createElement('summary');
-        summarySummary.className = 'trace-cmd';
-        const summaryCode = document.createElement('code');
-        const costStr = envelope.total_cost_usd != null ? ` · $${envelope.total_cost_usd.toFixed(4)}` : '';
-        summaryCode.textContent = `Run summary: ${envelope.num_turns} turns, ${durationSec}s${costStr}`;
-        summarySummary.appendChild(summaryCode);
-        summaryDetails.appendChild(summarySummary);
-        trace.appendChild(summaryDetails);
-
-        // Token usage
-        if (envelope.usage) {
-          const u = envelope.usage;
-          const usage = document.createElement('div');
-          usage.className = 'trace-usage';
-          usage.textContent = `Tokens: ${u.input_tokens || 0} input, ${u.cache_read_input_tokens || 0} cached-read, ${u.cache_creation_input_tokens || 0} cache-write, ${u.output_tokens || 0} output`;
-          trace.appendChild(usage);
-        }
-
-        // Structured output (decision / reason / concerns)
-        const structured = envelope.structured_output || (envelope.result && typeof envelope.result === 'object' ? envelope.result : null);
-        if (structured) {
-          const msg = document.createElement('div');
-          msg.className = 'trace-agent-msg';
-          msg.appendChild(formatStructuredReview(structured));
-          trace.appendChild(msg);
-        } else if (envelope.result && typeof envelope.result === 'string' && envelope.result.trim()) {
-          const msg = document.createElement('div');
-          msg.className = 'trace-agent-msg';
-          msg.textContent = envelope.result;
-          trace.appendChild(msg);
-        }
-
-        return trace;
-      }
-    } catch { /* not a JSON envelope, fall through to line-based parsing */ }
-
     // Unescape escaped newlines from SDK bridge trace lines.
     function unescape(s) {
       return s.replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
@@ -1243,10 +1188,62 @@
         continue;
       }
 
-      // --- Codex JSONL format ---
+      // --- Claude Code stream-json / Codex JSONL format ---
       if (!trimmed.startsWith('{')) continue;
       try {
         const event = JSON.parse(trimmed);
+
+        // Claude Code stream-json events
+        if (event.type === 'assistant' && event.message) {
+          const msg = event.message;
+          for (const part of (msg.content || [])) {
+            if (part.type === 'text' && part.text) {
+              steps.push({ type: 'message', text: part.text, _toolUseId: null });
+            } else if (part.type === 'thinking' && part.thinking) {
+              steps.push({ type: 'reasoning', text: part.thinking });
+            } else if (part.type === 'tool_use') {
+              const name = part.name || '';
+              let argsStr = '';
+              if (part.input) {
+                if (name === 'Bash' && part.input.command) {
+                  argsStr = part.input.command;
+                } else {
+                  try { argsStr = JSON.stringify(part.input); } catch { argsStr = String(part.input); }
+                }
+              }
+              const stepType = name === 'Bash' ? 'shell' : 'tool-call';
+              steps.push({ type: stepType, command: argsStr, name, args: argsStr, output: '', _toolUseId: part.id });
+            }
+          }
+          continue;
+        }
+        if (event.type === 'user' && event.message) {
+          for (const part of (event.message.content || [])) {
+            if (part.type === 'tool_result') {
+              const output = Array.isArray(part.content)
+                ? part.content.map((c) => (typeof c === 'string' ? c : c.text || '')).join('\n')
+                : (part.content || '');
+              for (let i = steps.length - 1; i >= 0; i--) {
+                if ((steps[i].type === 'shell' || steps[i].type === 'tool-call') && steps[i]._toolUseId === part.tool_use_id) {
+                  steps[i].output = output;
+                  break;
+                }
+              }
+            }
+          }
+          continue;
+        }
+        if (event.type === 'result') {
+          const u = event.usage || {};
+          steps.push({
+            type: 'usage',
+            text: `Tokens: ${u.input_tokens || 0} input, ${u.cache_read_input_tokens || 0} cached-read, ${u.cache_creation_input_tokens || 0} cache-write, ${u.output_tokens || 0} output` +
+              (event.total_cost_usd != null ? ` · $${event.total_cost_usd.toFixed(4)}` : ''),
+          });
+          continue;
+        }
+
+        // Codex JSONL events
         const item = event.item || {};
         if (event.type === 'item.completed' && item.type === 'command_execution') {
           steps.push({ type: 'shell', command: item.command || '', output: item.output || '' });

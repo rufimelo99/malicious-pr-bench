@@ -38,7 +38,8 @@ class ClaudeCodeBridge(CLIAgentBridge):
             "-p",
             prompt,
             "--output-format",
-            "json",
+            "stream-json",
+            "--verbose",
             "--dangerously-skip-permissions",
             "--add-dir",
             workdir,
@@ -54,20 +55,34 @@ class ClaudeCodeBridge(CLIAgentBridge):
             res = await sb.exec(cmd=args, cwd=workdir, timeout=self.timeout, env=env)
             raw = "\n".join(p for p in (res.stdout, res.stderr) if p).strip()
             if res.returncode == 0:
-                try:
-                    envelope = json.loads(res.stdout)
-                    if isinstance(envelope, dict):
-                        if "structured_output" in envelope:
-                            payload = json.dumps(envelope["structured_output"])
-                        elif "result" in envelope:
-                            payload = json.dumps(envelope["result"])
-                        else:
-                            payload = res.stdout
-                    else:
-                        payload = res.stdout
-                except json.JSONDecodeError:
-                    payload = res.stdout
+                payload = self._extract_structured_output(res.stdout)
                 await sb.write_file(output_file, payload)
             return res.returncode, raw
         except TimeoutError:
             return 124, f"claude timed out after {self.timeout}s"
+
+    @staticmethod
+    def _extract_structured_output(stream_json: str) -> str:
+        """Extract structured_output (or result) from the final result event in stream-json output."""
+        result_event = None
+        for line in stream_json.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+                if isinstance(event, dict) and event.get("type") == "result":
+                    result_event = event
+            except json.JSONDecodeError:
+                continue
+        if result_event is None:
+            return stream_json
+        structured = result_event.get("structured_output")
+        if structured is not None:
+            return json.dumps(structured)
+        result = result_event.get("result")
+        if isinstance(result, dict):
+            return json.dumps(result)
+        if isinstance(result, str) and result.strip().startswith("{"):
+            return result
+        return stream_json
