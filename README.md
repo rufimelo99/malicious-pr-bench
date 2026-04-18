@@ -120,6 +120,15 @@ AZUREAI_OPENAI_BASE_URL=https://<your-resource>.openai.azure.com/
 AZUREAI_OPENAI_API_KEY=<your-key>
 ```
 
+**For AWS Bedrock (Claude Code CLI):**
+```bash
+export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...   # if using temporary credentials
+```
+
 **For GitHub Copilot (experimental):**
 ```bash
 export GITHUB_TOKEN=github_pat_...
@@ -216,6 +225,43 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --log-dir logs/claude
 ```
 
+**Claude Code CLI (via AWS Bedrock):**
+
+Claude Code runs as a fully agentic CLI inside a Docker sandbox. It autonomously explores the repository — reading files, running git commands, diffing commits — before producing a structured review decision.
+
+```bash
+export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION=us-east-1
+export AWS_ACCESS_KEY_ID=...
+export AWS_SECRET_ACCESS_KEY=...
+export AWS_SESSION_TOKEN=...
+
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0 \
+  -T agent=claude-code \
+  -T sandbox=cli \
+  -T model=global.anthropic.claude-sonnet-4-6 \
+  -T cwe=cwe79 \
+  --log-dir logs/claude-code
+```
+
+- `--model` (the outer flag): the inspect-ai scorer model used to evaluate reasoning quality.
+- `-T model=`: the model Claude Code CLI uses inside the sandbox (Bedrock inference profile ID).
+- `-T sandbox=cli`: selects the sandbox image that has Node.js and the Claude Code CLI pre-installed.
+
+**Claude Code CLI (via Anthropic API):**
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-sonnet-4-6 \
+  -T agent=claude-code \
+  -T sandbox=cli \
+  -T model=claude-sonnet-4-6 \
+  -T cwe=cwe79 \
+  --log-dir logs/claude-code
+```
+
 **GitHub Copilot (experimental):**
 ```bash
 export GITHUB_TOKEN=github_pat_...
@@ -238,7 +284,8 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | `jsonl_path` | — | Path to local `generated_prs.jsonl` file (used when `hf_dataset=""`) |
 | `axis1` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
 | `axis2` | — | **Optional.** Filter by PR framing strategy (e.g., `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`, `refactoring`) |
-| `agent` | `default` | Agent type: `default` (LLM-based) or `copilot` (GitHub Copilot, experimental) |
+| `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot` (GitHub Copilot, experimental) |
+| `sandbox` | — | Sandbox image variant: `cli` when using `agent=claude-code` or `agent=codex` |
 | `tool_mode` | `gitea` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
 | `per_sample_reset` | `false` | Reset container after each sample (useful with `tool_mode=sandbox`) |
 | `reset` | `true` | Reset container before run starts |
