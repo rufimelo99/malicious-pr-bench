@@ -239,7 +239,6 @@ export AWS_SESSION_TOKEN=...
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0 \
   -T agent=claude-code \
-  -T sandbox=cli \
   -T model=global.anthropic.claude-sonnet-4-6 \
   -T cwe=cwe79 \
   --log-dir logs/claude-code
@@ -247,7 +246,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 
 - `--model` (the outer flag): the inspect-ai scorer model used to evaluate reasoning quality.
 - `-T model=`: the model Claude Code CLI uses inside the sandbox (Bedrock inference profile ID).
-- `-T sandbox=cli`: selects the sandbox image that has Node.js and the Claude Code CLI pre-installed.
+- The CLI sandbox image (with Node.js and the `claude` CLI) is selected automatically when `agent=claude-code` is set.
 
 **Claude Code CLI (via Anthropic API):**
 ```bash
@@ -256,7 +255,6 @@ export ANTHROPIC_API_KEY=sk-ant-...
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model anthropic/claude-sonnet-4-6 \
   -T agent=claude-code \
-  -T sandbox=cli \
   -T model=claude-sonnet-4-6 \
   -T cwe=cwe79 \
   --log-dir logs/claude-code
@@ -284,8 +282,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | `jsonl_path` | — | Path to local `generated_prs.jsonl` file (used when `hf_dataset=""`) |
 | `axis1` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
 | `axis2` | — | **Optional.** Filter by PR framing strategy (e.g., `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`, `refactoring`) |
-| `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot` (GitHub Copilot, experimental) |
-| `sandbox` | — | Sandbox image variant: `cli` when using `agent=claude-code` or `agent=codex` |
+| `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot` (GitHub Copilot, experimental). Setting `agent=claude-code` automatically uses the CLI sandbox image. |
 | `tool_mode` | `gitea` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
 | `per_sample_reset` | `false` | Reset container after each sample (useful with `tool_mode=sandbox`) |
 | `reset` | `true` | Reset container before run starts |
