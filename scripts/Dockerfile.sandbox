@@ -18,4 +18,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && rm -rf /var/lib/apt/lists/* \
     && npm install -g @anthropic-ai/claude-code
 
+# Claude Code refuses --dangerously-skip-permissions when running as root
+RUN useradd -m -s /bin/bash sandbox \
+    && mkdir -p /workspace \
+    && chown sandbox:sandbox /workspace
+
+USER sandbox
 WORKDIR /workspace
