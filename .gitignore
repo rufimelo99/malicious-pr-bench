@@ -25,3 +25,4 @@ extract_rejection_analysis.py
 summary_rejection_reasons.py
 HF_DATASET_README.md
 .coverage
+/proof_of_vulnerability/cpg_cache
