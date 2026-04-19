@@ -60,7 +60,21 @@ def reset_gitea(
         [*compose, "down", "--volumes", "--remove-orphans"], env=env, check=False
     )
     subprocess.run([*compose, "rm", "-fsv"], env=env, check=False)
-    subprocess.run([*compose, "up", "-d", "--force-recreate"], env=env, check=True)
+    result = subprocess.run(
+        [*compose, "up", "-d", "--force-recreate"],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        logger.error(
+            "Docker compose up failed",
+            returncode=result.returncode,
+            stderr=result.stderr,
+        )
+        raise RuntimeError(
+            f"Failed to start Gitea container on port {port}:\n{result.stderr}"
+        )
 
     base_url = f"http://localhost:{port}"
     print(f"  Waiting for Gitea on port {port}...", end="", flush=True)
