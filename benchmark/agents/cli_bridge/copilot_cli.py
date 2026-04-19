@@ -79,8 +79,6 @@ class CopilotCLIBridge(CLIAgentBridge):
             "copilot",
             "-p",
             prompt,
-            "--output-format",
-            "json",
             "--add-dir",
             workdir,
             "--allow-all",
