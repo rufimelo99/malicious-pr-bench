@@ -9,10 +9,6 @@ import pytest
 from conftest import PRRecord
 from conftest import write_jsonl as _write_jsonl
 
-# ---------------------------------------------------------------------------
-# _free_port
-# ---------------------------------------------------------------------------
-
 
 class TestFreePort:
     def test_returns_integer_port(self):
@@ -305,8 +301,7 @@ class TestLoadBenignSamples:
         return p
 
     def test_basic_load(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         p = self._make_benign_jsonl(
             tmp_path,
@@ -316,8 +311,7 @@ class TestLoadBenignSamples:
         assert len(samples) == 1
 
     def test_metadata_fields(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         record = {
             "pr_number": 5,
@@ -336,8 +330,7 @@ class TestLoadBenignSamples:
         assert meta["branch"] == "fix/sqli"
 
     def test_deduplicates_by_vuln_id(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         records = [
             {"pr_number": 1, "repo": "owner/repo", "vuln_id": "CVE-2024-0001"},
@@ -352,8 +345,7 @@ class TestLoadBenignSamples:
         assert len(samples) == 1
 
     def test_uses_repo_pr_as_id_when_no_vuln_id(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         record = {"pr_number": 7, "repo": "owner/repo"}
         p = self._make_benign_jsonl(tmp_path, [record])
@@ -361,15 +353,13 @@ class TestLoadBenignSamples:
         assert "pr7" in samples[0].id
 
     def test_raises_when_no_source(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         with pytest.raises((ValueError, TypeError)):
             _load_benign_samples(None, hf_dataset=None, cwe="cwe89")
 
     def test_glob_pattern_loads_multiple_files(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         self._make_benign_jsonl(
             tmp_path,
@@ -386,8 +376,7 @@ class TestLoadBenignSamples:
         assert len(samples) == 2
 
     def test_sample_input_mentions_pr_number(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         record = {"pr_number": 99, "repo": "owner/repo", "vuln_id": "CVE-2024-0099"}
         p = self._make_benign_jsonl(tmp_path, [record])
@@ -395,8 +384,7 @@ class TestLoadBenignSamples:
         assert "PR #99" in samples[0].input
 
     def test_slug_inferred_from_filename(self, tmp_path):
-        from benchmark.dataset import \
-            load_benign_samples as _load_benign_samples
+        from benchmark.dataset import load_benign_samples as _load_benign_samples
 
         record = {"pr_number": 1, "repo": "owner/repo", "vuln_id": "CVE-2024-0001"}
         p = self._make_benign_jsonl(

@@ -10,8 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from benchmark.registry import (SIMULATED_MERGES_REGISTRY,
-                                clear_simulated_merges)
+from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
 
 # ---------------------------------------------------------------------------
 # Helpers

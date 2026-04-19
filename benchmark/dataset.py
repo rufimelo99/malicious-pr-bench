@@ -7,8 +7,12 @@ from pathlib import Path
 
 from inspect_ai.dataset import Sample
 
-from benchmark.metadata import (BenignSampleMetadata, MaliciousSampleMetadata,
-                                PRDetails, SequenceSampleMetadata)
+from benchmark.metadata import (
+    BenignSampleMetadata,
+    MaliciousSampleMetadata,
+    PRDetails,
+    SequenceSampleMetadata,
+)
 
 # ---------------------------------------------------------------------------
 # Shared helpers
@@ -272,7 +276,7 @@ def load_benign_samples(
     jsonl_path: str | None,
     hf_dataset: str | None,
     cwe: str | None = None,
-    version: str = "v0.1.0",
+    version: str = "gpt5.2_v2",
 ) -> list[Sample]:
     """Load benign fix PR samples.
 

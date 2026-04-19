@@ -1,0 +1,9 @@
+services:
+  default:
+    image: rufimelo/sandbox-cli:copilot
+    platform: linux/amd64
+    command: "tail -f /dev/null"
+    init: true
+    stop_grace_period: 1s
+    extra_hosts:
+      - "gitea:host-gateway"
