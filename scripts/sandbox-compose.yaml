@@ -1,6 +1,7 @@
 services:
   default:
     image: rufimelo/sandbox-cli:joern
+    platform: linux/amd64
     command: "tail -f /dev/null"
     init: true
     stop_grace_period: 1s
