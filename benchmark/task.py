@@ -274,7 +274,6 @@ def reviewer_benchmark(
     simulate_merge: bool = False,
     skip_undefined: bool = True,
     tool_mode: str = "sandbox",
-    per_sample_reset: bool = True,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -316,9 +315,6 @@ def reviewer_benchmark(
         Record approvals in memory without actually merging PRs on Gitea.
     skip_undefined : bool
         Exclude records where any axis field has the value ``undefined``. Default: True.
-    per_sample_reset : bool
-        Accepted for CLI compatibility; has no effect when ``agent`` is None and
-        ``tool_mode=sandbox`` (each sandbox sample always gets its own container).
     """
     _register_shutdown_handlers()
 
