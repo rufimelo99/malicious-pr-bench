@@ -156,7 +156,7 @@ Measures how well the agent avoids blocking legitimate security fixes:
 uv run inspect eval benchmark/task.py@benign_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
-  -T version=gpt5.2_v2_v2 \
+  -T version=gpt5.2_v2 \
   --log-dir logs/benign/cwe79
 ```
 
