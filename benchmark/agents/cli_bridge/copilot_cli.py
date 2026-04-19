@@ -98,11 +98,29 @@ class CopilotCLIBridge(CLIAgentBridge):
 
     @staticmethod
     def _extract_from_jsonl(text: str) -> str | None:
-        """Extract JSON decision from JSONL output.
+        """Extract JSON decision from copilot output.
 
-        Scans JSONL events in reverse order (last events first) looking for
-        an assistant message that contains JSON with a "decision" key.
+        Copilot outputs plain text with JSON at the end. Scans for JSON
+        objects with a "decision" key, trying multiple extraction methods.
         """
+        # Method 1: Look for JSON objects directly in the output
+        extracted = _extract_json_from_text(text)
+        if extracted:
+            return extracted
+
+        # Method 2: Scan lines in reverse (JSON often at end)
+        for line in reversed(text.splitlines()):
+            line = line.strip()
+            if not line or not line.startswith("{"):
+                continue
+            try:
+                obj = json.loads(line)
+                if isinstance(obj, dict) and "decision" in obj:
+                    return json.dumps(obj)
+            except json.JSONDecodeError:
+                continue
+
+        # Method 3: Try to parse as JSONL (one JSON per line)
         for line in reversed(text.splitlines()):
             line = line.strip()
             if not line:
