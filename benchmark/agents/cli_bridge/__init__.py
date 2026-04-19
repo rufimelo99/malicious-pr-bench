@@ -3,10 +3,12 @@
 from benchmark.agents.cli_bridge.base import CLIAgentBridge, CLIReviewResult
 from benchmark.agents.cli_bridge.claude_code import ClaudeCodeBridge
 from benchmark.agents.cli_bridge.codex import CodexBridge
+from benchmark.agents.cli_bridge.copilot_cli import CopilotCLIBridge
 
 BRIDGES: dict[str, type[CLIAgentBridge]] = {
     "claude-code": ClaudeCodeBridge,
     "codex": CodexBridge,
+    "copilot-cli": CopilotCLIBridge,
 }
 
 # Register the SDK-backed Copilot bridge only when the optional package is
@@ -24,6 +26,7 @@ __all__ = [
     "CLIReviewResult",
     "CodexBridge",
     "ClaudeCodeBridge",
+    "CopilotCLIBridge",
     "CopilotSDKBridge",
     "BRIDGES",
 ]

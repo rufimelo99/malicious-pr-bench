@@ -63,23 +63,18 @@ from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import _register_shutdown_handlers
-from benchmark.gitea import (
-    clone_repo_to_sandbox,
-    fetch_pr_details,
-    post_pr_comment,
-    reset_gitea,
-)
+from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,
+                             post_pr_comment, reset_gitea)
 from benchmark.registry import clear_simulated_merges
-from benchmark.utils import (
-    extract_reviewer_reason,
-    format_pr_description,
-    store_pr_details,
-    is_pr_merged
-)
+from benchmark.utils import (extract_reviewer_reason, format_pr_description,
+                             is_pr_merged, store_pr_details)
 
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
 _SANDBOX_COMPOSE_REVIEWER = (
     Path(__file__).parent.parent / "scripts" / "sandbox-compose-reviewer.yaml"
+)
+_SANDBOX_COMPOSE_COPILOT = (
+    Path(__file__).parent.parent / "scripts" / "sandbox-compose-copilot.yaml"
 )
 
 
@@ -357,7 +352,9 @@ def reviewer_benchmark(
         )
     )
 
-    if agent is not None:
+    if agent == "copilot-cli":
+        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
+    elif agent is not None:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
     elif tool_mode == "sandbox":
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
@@ -562,7 +559,9 @@ def benign_benchmark(
         )
     )
 
-    if agent is not None:
+    if agent == "copilot-cli":
+        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
+    elif agent is not None:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
     elif tool_mode == "sandbox":
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
