@@ -7,25 +7,10 @@ import os
 from typing import TYPE_CHECKING
 
 from benchmark.agents.cli_bridge.base import CLIAgentBridge
+from benchmark.config import FORWARDED_ENV_VARS
 
 if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
-
-_FORWARDED_ENV_VARS = [
-    # Anthropic direct
-    "ANTHROPIC_API_KEY",
-    # AWS Bedrock
-    "CLAUDE_CODE_USE_BEDROCK",
-    "AWS_REGION",
-    "AWS_DEFAULT_REGION",
-    "AWS_ACCESS_KEY_ID",
-    "AWS_SECRET_ACCESS_KEY",
-    "AWS_SESSION_TOKEN",
-    "AWS_PROFILE",
-    "AWS_BEARER_TOKEN_BEDROCK",
-    # Claude Pro OAuth
-    "CLAUDE_CODE_OAUTH_TOKEN",
-]
 
 
 class ClaudeCodeBridge(CLIAgentBridge):
@@ -49,7 +34,7 @@ class ClaudeCodeBridge(CLIAgentBridge):
         if self.model:
             args.extend(["--model", self.model])
 
-        env = {k: v for k in _FORWARDED_ENV_VARS if (v := os.environ.get(k))}
+        env = {k: v for k in FORWARDED_ENV_VARS if (v := os.environ.get(k))}
 
         try:
             res = await sb.exec(cmd=args, cwd=workdir, timeout=self.timeout, env=env)
