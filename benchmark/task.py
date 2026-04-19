@@ -387,7 +387,7 @@ def benign_reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: str = "v0.1.0",
+    version: str = "gpt5.2_v2",
     tool_mode: str = "sandbox",
 ) -> Solver:
     import asyncio as _asyncio
@@ -486,7 +486,7 @@ def benign_benchmark(
     hf_dataset: str | None = HF_DATASET_DEFAULT,
     jsonl_path: str | None = None,
     cwe: str | None = None,
-    version: str = "v0.1.0",
+    version: str = "gpt5.2_v2",
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,
