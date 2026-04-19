@@ -11,6 +11,7 @@ from inspect_ai.util import sandbox as _sandbox
 from inspect_ai.util import store
 
 from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
+from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
@@ -45,6 +46,7 @@ def cli_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     version: str = "v0.0.0",
+    image: str | None = None,
 ) -> Solver:
     """Inspect solver that dispatches PR reviews to a local CLI coding agent.
 
@@ -69,11 +71,13 @@ def cli_solver(
         nonlocal _reset_task
 
         # Reset Gitea once before the first sample; all samples share it.
-        if cwe:
+        if image or cwe:
             if _reset_task is None:
-                image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
+                _image = image or MALICIOUS_IMAGE_TEMPLATE.format(
+                    cwe=cwe, version=version
+                )
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(reset_gitea, image, gitea_port)
+                    _asyncio.to_thread(reset_gitea, _image, gitea_port)
                 )
             api_url, gitea_token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url

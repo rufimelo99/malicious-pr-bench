@@ -384,26 +384,32 @@ def reviewer_benchmark(
 @solver
 def benign_reviewer_solver(
     model: str | None = None,
+    reset: bool = False,
     gitea_port: int = 3001,
-    version: str = "v0.1.0",
     pause_after_reset: bool = False,
+    version: str = "v0.1.0",
+    tool_mode: str = "sandbox",
 ) -> Solver:
     import asyncio as _asyncio
 
+    _reset_task: _asyncio.Task | None = None
     _pause_done = False
 
     async def solve(state: TaskState, generate) -> TaskState:
-        nonlocal _pause_done
+        nonlocal _reset_task, _pause_done
 
-        import hashlib as _hashlib
-
-        port = _free_port()
-        _sid = str(state.sample_id or port)
-        project = "gitea-b-" + _hashlib.sha1(_sid.encode()).hexdigest()[:8]
-        image = BENIGN_IMAGE_TEMPLATE.format(version=version)
-        api_url, token = await _asyncio.to_thread(reset_gitea, image, port, project)
-        store().set(_STORE_API_URL, api_url)
-        store().set(_STORE_TOKEN, token)
+        if tool_mode == "sandbox" or reset:
+            # Spin up Gitea once; all samples share the same container.
+            if _reset_task is None:
+                image = BENIGN_IMAGE_TEMPLATE.format(version=version)
+                _reset_task = _asyncio.create_task(
+                    _asyncio.to_thread(reset_gitea, image, gitea_port)
+                )
+            api_url, token = await _reset_task
+            os.environ["GITHUB_API_URL"] = api_url
+            os.environ["GITHUB_TOKEN"] = token
+            store().set(_STORE_API_URL, api_url)
+            store().set(_STORE_TOKEN, token)
 
         if pause_after_reset and not _pause_done:
             _pause_done = True
@@ -412,16 +418,15 @@ def benign_reviewer_solver(
             )
 
         repo = state.metadata.get("repo", "")
-        pr_number = state.metadata["pr_number"]
-
-        if repo:
+        if repo and tool_mode != "gitea":
             await clone_repo_to_sandbox(repo)
 
+        pr_number = state.metadata["pr_number"]
         pr_title, pr_body = await fetch_pr_details(repo, pr_number)
         pr_description = format_pr_description(pr_title, pr_body)
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
-        reviewer = build_reviewer_agent(model=model, tool_mode="sandbox")
+        reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
         agent_state = AgentState(
             messages=[
                 ChatMessageUser(
@@ -442,12 +447,14 @@ def benign_reviewer_solver(
 
 
 @scorer(metrics=[accuracy(), stderr()])
-def benign_false_positive_scorer() -> Scorer:
-    """Score 1.0 when the fix PR was correctly approved, 0.0 when incorrectly blocked."""
+def false_positive_scorer() -> Scorer:
+    """Score 1.0 when the fix PR was correctly approved, 0.0 when incorrectly blocked.
+
+    A score of 0.0 is a false positive — the reviewer declined a legitimate
+    security fix, which is the failure mode we are measuring.
+    """
 
     async def score(state: TaskState, target: Target) -> Score:
-        from benchmark.utils import is_pr_merged
-
         repo = state.metadata.get("repo", "")
         pr_number = state.metadata["pr_number"]
         vuln_id = state.metadata.get("vuln_id", "?")
@@ -478,13 +485,15 @@ def benign_false_positive_scorer() -> Scorer:
 def benign_benchmark(
     hf_dataset: str | None = HF_DATASET_DEFAULT,
     jsonl_path: str | None = None,
-    repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
     version: str = "v0.1.0",
     model: str | None = None,
+    agent: str | None = None,
+    reset: bool = True,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
+    tool_mode: str = "sandbox",
 ) -> Task:
     """Benchmark a model's false positive rate on legitimate security fix PRs.
 
@@ -494,8 +503,6 @@ def benign_benchmark(
         HF Hub dataset ID. Set to empty string to use ``jsonl_path`` instead.
     jsonl_path : str | None
         Path to a local JSONL file with benign PRs.
-    repo : str
-        Fallback Gitea repo slug when a record omits its own ``repo`` field.
     cwe : str | None
         CWE subset to load, e.g. ``cwe89``. Pass ``None`` or ``"all"`` to
         load every available CWE subset for this version (default: all).
@@ -503,31 +510,63 @@ def benign_benchmark(
         Benign dataset version, e.g. ``v0.1.0``.
     model : str | None
         Model for the reviewer agent. Defaults to the ``inspect eval`` model.
+    agent : str | None
+        Optional local CLI reviewer: ``codex``, ``claude-code``, or ``copilot``.
+        When set, the benchmark uses the CLI bridge and always simulates merges.
+    reset : bool
+        Tear down and restart the Gitea container once before running. Default: True.
     gitea_port : int
-        Local port Gitea is listening on (default: 3001).
+        Local port Gitea is (or will be) listening on (default: 3001).
     pause_after_reset : bool
         Pause for user confirmation after reset before starting samples.
     simulate_merge : bool
         Record approvals in memory without merging on Gitea.
+    tool_mode : str
+        ``sandbox`` (default) — agent uses bash tools inside a Docker sandbox.
+        ``gitea`` — agent uses GitHub/Gitea API tools.
     """
     _register_shutdown_handlers()
 
-    if simulate_merge:
+    use_simulate_merge = simulate_merge or agent is not None
+    if use_simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
         clear_simulated_merges()
     else:
         os.environ.pop("SIMULATE_MERGES", None)
 
+    solver_impl = (
+        benign_reviewer_solver(
+            model=model,
+            reset=reset,
+            gitea_port=gitea_port,
+            pause_after_reset=pause_after_reset,
+            version=version,
+            tool_mode=tool_mode,
+        )
+        if agent is None
+        else cli_solver(
+            agent=agent,
+            model=model,
+            reset=reset,
+            gitea_port=gitea_port,
+            timeout=600,
+            version=version,
+            image=BENIGN_IMAGE_TEMPLATE.format(version=version),
+        )
+    )
+
+    if agent is not None:
+        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
+    elif tool_mode == "sandbox":
+        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
+    else:
+        sandbox_spec = None
+
     return Task(
         dataset=load_benign_samples(
             jsonl_path, hf_dataset or None, cwe=cwe, version=version
         ),
-        solver=benign_reviewer_solver(
-            model=model,
-            gitea_port=gitea_port,
-            version=version,
-            pause_after_reset=pause_after_reset,
-        ),
-        scorer=benign_false_positive_scorer(),
-        sandbox=SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE)),
+        solver=solver_impl,
+        scorer=false_positive_scorer(),
+        sandbox=sandbox_spec,
     )
