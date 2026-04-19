@@ -1,6 +1,7 @@
 services:
   benchmark:
     image: ${DOCKER_IMAGE:-rufimelo/malicious-pr-cwe89:v0.0.0}
+    platform: linux/amd64
     environment:
       - GITEA__database__DB_TYPE=sqlite3
       - GITEA__database__PATH=/data/gitea/gitea.db

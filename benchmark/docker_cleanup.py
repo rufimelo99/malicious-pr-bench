@@ -107,9 +107,13 @@ def _cleanup_all() -> None:
 
 
 def _register_shutdown_handlers() -> None:
-    """Register signal handlers for graceful shutdown."""
+    """Register signal handlers for graceful shutdown (main thread only)."""
+    import threading
+
     global _shutdown_registered
     if _shutdown_registered:
+        return
+    if threading.current_thread() is not threading.main_thread():
         return
 
     def _signal_handler(signum, frame):

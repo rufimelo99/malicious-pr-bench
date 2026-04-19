@@ -112,31 +112,53 @@ def reset_gitea(
     return api_url, token
 
 
-async def clone_repo_to_sandbox(repo: str) -> None:
+async def clone_repo_to_sandbox(
+    repo: str,
+    branch: str | None = None,
+    gitea_port: int | None = None,
+) -> None:
     """Clone *repo* from Gitea into ``SANDBOX_REPO_PATH`` inside the running sandbox.
 
     Must be called from inside a solve() coroutine so that the per-sample
     sandbox container is already up and the store has been populated by
     ``reset_gitea``.
+
+    Parameters
+    ----------
+    repo:
+        ``owner/name`` repository path on Gitea.
+    branch:
+        If given, clone only this branch (``--branch --single-branch``).
+    gitea_port:
+        Host port Gitea listens on; used to build the clone URL directly when
+        the inspect-ai store is not populated (e.g. in the PoV harness).
     """
     from inspect_ai.util import sandbox as _sandbox
     from inspect_ai.util import store
 
-    api_url = store().get(_STORE_API_URL) or os.environ.get(
-        "GITHUB_API_URL", "http://localhost:3001/api/v1"
-    )
-    # Inside the sandbox container localhost refers to the container itself.
-    # The compose file adds "gitea" as an extra_hosts entry pointing to the
-    # Docker host gateway, so the host port is reachable via "gitea:<port>".
-    base_url = api_url.replace("/api/v1", "").replace("//localhost:", "//gitea:")
+    if gitea_port is not None:
+        base_url = f"http://gitea:{gitea_port}"
+    else:
+        api_url = store().get(_STORE_API_URL) or os.environ.get(
+            "GITHUB_API_URL", "http://localhost:3001/api/v1"
+        )
+        # Inside the sandbox container localhost refers to the container itself.
+        # The compose file adds "gitea" as an extra_hosts entry pointing to the
+        # Docker host gateway, so the host port is reachable via "gitea:<port>".
+        base_url = api_url.replace("/api/v1", "").replace("//localhost:", "//gitea:")
+
     git_url = f"{base_url}/{repo}.git"
 
     sb = _sandbox()
     await sb.exec(cmd=["rm", "-rf", SANDBOX_REPO_PATH], timeout=10)
 
+    clone_cmd = ["git", "clone"]
+    if branch:
+        clone_cmd += ["--branch", branch, "--single-branch"]
+    clone_cmd += [git_url, SANDBOX_REPO_PATH]
+
     logger.info(f"[sandbox] Cloning {git_url} → {SANDBOX_REPO_PATH}")
-    print(f"[sandbox] git clone {git_url} {SANDBOX_REPO_PATH}")
-    result = await sb.exec(cmd=["git", "clone", git_url, SANDBOX_REPO_PATH], timeout=60)
+    result = await sb.exec(cmd=clone_cmd, timeout=120)
     if result.returncode != 0:
         logger.error("[sandbox] git clone failed", stderr=result.stderr)
         raise RuntimeError(f"Failed to clone {repo} into sandbox: {result.stderr}")

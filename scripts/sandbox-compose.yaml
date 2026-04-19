@@ -6,3 +6,14 @@ services:
     stop_grace_period: 1s
     extra_hosts:
       - "gitea:host-gateway"
+    environment:
+      - ANTHROPIC_API_KEY
+      - CLAUDE_CODE_USE_BEDROCK
+      - AWS_REGION
+      - AWS_DEFAULT_REGION
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - AWS_PROFILE
+      - AWS_BEARER_TOKEN_BEDROCK
+      - CLAUDE_CODE_OAUTH_TOKEN

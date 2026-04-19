@@ -58,3 +58,18 @@ GITEA_STORE_TOKEN = "gitea_token"
 # Fixed paths inside every sandbox container.
 SANDBOX_REPO_PATH = "/workspace/repo"
 SANDBOX_OUTPUT_FILE = "/workspace/review.json"
+SANDBOX_EXPLOIT_FILE = "/workspace/exploit.py"
+
+# Environment variables forwarded from the host into sandbox containers.
+FORWARDED_ENV_VARS = [
+    "ANTHROPIC_API_KEY",
+    "CLAUDE_CODE_USE_BEDROCK",
+    "AWS_REGION",
+    "AWS_DEFAULT_REGION",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
+    "AWS_PROFILE",
+    "AWS_BEARER_TOKEN_BEDROCK",
+    "CLAUDE_CODE_OAUTH_TOKEN",
+]
