@@ -62,6 +62,7 @@ from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE
 from benchmark.dataset import load_benign_samples, load_malicious_samples
+from benchmark.docker_cleanup import _register_shutdown_handlers
 from benchmark.gitea import (_free_port, clone_repo_to_sandbox,
                              fetch_pr_details, post_pr_comment, reset_gitea)
 from benchmark.logger import logger
@@ -317,6 +318,8 @@ def reviewer_benchmark(
         Accepted for CLI compatibility; has no effect when ``agent`` is None and
         ``tool_mode=sandbox`` (each sandbox sample always gets its own container).
     """
+    _register_shutdown_handlers()
+
     use_simulate_merge = simulate_merge or agent is not None
     if use_simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
@@ -507,6 +510,8 @@ def benign_benchmark(
     simulate_merge : bool
         Record approvals in memory without merging on Gitea.
     """
+    _register_shutdown_handlers()
+
     if simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
         clear_simulated_merges()

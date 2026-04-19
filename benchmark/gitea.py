@@ -14,6 +14,7 @@ from pathlib import Path
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT, SANDBOX_REPO_PATH
+from benchmark.docker_cleanup import track_project
 from benchmark.logger import logger
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
@@ -49,6 +50,10 @@ def reset_gitea(
     compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
     if project_name:
         compose += ["--project-name", project_name]
+    else:
+        project_name = "benchmark"
+
+    track_project(project_name, _COMPOSE_FILE)
 
     print(f"==> Resetting Gitea container ({image}) on port {port}...")
     subprocess.run(
