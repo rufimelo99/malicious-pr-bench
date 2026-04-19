@@ -61,6 +61,7 @@ class TestExtractReviewerReason:
         ]
         assert extract_reviewer_reason(msgs) == "real reason"
 
+
 class TestIsPrMerged:
     def setup_method(self):
         clear_simulated_merges()

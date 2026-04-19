@@ -9,10 +9,6 @@ import pytest
 from conftest import PRRecord
 from conftest import write_jsonl as _write_jsonl
 
-# ---------------------------------------------------------------------------
-# _free_port
-# ---------------------------------------------------------------------------
-
 
 class TestFreePort:
     def test_returns_integer_port(self):
