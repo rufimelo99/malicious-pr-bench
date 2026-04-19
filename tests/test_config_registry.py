@@ -66,16 +66,14 @@ class TestSimulatedMergesRegistry:
         assert SIMULATED_MERGES_REGISTRY == {}
 
     def test_clear_removes_existing_entries(self):
-        from benchmark.registry import (SIMULATED_MERGES_REGISTRY,
-                                        clear_simulated_merges)
+        from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
 
         SIMULATED_MERGES_REGISTRY["owner/repo"] = {1, 2, 3}
         clear_simulated_merges()
         assert SIMULATED_MERGES_REGISTRY == {}
 
     def test_clear_removes_multiple_repos(self):
-        from benchmark.registry import (SIMULATED_MERGES_REGISTRY,
-                                        clear_simulated_merges)
+        from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
 
         SIMULATED_MERGES_REGISTRY["a/b"] = {1}
         SIMULATED_MERGES_REGISTRY["c/d"] = {2, 3}

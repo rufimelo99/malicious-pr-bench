@@ -1,0 +1,43 @@
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    build-essential \
+    python3 \
+    python3-pip \
+    vim \
+    nano \
+    file \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install GitHub Copilot CLI and locate the binary
+RUN pip install --no-cache-dir github-copilot-sdk
+
+# Locate the copilot binary and create a simple wrapper script
+RUN python3 << 'PYSCRIPT' && chmod +x /usr/local/bin/copilot
+import os
+import copilot
+
+copilot_dir = os.path.dirname(copilot.__file__)
+copilot_bin = os.path.join(copilot_dir, 'bin', 'copilot')
+
+wrapper = f"""#!/bin/bash
+exec "{copilot_bin}" "$@"
+"""
+
+with open('/usr/local/bin/copilot', 'w') as f:
+    f.write(wrapper)
+
+print(f"✓ copilot wrapper created at /usr/local/bin/copilot")
+print(f"  Binary location: {copilot_bin}")
+PYSCRIPT
+
+# Copilot CLI refuses to run as root in some cases
+RUN useradd -m -s /bin/bash sandbox \
+    && mkdir -p /workspace \
+    && chown sandbox:sandbox /workspace
+
+USER sandbox
+WORKDIR /workspace

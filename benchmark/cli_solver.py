@@ -45,6 +45,7 @@ def cli_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     version: str = "v0.0.0",
+    image: str | None = None,
 ) -> Solver:
     """Inspect solver that dispatches PR reviews to a local CLI coding agent.
 
@@ -69,11 +70,13 @@ def cli_solver(
         nonlocal _reset_task
 
         # Reset Gitea once before the first sample; all samples share it.
-        if cwe:
+        if image or cwe:
             if _reset_task is None:
-                image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
+                _image = image or MALICIOUS_IMAGE_TEMPLATE.format(
+                    cwe=cwe, version=version
+                )
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(reset_gitea, image, gitea_port)
+                    _asyncio.to_thread(reset_gitea, _image, gitea_port)
                 )
             api_url, gitea_token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url

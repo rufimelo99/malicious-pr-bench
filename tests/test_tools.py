@@ -11,10 +11,10 @@ import requests
 
 from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _b64(text: str) -> str:
     return base64.b64encode(text.encode()).decode()
@@ -22,17 +22,20 @@ def _b64(text: str) -> str:
 
 def _mock_get(responses: dict):
     """Return a side_effect function that maps URL substrings to return values."""
+
     def _side_effect(path: str):
         for key, val in responses.items():
             if key in path:
                 return val
         raise AssertionError(f"Unexpected _get call: {path}")
+
     return _side_effect
 
 
 # ---------------------------------------------------------------------------
 # _read_file_content
 # ---------------------------------------------------------------------------
+
 
 class TestReadFileContent:
     def test_decodes_base64_content(self):
@@ -55,9 +58,11 @@ class TestReadFileContent:
 # github_list_pr_files
 # ---------------------------------------------------------------------------
 
+
 class TestGithubListPrFiles:
     def _make_execute(self):
         from benchmark.tools import github_list_pr_files
+
         return github_list_pr_files()
 
     def _mock_diff_response(self, text: str, status_code: int = 200):
@@ -65,7 +70,9 @@ class TestGithubListPrFiles:
         mock_resp.status_code = status_code
         mock_resp.text = text
         if status_code >= 400:
-            mock_resp.raise_for_status.side_effect = requests.HTTPError(response=mock_resp)
+            mock_resp.raise_for_status.side_effect = requests.HTTPError(
+                response=mock_resp
+            )
         else:
             mock_resp.raise_for_status.return_value = None
         return mock_resp
@@ -76,6 +83,7 @@ class TestGithubListPrFiles:
 
         with patch("requests.get", return_value=self._mock_diff_response(diff)):
             import asyncio
+
             result = asyncio.run(execute("owner/repo", 1))
 
         assert "@@ -1 +1 @@" in result
@@ -85,6 +93,7 @@ class TestGithubListPrFiles:
 
         with patch("requests.get", return_value=self._mock_diff_response("", 404)):
             import asyncio
+
             result = asyncio.run(execute("owner/repo", 1))
 
         assert "not found" in result.lower()
@@ -92,6 +101,7 @@ class TestGithubListPrFiles:
     def test_returns_error_for_pr_zero(self):
         execute = self._make_execute()
         import asyncio
+
         result = asyncio.run(execute("owner/repo", 0))
         assert "invalid" in result.lower()
 
@@ -100,6 +110,7 @@ class TestGithubListPrFiles:
 
         with patch("requests.get", return_value=self._mock_diff_response("   ")):
             import asyncio
+
             result = asyncio.run(execute("owner/repo", 1))
 
         assert result == "No files changed."
@@ -108,6 +119,7 @@ class TestGithubListPrFiles:
 # ---------------------------------------------------------------------------
 # github_approve_pull_request (simulate mode)
 # ---------------------------------------------------------------------------
+
 
 class TestGithubApprovePullRequest:
     def setup_method(self):
@@ -119,6 +131,7 @@ class TestGithubApprovePullRequest:
         execute = github_approve_pull_request()
         with patch("benchmark.tools.SIMULATE_MERGES", True):
             import asyncio
+
             result = asyncio.run(execute("owner/repo", 42))
 
         data = json.loads(result)
@@ -130,6 +143,7 @@ class TestGithubApprovePullRequest:
 
         execute = github_approve_pull_request()
         import asyncio
+
         with patch("benchmark.tools.SIMULATE_MERGES", True):
             asyncio.run(execute("owner/repo", 1))
             asyncio.run(execute("owner/repo", 2))
@@ -141,5 +155,6 @@ class TestGithubApprovePullRequest:
 
         execute = github_approve_pull_request()
         import asyncio
+
         result = asyncio.run(execute("owner/repo", 0))
         assert "invalid" in result.lower()
