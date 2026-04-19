@@ -168,7 +168,7 @@ While the benchmark runs:
 
 ### Full Example: Multi-CWE Evaluation
 
-Run a complete evaluation across multiple CWE classes:
+Run a complete evaluation across multiple CWE classes with the default LLM agent:
 
 ```bash
 # Malicious PRs across all 10 CWE classes
@@ -185,8 +185,41 @@ for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
   uv run inspect eval benchmark/task.py@benign_benchmark \
     --model anthropic/claude-opus-4-6 \
     -T cwe=$cwe \
-    -T version=gpt5.2_v2_v2 \
+    -T version=v0.1.0 \
     --log-dir logs/benign/$cwe
+done
+```
+
+### Full Example: Copilot CLI Evaluation
+
+Evaluate both malicious and benign PRs with GitHub Copilot CLI:
+
+```bash
+export COPILOT_GITHUB_TOKEN=your_github_token_here
+
+# Build the Copilot Docker image (one-time)
+./scripts/build-copilot-image.sh
+
+# Malicious PRs with Copilot CLI
+for cwe in cwe79 cwe89 cwe352 cwe862; do
+  uv run inspect eval benchmark/task.py@reviewer_benchmark \
+    --model anthropic/claude-opus-4-6 \
+    -T agent=copilot-cli \
+    -T cwe=$cwe \
+    -T version=gpt5.2_v2 \
+    --limit 5 \
+    --log-dir logs/malicious-copilot/$cwe
+done
+
+# Benign PRs with Copilot CLI
+for cwe in cwe79 cwe89 cwe352 cwe862; do
+  uv run inspect eval benchmark/task.py@benign_benchmark \
+    --model anthropic/claude-opus-4-6 \
+    -T agent=copilot-cli \
+    -T cwe=$cwe \
+    -T version=v0.1.0 \
+    --limit 5 \
+    --log-dir logs/benign-copilot/$cwe
 done
 ```
 
@@ -260,15 +293,36 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --log-dir logs/claude-code
 ```
 
-**GitHub Copilot (experimental):**
+**GitHub Copilot CLI (runs inside Docker sandbox):**
+
+Copilot CLI runs as a fully agentic process inside a Docker sandbox, similar to Claude Code. It autonomously explores the repository before producing a structured review decision.
+
+```bash
+export COPILOT_GITHUB_TOKEN=your_github_token_here
+
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T agent=copilot-cli \
+  -T cwe=cwe79 \
+  --log-dir logs/copilot-cli
+```
+
+- Requires: Docker image `rufimelo/sandbox-cli:copilot` (build with `./scripts/build-copilot-image.sh` or use pre-built)
+- `COPILOT_GITHUB_TOKEN` is automatically forwarded from the host to the container
+- Uses `sandbox-compose-copilot.yaml` for container configuration
+
+**GitHub Copilot SDK (host-based, legacy):**
 ```bash
 export GITHUB_TOKEN=github_pat_...
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
-  -T agent=copilot \
+  -T agent=copilot-sdk \
   -T model=gpt-5.3-codex \
   -T cwe=cwe79 \
-  --log-dir logs/copilot
+  --log-dir logs/copilot-sdk
 ```
+
+- Runs on host machine with Python SDK
+- Routes bash commands into sandbox container
 
 ## Configuration Reference
 
@@ -282,7 +336,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | `jsonl_path` | — | Path to local `generated_prs.jsonl` file (used when `hf_dataset=""`) |
 | `axis1` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
 | `axis2` | — | **Optional.** Filter by PR framing strategy (e.g., `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`, `refactoring`) |
-| `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot` (GitHub Copilot, experimental). Setting `agent=claude-code` automatically uses the CLI sandbox image. |
+| `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), `copilot-cli` (GitHub Copilot CLI in Docker sandbox), or `copilot-sdk` (Copilot SDK host-based). Setting `agent=claude-code` or `agent=copilot-cli` automatically uses the appropriate CLI sandbox image. |
 | `tool_mode` | `gitea` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
 | `per_sample_reset` | `false` | Reset container after each sample (useful with `tool_mode=sandbox`) |
 | `reset` | `true` | Reset container before run starts |
@@ -330,12 +384,25 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `cwe` | — | **Required.** CWE class to evaluate (same as malicious) |
-| `version` | `gpt5.2_v2` | Dataset version: `gpt5.2_v2` (347 benign PRs for false-decline rate measurement) |
+| `version` | `v0.1.0` | Dataset version: `v0.1.0` (347 benign PRs for false-decline rate measurement) |
 | `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from |
+| `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot-cli` (GitHub Copilot CLI) |
+| `tool_mode` | `sandbox` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
 | `reset` | `true` | Reset Gitea container before run |
 | `gitea_port` | `3001` | Port for Gitea instance |
 
-**Note:** Benign PRs are deterministically generated from official CVE fixes without social engineering framing. They serve to measure how often the agent incorrectly rejects legitimate security improvements.
+**Note:** Benign PRs are deterministically generated from official CVE fixes without social engineering framing. They serve to measure how often the agent incorrectly rejects legitimate security improvements (false-positive rate).
+
+**Example: Evaluate benign PRs with Copilot CLI:**
+```bash
+export COPILOT_GITHUB_TOKEN=your_github_token_here
+
+uv run inspect eval benchmark/task.py@benign_benchmark \
+  --model anthropic/claude-opus-4-6 \
+  -T agent=copilot-cli \
+  -T cwe=cwe79 \
+  --log-dir logs/benign/copilot-cli
+```
 
 ## Troubleshooting
 
