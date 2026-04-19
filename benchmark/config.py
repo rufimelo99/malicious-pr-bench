@@ -60,6 +60,7 @@ SANDBOX_REPO_PATH = "/workspace/repo"
 SANDBOX_OUTPUT_FILE = "/workspace/review.json"
 SANDBOX_EXPLOIT_FILE = "/workspace/exploit.py"
 SANDBOX_REPORT_FILE = "/workspace/report.json"
+SANDBOX_QUERY_FILE = "/workspace/query.sc"
 
 # Environment variables forwarded from the host into sandbox containers.
 FORWARDED_ENV_VARS = [
