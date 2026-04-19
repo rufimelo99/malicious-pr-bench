@@ -23,11 +23,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && npm install -g @anthropic-ai/claude-code
 
 # Install Joern
-ENV JOERN_VERSION=4.0.322
-RUN wget -q "https://github.com/joernio/joern/releases/download/v${JOERN_VERSION}/joern-install.sh" \
-    && chmod +x joern-install.sh \
-    && ./joern-install.sh --version=${JOERN_VERSION} --install-dir=/opt/joern \
-    && rm joern-install.sh
+ENV JOERN_VERSION=4.0.524
+RUN wget -q -L \
+    "https://github.com/joernio/joern/releases/download/v${JOERN_VERSION}/joern-cli.zip" \
+    -O /tmp/joern-cli.zip \
+    && mkdir -p /opt/joern \
+    && unzip -q /tmp/joern-cli.zip -d /opt/joern \
+    && rm /tmp/joern-cli.zip
 ENV PATH="/opt/joern/joern-cli:${PATH}"
 
 # Claude Code refuses --dangerously-skip-permissions when running as root
