@@ -6,14 +6,15 @@ import pytest
 
 from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
 
-
 # ---------------------------------------------------------------------------
 # extract_reviewer_reason
 # ---------------------------------------------------------------------------
 
+
 class TestExtractReviewerReason:
     def _make_msg(self, role: str, content):
         from inspect_ai.model import ChatMessageAssistant, ChatMessageUser
+
         if role == "assistant":
             return ChatMessageAssistant(content=content)
         return ChatMessageUser(content=content)
@@ -64,6 +65,7 @@ class TestExtractReviewerReason:
 # ---------------------------------------------------------------------------
 # is_pr_merged (simulate mode)
 # ---------------------------------------------------------------------------
+
 
 class TestIsPrMerged:
     def setup_method(self):

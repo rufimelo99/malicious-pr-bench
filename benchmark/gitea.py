@@ -5,27 +5,17 @@ from __future__ import annotations
 import base64
 import json
 import os
-import socket
 import subprocess
 import time
 import urllib.request
 from pathlib import Path
 
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
-from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT, SANDBOX_REPO_PATH
 from benchmark.docker_cleanup import track_project
 from benchmark.logger import logger
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
-
-
-def _free_port() -> int:
-    """Return an ephemeral free TCP port on localhost."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
 
 
 def reset_gitea(

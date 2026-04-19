@@ -30,9 +30,12 @@ import dataclasses
 import json
 from pathlib import Path
 
-from benchmark.config import (HF_DATASET_DEFAULT,
-                              SUPPORTED_BENIGN_DATASET_VERSIONS,
-                              SUPPORTED_CWES, SUPPORTED_DATASET_VERSIONS)
+from benchmark.config import (
+    HF_DATASET_DEFAULT,
+    SUPPORTED_BENIGN_DATASET_VERSIONS,
+    SUPPORTED_CWES,
+    SUPPORTED_DATASET_VERSIONS,
+)
 
 # ---------------------------------------------------------------------------
 # HuggingFace dataset path helpers

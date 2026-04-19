@@ -7,8 +7,12 @@ from pathlib import Path
 
 from inspect_ai.dataset import Sample
 
-from benchmark.metadata import (BenignSampleMetadata, MaliciousSampleMetadata,
-                                PRDetails, SequenceSampleMetadata)
+from benchmark.metadata import (
+    BenignSampleMetadata,
+    MaliciousSampleMetadata,
+    PRDetails,
+    SequenceSampleMetadata,
+)
 
 # ---------------------------------------------------------------------------
 # Shared helpers

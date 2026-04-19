@@ -11,9 +11,15 @@ from inspect_ai.tool import Tool, tool
 from inspect_ai.util import sandbox, store
 from pydantic import BaseModel
 
-from benchmark.config import (GITEA_STORE_API_URL, GITEA_STORE_TOKEN,
-                              GITHUB_ACCEPT, GITHUB_API_VERSION, HTTP_TIMEOUT,
-                              SANDBOX_REPO_PATH, SIMULATE_MERGES)
+from benchmark.config import (
+    GITEA_STORE_API_URL,
+    GITEA_STORE_TOKEN,
+    GITHUB_ACCEPT,
+    GITHUB_API_VERSION,
+    HTTP_TIMEOUT,
+    SANDBOX_REPO_PATH,
+    SIMULATE_MERGES,
+)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 # ---------------------------------------------------------------------------

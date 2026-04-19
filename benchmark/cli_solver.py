@@ -11,7 +11,6 @@ from inspect_ai.util import sandbox as _sandbox
 from inspect_ai.util import store
 
 from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
-from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
