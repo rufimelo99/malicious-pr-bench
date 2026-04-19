@@ -74,6 +74,7 @@ from benchmark.utils import (
     extract_reviewer_reason,
     format_pr_description,
     store_pr_details,
+    is_pr_merged
 )
 
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
