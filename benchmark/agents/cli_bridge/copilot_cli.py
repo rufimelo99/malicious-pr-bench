@@ -94,7 +94,7 @@ class CopilotCLIBridge(CLIAgentBridge):
                 await sb.write_file(output_file, payload or res.stdout)
             return res.returncode, raw
         except TimeoutError:
-            return 124, f"copilot timed out after {self.timeout}s"
+            return self._timeout_error("copilot")
 
     @staticmethod
     def _extract_from_jsonl(text: str) -> str | None:

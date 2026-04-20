@@ -233,3 +233,7 @@ class CLIAgentBridge(ABC):
             raw_output=raw_output,
             duration_seconds=duration_seconds,
         )
+
+    def _timeout_error(self, agent_name: str) -> tuple[int, str]:
+        """Return standard timeout error (exit code 124)."""
+        return _TIMEOUT_EXIT_CODE, f"{agent_name} timed out after {self.timeout}s"
