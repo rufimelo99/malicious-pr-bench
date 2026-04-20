@@ -526,6 +526,43 @@
   </section>
 
 
+  <!-- Filters Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-4">Filters</h2>
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Harness</label>
+            <div class="control">
+              <div class="select">
+                <select id="harness-filter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">CWE Type</label>
+            <div class="control">
+              <div class="select">
+                <select id="cwe-filter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chart Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-4">Score Over Time</h2>
+      <canvas id="timeSeriesChart"></canvas>
+    </div>
+  </section>
+
   <!-- 🔍 Malicious PR Detection Section -->
   <section class="section">
     <div class="container is-max-desktop">
@@ -540,6 +577,7 @@
               <th>CWE Type</th>
               <th>Date</th>
               <th>Samples</th>
+              <th>Accuracy</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -550,6 +588,7 @@
               <td><code>cwe125</code></td>
               <td>2026-04-18</td>
               <td>395</td>
+              <td class="has-text-warning"><strong>77.5%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -558,6 +597,7 @@
               <td><code>cwe22</code></td>
               <td>2026-04-18</td>
               <td>349</td>
+              <td class="has-text-warning"><strong>74.5%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -566,6 +606,7 @@
               <td><code>cwe352</code></td>
               <td>2026-04-18</td>
               <td>452</td>
+              <td class="has-text-success"><strong>82.3%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -574,6 +615,7 @@
               <td><code>cwe416</code></td>
               <td>2026-04-18</td>
               <td>109</td>
+              <td class="has-text-warning"><strong>74.3%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -582,6 +624,7 @@
               <td><code>cwe78</code></td>
               <td>2026-04-18</td>
               <td>43</td>
+              <td class="has-text-success"><strong>93.0%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -590,6 +633,7 @@
               <td><code>cwe787</code></td>
               <td>2026-04-18</td>
               <td>269</td>
+              <td class="has-text-success"><strong>89.6%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -598,6 +642,7 @@
               <td><code>cwe79</code></td>
               <td>2026-04-18</td>
               <td>382</td>
+              <td class="has-text-success"><strong>80.4%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -606,6 +651,7 @@
               <td><code>cwe862</code></td>
               <td>2026-04-18</td>
               <td>364</td>
+              <td class="has-text-success"><strong>84.3%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -614,6 +660,7 @@
               <td><code>cwe89</code></td>
               <td>2026-04-18</td>
               <td>219</td>
+              <td class="has-text-success"><strong>91.3%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
             <tr>
@@ -622,6 +669,7 @@
               <td><code>cwe94</code></td>
               <td>2026-04-18</td>
               <td>86</td>
+              <td class="has-text-success"><strong>84.9%</strong></td>
               <td><span class="tag is-info">? unknown</span></td>
             </tr>
           </tbody>
@@ -633,9 +681,13 @@
   <section class="section">
     <div class="container is-max-desktop has-text-centered has-text-grey-light">
       <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-04-19 20:54:01 UTC
+        Last updated: 2026-04-19 21:00:37 UTC
       </p>
     </div>
   </section>
+
+  <!-- Chart.js and leaderboard scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="leaderboard.js"></script>
 </body>
   </html>

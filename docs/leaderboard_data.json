@@ -1,0 +1,255 @@
+{
+  "timestamp": "2026-04-19T21:00:37.515846",
+  "total_runs": 10,
+  "data_points": [
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 382,
+      "cwe": "cwe79",
+      "status": "unknown",
+      "created": "2026-04-18T06:03:01+00:00",
+      "score": 0.8036649214659686,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 43,
+      "cwe": "cwe78",
+      "status": "unknown",
+      "created": "2026-04-18T18:37:54+00:00",
+      "score": 0.9302325581395349,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 109,
+      "cwe": "cwe416",
+      "status": "unknown",
+      "created": "2026-04-18T17:29:36+00:00",
+      "score": 0.7431192660550459,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 349,
+      "cwe": "cwe22",
+      "status": "unknown",
+      "created": "2026-04-18T17:12:05+00:00",
+      "score": 0.7449856733524355,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 364,
+      "cwe": "cwe862",
+      "status": "unknown",
+      "created": "2026-04-18T16:38:22+00:00",
+      "score": 0.8434065934065934,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 269,
+      "cwe": "cwe787",
+      "status": "unknown",
+      "created": "2026-04-18T16:57:21+00:00",
+      "score": 0.895910780669145,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 395,
+      "cwe": "cwe125",
+      "status": "unknown",
+      "created": "2026-04-18T17:33:33+00:00",
+      "score": 0.7746835443037975,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 452,
+      "cwe": "cwe352",
+      "status": "unknown",
+      "created": "2026-04-18T16:16:09+00:00",
+      "score": 0.8230088495575221,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 219,
+      "cwe": "cwe89",
+      "status": "unknown",
+      "created": "2026-04-18T16:07:59+00:00",
+      "score": 0.91324200913242,
+      "task": "reviewer_benchmark"
+    },
+    {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "date": "2026-04-18",
+      "samples": 86,
+      "cwe": "cwe94",
+      "status": "unknown",
+      "created": "2026-04-18T18:57:37+00:00",
+      "score": 0.8488372093023255,
+      "task": "reviewer_benchmark"
+    }
+  ],
+  "grouped": {
+    "gpt-5.2_inspect + gitea": {
+      "model": "gpt-5.2",
+      "harness": "inspect + gitea",
+      "data": [
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 382,
+          "cwe": "cwe79",
+          "status": "unknown",
+          "created": "2026-04-18T06:03:01+00:00",
+          "score": 0.8036649214659686,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 43,
+          "cwe": "cwe78",
+          "status": "unknown",
+          "created": "2026-04-18T18:37:54+00:00",
+          "score": 0.9302325581395349,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 109,
+          "cwe": "cwe416",
+          "status": "unknown",
+          "created": "2026-04-18T17:29:36+00:00",
+          "score": 0.7431192660550459,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 349,
+          "cwe": "cwe22",
+          "status": "unknown",
+          "created": "2026-04-18T17:12:05+00:00",
+          "score": 0.7449856733524355,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 364,
+          "cwe": "cwe862",
+          "status": "unknown",
+          "created": "2026-04-18T16:38:22+00:00",
+          "score": 0.8434065934065934,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 269,
+          "cwe": "cwe787",
+          "status": "unknown",
+          "created": "2026-04-18T16:57:21+00:00",
+          "score": 0.895910780669145,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 395,
+          "cwe": "cwe125",
+          "status": "unknown",
+          "created": "2026-04-18T17:33:33+00:00",
+          "score": 0.7746835443037975,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 452,
+          "cwe": "cwe352",
+          "status": "unknown",
+          "created": "2026-04-18T16:16:09+00:00",
+          "score": 0.8230088495575221,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 219,
+          "cwe": "cwe89",
+          "status": "unknown",
+          "created": "2026-04-18T16:07:59+00:00",
+          "score": 0.91324200913242,
+          "task": "reviewer_benchmark"
+        },
+        {
+          "model": "gpt-5.2",
+          "harness": "inspect + gitea",
+          "date": "2026-04-18",
+          "samples": 86,
+          "cwe": "cwe94",
+          "status": "unknown",
+          "created": "2026-04-18T18:57:37+00:00",
+          "score": 0.8488372093023255,
+          "task": "reviewer_benchmark"
+        }
+      ]
+    }
+  },
+  "models": [
+    "gpt-5.2"
+  ],
+  "harnesses": [
+    "inspect + gitea"
+  ],
+  "cwes": [
+    "cwe125",
+    "cwe22",
+    "cwe352",
+    "cwe416",
+    "cwe78",
+    "cwe787",
+    "cwe79",
+    "cwe862",
+    "cwe89",
+    "cwe94"
+  ],
+  "tasks": [
+    "reviewer_benchmark"
+  ]
+}

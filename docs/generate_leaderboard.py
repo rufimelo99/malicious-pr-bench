@@ -11,12 +11,33 @@ from typing import Any, Optional
 
 
 def parse_eval_file(eval_path: Path) -> Optional[dict[str, Any]]:
-    """Parse .eval ZIP file to extract metadata."""
+    """Parse .eval ZIP file to extract metadata and scores."""
     try:
         with zipfile.ZipFile(eval_path) as zf:
             header_data = zf.read("header.json")
             header = json.loads(header_data)
-            return header.get("eval", {})
+            eval_meta = header.get("eval", {})
+
+            # Extract scores from reductions.json (actual evaluation results)
+            try:
+                reductions_data = zf.read("reductions.json")
+                reductions = json.loads(reductions_data) if reductions_data else []
+
+                if reductions:
+                    # Get the first reducer (usually detection_scorer)
+                    for reduction in reductions:
+                        if reduction.get("scorer") == "detection_scorer":
+                            samples = reduction.get("samples", [])
+                            if samples:
+                                scores = [s.get("value", 0) for s in samples]
+                                if scores:
+                                    eval_meta["avg_score"] = sum(scores) / len(scores)
+                                    eval_meta["score_count"] = len(scores)
+                            break
+            except Exception:
+                pass
+
+            return eval_meta
     except Exception:
         return None
 
@@ -107,6 +128,7 @@ def parse_logs(
             "cwe": cwe,
             "status": metadata.get("status", "unknown"),
             "created": created_str,
+            "score": metadata.get("avg_score"),
         }
 
         results[task][cwe].append(result)
@@ -117,6 +139,48 @@ def parse_logs(
             results[task][cwe].sort(key=lambda x: x["created"], reverse=True)
 
     return dict(results)
+
+
+def generate_filters_html() -> str:
+    """Generate filter UI for leaderboard."""
+    return """
+  <!-- Filters Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-4">Filters</h2>
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <label class="label">Harness</label>
+            <div class="control">
+              <div class="select">
+                <select id="harness-filter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
+            <label class="label">CWE Type</label>
+            <div class="control">
+              <div class="select">
+                <select id="cwe-filter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chart Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-4">Score Over Time</h2>
+      <canvas id="timeSeriesChart"></canvas>
+    </div>
+  </section>
+"""
 
 
 def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
@@ -138,6 +202,7 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
               <th>CWE Type</th>
               <th>Date</th>
               <th>Samples</th>
+              <th>Accuracy</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -148,12 +213,31 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
         for cwe in sorted(entries.keys()):
             for entry in entries[cwe]:
                 status_badge = _get_status_badge(entry["status"])
+                # Format score
+                score_display = (
+                    f"{entry['score']:.1%}" if entry["score"] is not None else "—"
+                )
+                score_color = (
+                    "has-text-success"
+                    if entry["score"] and entry["score"] > 0.8
+                    else (
+                        "has-text-warning"
+                        if entry["score"] and entry["score"] > 0.6
+                        else (
+                            "has-text-danger"
+                            if entry["score"] and entry["score"] < 0.5
+                            else ""
+                        )
+                    )
+                )
+
                 html += f"""            <tr>
               <td><strong>{entry['model']}</strong></td>
               <td><code>{entry['harness']}</code></td>
               <td><code>{entry['cwe']}</code></td>
               <td>{entry['date']}</td>
               <td>{entry['samples']}</td>
+              <td class="{score_color}"><strong>{score_display}</strong></td>
               <td>{status_badge}</td>
             </tr>
 """
@@ -187,8 +271,10 @@ def insert_leaderboard_content(
 ) -> str:
     """Insert leaderboard content into the template."""
 
+    # Generate filters and charts first
+    leaderboard_content = generate_filters_html()
+
     # Generate all tables
-    leaderboard_content = ""
     for task_name in sorted(results.keys()):
         leaderboard_content += generate_table_html(task_name, results[task_name])
 
@@ -202,6 +288,10 @@ def insert_leaderboard_content(
       </p>
     </div>
   </section>
+
+  <!-- Chart.js and leaderboard scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="leaderboard.js"></script>
 """
 
     # Find and replace the placeholder section
@@ -251,6 +341,51 @@ def update_template_metadata(template: str) -> str:
         result = result.replace(old, new)
 
     return result
+
+
+def generate_leaderboard_data(
+    results: dict[str, dict[str, list[dict]]], output_path: Path
+) -> None:
+    """Generate JSON data file for frontend visualization and filtering."""
+    # Flatten results into a single list with all metadata
+    data_points = []
+
+    for task_name, cwes_dict in results.items():
+        for cwe, entries in cwes_dict.items():
+            for entry in entries:
+                data_point = {
+                    **entry,
+                    "task": task_name,
+                }
+                data_points.append(data_point)
+
+    # Group by model/harness for easier filtering
+    grouped = {}
+    for point in data_points:
+        key = f"{point['model']}_{point['harness']}"
+        if key not in grouped:
+            grouped[key] = {
+                "model": point["model"],
+                "harness": point["harness"],
+                "data": [],
+            }
+        grouped[key]["data"].append(point)
+
+    # Create output structure
+    output = {
+        "timestamp": datetime.now().isoformat(),
+        "total_runs": len(data_points),
+        "data_points": data_points,
+        "grouped": grouped,
+        "models": sorted(set(p["model"] for p in data_points)),
+        "harnesses": sorted(set(p["harness"] for p in data_points)),
+        "cwes": sorted(set(p["cwe"] for p in data_points)),
+        "tasks": sorted(set(p["task"] for p in data_points)),
+    }
+
+    # Write JSON
+    output_path.write_text(json.dumps(output, indent=2))
+    print(f"📊 Data exported: {output_path}")
 
 
 def _format_task_name(task: str) -> str:
@@ -335,8 +470,11 @@ def main():
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(html)
-
     print(f"✅ Leaderboard generated: {args.output}")
+
+    # Generate data JSON for frontend
+    data_output = args.output.parent / "leaderboard_data.json"
+    generate_leaderboard_data(results, data_output)
 
 
 if __name__ == "__main__":
