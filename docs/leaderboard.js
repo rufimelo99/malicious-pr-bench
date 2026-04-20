@@ -277,7 +277,7 @@ function renderDeceptionPatternsChart() {
       plugins: {
         title: {
           display: true,
-          text: "Model Performance by Deception Pattern (axis2)",
+          text: "Model Performance by Deception Pattern",
         },
         legend: { display: false },
       },
@@ -361,7 +361,7 @@ function renderRadarChart() {
       plugins: {
         title: {
           display: true,
-          text: "Model Performance by Attack Type (axis3)",
+          text: "Model Performance by Attack Type",
         },
         legend: { display: true, position: "top" },
       },
@@ -431,7 +431,7 @@ function renderAxisTable() {
   // Axis2 (Deception Patterns) table
   html += `<div class="column">
     <div class="table-container">
-      <h3 class="title is-5">Deception Patterns (axis2)</h3>
+      <h3 class="title is-5">Deception Patterns</h3>
       <table class="table is-striped is-hoverable">
         <thead><tr><th>Pattern</th><th>Accuracy</th></tr></thead>
         <tbody>`;
@@ -453,7 +453,7 @@ function renderAxisTable() {
   // Axis3 (Attack Types) table
   html += `<div class="column">
     <div class="table-container">
-      <h3 class="title is-5">Attack Types (axis3)</h3>
+      <h3 class="title is-5">Attack Types</h3>
       <table class="table is-striped is-hoverable">
         <thead><tr><th>Attack Type</th><th>Accuracy</th></tr></thead>
         <tbody>`;
