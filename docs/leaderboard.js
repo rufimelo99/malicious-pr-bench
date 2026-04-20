@@ -81,6 +81,7 @@ function getFilteredData() {
 function renderAllCharts() {
   renderTimeSeriesChart();
   renderBarChart();
+  renderDeceptionPatternsChart();
   renderRadarChart();
   renderAxisTable();
 }
@@ -212,6 +213,73 @@ function renderBarChart() {
         title: {
           display: true,
           text: `Model Comparison - ${selectedCwe.toUpperCase()}`,
+        },
+        legend: { display: false },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: { display: true, text: "Accuracy" },
+        },
+      },
+    },
+  });
+}
+
+function renderDeceptionPatternsChart() {
+  const filteredData = getFilteredData();
+
+  // Aggregate axis2 data by deception pattern
+  const deceptionScores = {};
+  filteredData.forEach((point) => {
+    if (point.axes && point.axes.axis2) {
+      for (const [pattern, score] of Object.entries(point.axes.axis2)) {
+        if (!deceptionScores[pattern]) {
+          deceptionScores[pattern] = [];
+        }
+        deceptionScores[pattern].push(score);
+      }
+    }
+  });
+
+  // Calculate averages
+  const patterns = Object.keys(deceptionScores).sort();
+  const data = patterns.map((pattern) => {
+    const scores = deceptionScores[pattern];
+    return scores.length > 0 ? scores.reduce((a, b) => a + b) / scores.length : 0;
+  });
+
+  const ctx = document.getElementById("deceptionChart");
+  if (!ctx) return;
+
+  const colors = data.map((score) =>
+    score > 0.8 ? "rgba(75, 192, 75, 0.6)" : score > 0.6 ? "rgba(255, 193, 7, 0.6)" : "rgba(244, 67, 54, 0.6)"
+  );
+
+  if (charts.deception) charts.deception.destroy();
+
+  charts.deception = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: patterns,
+      datasets: [
+        {
+          label: "Accuracy by Deception Pattern",
+          data: data,
+          backgroundColor: colors,
+          borderColor: colors.map((c) => c.replace("0.6", "1")),
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      indexAxis: "x",
+      plugins: {
+        title: {
+          display: true,
+          text: "Model Performance by Deception Pattern (axis2)",
         },
         legend: { display: false },
       },

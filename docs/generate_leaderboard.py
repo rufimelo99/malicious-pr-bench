@@ -249,6 +249,7 @@ def generate_filters_html() -> str:
         <ul>
           <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
           <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
+          <li><a onclick="switchChart('deception')">🎭 Deception Patterns</a></li>
           <li><a onclick="switchChart('radar')">🎯 Attack Types</a></li>
           <li><a onclick="switchChart('axes')">📋 Axis Breakdown</a></li>
         </ul>
@@ -264,12 +265,17 @@ def generate_filters_html() -> str:
         <canvas id="barChart"></canvas>
       </div>
 
+      <div id="deceptionContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Performance by Deception Pattern</h2>
+        <canvas id="deceptionChart"></canvas>
+      </div>
+
       <div id="radarContainer" class="chart-container" style="display:none;">
         <h2 class="title is-4">Performance by Attack Type</h2>
         <canvas id="radarChart"></canvas>
       </div>
 
-      <div id="axisTableContainer" class="chart-container" style="display:none;">
+      <div id="axisTableContainer" class="chart-container" style="display:none; margin-top: 4rem;">
         <h2 class="title is-4">Model Performance by Axis</h2>
       </div>
     </div>
@@ -280,6 +286,7 @@ def generate_filters_html() -> str:
       const containers = {
         'timeSeries': 'timeSeriesContainer',
         'bar': 'barContainer',
+        'deception': 'deceptionContainer',
         'radar': 'radarContainer',
         'axes': 'axisTableContainer'
       };
@@ -302,6 +309,7 @@ def generate_filters_html() -> str:
     .tabs a { cursor: pointer; }
     .chart-container { position: relative; height: 400px; }
     #radarChart { max-width: 500px; margin: 0 auto; }
+    #axisTableContainer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e5e5; }
   </style>
 """
 
