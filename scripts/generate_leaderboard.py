@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+"""Generate leaderboard HTML from benchmark logs using Academic template."""
+
+import argparse
+import json
+import zipfile
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
+
+
+def parse_eval_file(eval_path: Path) -> Optional[dict[str, Any]]:
+    """Parse .eval ZIP file to extract metadata."""
+    try:
+        with zipfile.ZipFile(eval_path) as zf:
+            header_data = zf.read("header.json")
+            header = json.loads(header_data)
+            return header.get("eval", {})
+    except Exception:
+        return None
+
+
+def extract_model_and_harness(metadata: dict) -> tuple[str, str]:
+    """Extract model name and harness from metadata.
+
+    Harness is determined by:
+    - CLI agent (claude-code, copilot) takes priority
+    - Otherwise: inspect + tool_mode (gitea or sandbox)
+    """
+    model_str = metadata.get("model", "unknown")
+    task_args = metadata.get("task_args", {})
+    agent = task_args.get("agent")
+
+    # Clean up model name
+    if model_str and model_str != "none/none":
+        # Handle paths like "openai/azure/gpt-5.2" or "global.anthropic.claude-opus"
+        parts = model_str.split("/")
+        model = parts[-1]
+    else:
+        model = "unknown"
+
+    # Determine harness
+    if agent:
+        # CLI agent (copilot, claude-code, etc.)
+        harness = agent
+    else:
+        # Inspect AI + tool mode
+        sandbox_config = metadata.get("sandbox", {})
+        config_path = sandbox_config.get("config", "")
+
+        if "gitea" in config_path.lower():
+            tool_mode = "gitea"
+        elif "sandbox" in config_path.lower() or "compose" in config_path.lower():
+            tool_mode = "sandbox"
+        else:
+            tool_mode = "unknown"
+
+        harness = f"inspect + {tool_mode}"
+
+    return model, harness
+
+
+def parse_logs(
+    log_dir: Path,
+    skip_years: Optional[list[int]] = None,
+    tool_modes: Optional[list[str]] = None,
+) -> dict[str, dict[str, list[dict[str, Any]]]]:
+    """Parse benchmark logs and aggregate results by task type."""
+    skip_years = skip_years or []
+    tool_modes = tool_modes or []
+
+    results = defaultdict(lambda: defaultdict(list))  # task_type -> cwe -> [entries]
+
+    if not log_dir.exists():
+        return results
+
+    for eval_file in log_dir.rglob("*.eval"):
+        metadata = parse_eval_file(eval_file)
+        if not metadata:
+            continue
+
+        # Extract timestamp
+        created_str = metadata.get("created", "")
+        try:
+            created_date = datetime.fromisoformat(created_str.replace("Z", "+00:00"))
+            if created_date.year in skip_years:
+                continue
+            date_str = created_date.strftime("%Y-%m-%d")
+        except Exception:
+            date_str = "unknown"
+
+        # Extract task and cwe
+        task = metadata.get("task", "unknown")
+        task_args = metadata.get("task_args", {})
+        cwe = task_args.get("cwe", "all")
+
+        # Check tool mode if filtering
+        if tool_modes:
+            sandbox_config = metadata.get("sandbox", {})
+            config_path = sandbox_config.get("config", "")
+            if "gitea" in config_path.lower():
+                detected_tool_mode = "gitea"
+            elif "sandbox" in config_path.lower() or "compose" in config_path.lower():
+                detected_tool_mode = "sandbox"
+            else:
+                detected_tool_mode = "unknown"
+
+            if detected_tool_mode not in tool_modes:
+                continue
+
+        # Extract model and harness
+        model, harness = extract_model_and_harness(metadata)
+
+        # Create result entry
+        result = {
+            "model": model,
+            "harness": harness,
+            "date": date_str,
+            "samples": metadata.get("dataset", {}).get("samples", 0),
+            "cwe": cwe,
+            "status": metadata.get("status", "unknown"),
+            "created": created_str,
+        }
+
+        results[task][cwe].append(result)
+
+    # Sort by date descending
+    for task in results:
+        for cwe in results[task]:
+            results[task][cwe].sort(key=lambda x: x["created"], reverse=True)
+
+    return dict(results)
+
+
+def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
+    """Generate HTML table for a task type using Bulma styling."""
+    task_display = _format_task_name(task_name)
+
+    html = f"""
+  <!-- {task_display} Section -->
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">{task_display}</h2>
+
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Harness</th>
+              <th>CWE Type</th>
+              <th>Date</th>
+              <th>Samples</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+"""
+
+    if entries:
+        for cwe in sorted(entries.keys()):
+            for entry in entries[cwe]:
+                status_badge = _get_status_badge(entry["status"])
+                html += f"""            <tr>
+              <td><strong>{entry['model']}</strong></td>
+              <td><code>{entry['harness']}</code></td>
+              <td><code>{entry['cwe']}</code></td>
+              <td>{entry['date']}</td>
+              <td>{entry['samples']}</td>
+              <td>{status_badge}</td>
+            </tr>
+"""
+    else:
+        html += """            <tr>
+              <td colspan="6" class="has-text-centered has-text-grey">
+                No results yet
+              </td>
+            </tr>
+"""
+
+    html += """          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+"""
+
+    return html
+
+
+def load_template(template_path: Path) -> str:
+    """Load the Academic template HTML."""
+    if not template_path.exists():
+        raise FileNotFoundError(f"Template not found: {template_path}")
+    return template_path.read_text()
+
+
+def insert_leaderboard_content(
+    template: str, results: dict[str, dict[str, list[dict]]]
+) -> str:
+    """Insert leaderboard content into the template."""
+
+    # Generate all tables
+    leaderboard_content = ""
+    for task_name in sorted(results.keys()):
+        leaderboard_content += generate_table_html(task_name, results[task_name])
+
+    # Add update timestamp
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+    leaderboard_content += f"""
+  <section class="section">
+    <div class="container is-max-desktop has-text-centered has-text-grey-light">
+      <p style="font-size: 0.9rem; margin-top: 2rem;">
+        Last updated: {timestamp}
+      </p>
+    </div>
+  </section>
+"""
+
+    # Find insertion point - look for a closing </main> or </body> tag
+    # Insert before the closing body tag
+    insertion_marker = "</body>"
+
+    if insertion_marker in template:
+        modified = template.replace(
+            insertion_marker, leaderboard_content + insertion_marker
+        )
+    else:
+        # Fallback: append before closing html tag
+        modified = template.replace("</html>", leaderboard_content + "</html>")
+
+    return modified
+
+
+def update_template_metadata(template: str) -> str:
+    """Update template metadata for the leaderboard."""
+    replacements = {
+        "PAPER_TITLE": "Malicious PR Benchmark Leaderboard",
+        "AUTHOR_NAMES": "SocialAITBD",
+        "BRIEF_DESCRIPTION_OF_YOUR_RESEARCH_CONTRIBUTION_AND_FINDINGS": "Model evaluation on security review and malicious PR detection capabilities",
+        "INSTITUTION_OR_LAB_NAME": "SocialAITBD",
+        "YOUR_DOMAIN.com": "github.com",
+        "YOUR_PROJECT_PAGE": "SocialAITBD/malicious-pr-bench",
+    }
+
+    result = template
+    for old, new in replacements.items():
+        result = result.replace(old, new)
+
+    return result
+
+
+def _format_task_name(task: str) -> str:
+    """Format task name for display."""
+    task_map = {
+        "reviewer_benchmark": "🔍 Malicious PR Detection",
+        "pov_benchmark": "✅ Proof of Vulnerability",
+        "benign_benchmark": "📋 Benign PR Evaluation",
+    }
+    return task_map.get(task, task.replace("_", " ").title())
+
+
+def _get_status_badge(status: str) -> str:
+    """Generate Bulma badge for status."""
+    status_map = {
+        "completed": ("is-success", "✓"),
+        "running": ("is-warning", "⟳"),
+        "failed": ("is-danger", "✗"),
+        "cancelled": ("is-info", "−"),
+    }
+
+    tag_class, icon = status_map.get(status, ("is-info", "?"))
+    return f'<span class="tag {tag_class}">{icon} {status}</span>'
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate benchmark leaderboard from Academic template"
+    )
+    parser.add_argument(
+        "--logs",
+        type=Path,
+        default=Path("docs/logs"),
+        help="Input logs directory (default: docs/logs)",
+    )
+    parser.add_argument(
+        "--template",
+        type=Path,
+        default=Path("docs/index.html"),
+        help="Academic template HTML (default: docs/index.html)",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("docs/index.html"),
+        help="Output HTML file (default: docs/index.html)",
+    )
+    parser.add_argument(
+        "--skip-years",
+        type=int,
+        nargs="+",
+        help="Skip logs from specific years",
+    )
+    parser.add_argument(
+        "--tool-modes",
+        choices=["sandbox", "gitea"],
+        nargs="+",
+        help="Only include specific tool modes",
+    )
+
+    args = parser.parse_args()
+
+    print(f"📊 Scanning logs in {args.logs}...")
+    results = parse_logs(
+        args.logs,
+        skip_years=args.skip_years,
+        tool_modes=args.tool_modes,
+    )
+
+    total = sum(
+        sum(len(entries) for entries in cwes_dict.values())
+        for cwes_dict in results.values()
+    )
+    print(f"Found {total} benchmark runs across {len(results)} tasks")
+
+    print(f"📄 Loading template from {args.template}...")
+    template = load_template(args.template)
+
+    print(f"🎨 Generating leaderboard...")
+    template = update_template_metadata(template)
+    html = insert_leaderboard_content(template, results)
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(html)
+
+    print(f"✅ Leaderboard generated: {args.output}")
+
+
+if __name__ == "__main__":
+    main()
