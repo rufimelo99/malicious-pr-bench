@@ -45,4 +45,4 @@ class CodexBridge(CLIAgentBridge):
             raw = "\n".join(p for p in (res.stdout, res.stderr) if p).strip()
             return res.returncode, raw
         except TimeoutError:
-            return 124, f"codex timed out after {self.timeout}s"
+            return self._timeout_error("codex")

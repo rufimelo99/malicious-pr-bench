@@ -44,7 +44,7 @@ class ClaudeCodeBridge(CLIAgentBridge):
                 await sb.write_file(output_file, payload)
             return res.returncode, raw
         except TimeoutError:
-            return 124, f"claude timed out after {self.timeout}s"
+            return self._timeout_error("claude")
 
     @staticmethod
     def _extract_structured_output(stream_json: str) -> str:

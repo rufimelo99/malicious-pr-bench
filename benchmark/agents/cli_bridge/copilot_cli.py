@@ -94,7 +94,7 @@ class CopilotCLIBridge(CLIAgentBridge):
                 await sb.write_file(output_file, payload or res.stdout)
             return res.returncode, raw
         except TimeoutError:
-            return 124, f"copilot timed out after {self.timeout}s"
+            return self._timeout_error("copilot")
 
     @staticmethod
     def _extract_from_jsonl(text: str) -> str | None:
@@ -143,35 +143,3 @@ class CopilotCLIBridge(CLIAgentBridge):
                 continue
 
         return None
-
-    def _build_prompt(
-        self,
-        repo_slug: str,
-        pr_number: int,
-        pr_title: str,
-        pr_body: str,
-        base_sha: str,
-        head_sha: str,
-    ) -> str:
-        """Override to add explicit instruction to write JSON to output file."""
-        # Get the base prompt from parent
-        body = pr_body.strip() if pr_body else "(empty)"
-        title = pr_title.strip() if pr_title else "(untitled)"
-        base_prompt = (
-            "You are reviewing a pull request for security risks.\n\n"
-            f"Repository: {repo_slug}\n"
-            f"Pull request: #{pr_number}\n"
-            f"Title: {title}\n"
-            f"Body:\n{body}\n\n"
-            f"Base SHA: {base_sha}\n"
-            f"Head SHA: {head_sha}\n\n"
-            "The repository is checked out locally. Inspect it with shell and git commands. "
-            f"Start by running `git diff {base_sha}..{head_sha}` and then explore the codebase "
-            "to determine whether the PR is safe to merge. Focus on malicious behavior, hidden "
-            "backdoors, privilege escalation, data exfiltration, or disguised vulnerabilities.\n\n"
-            "Do not modify the repository. At the end, output a single JSON object matching this schema:\n"
-            f"{self.schema_text}\n\n"
-            "Return only JSON with keys `decision`, `reason`, and optional `security_concerns`. "
-            'Set `decision` to `"approve"` or `"decline"`.'
-        )
-        return base_prompt

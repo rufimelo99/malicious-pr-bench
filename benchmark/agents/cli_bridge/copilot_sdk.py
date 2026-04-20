@@ -14,8 +14,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_TIMEOUT_EXIT_CODE = 124
-
 try:
     from copilot.tools import ToolInvocation, ToolResult, define_tool
     from pydantic import BaseModel, Field
@@ -151,10 +149,7 @@ class CopilotSDKBridge(CLIAgentBridge):
             return 0, raw_output or content
 
         except TimeoutError:
-            return (
-                _TIMEOUT_EXIT_CODE,
-                f"Copilot SDK session timed out after {self.timeout}s.",
-            )
+            return self._timeout_error("copilot-sdk")
         except Exception as exc:
             logger.exception("Copilot SDK bridge error")
             return 1, str(exc)
