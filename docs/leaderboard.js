@@ -159,50 +159,70 @@ function renderBarChart() {
   const filteredData = getFilteredData();
   const cweFilter = document.getElementById("cwe-filter")?.value || "all";
 
-  // If no CWE filter, use the first CWE
-  const selectedCwe =
-    cweFilter === "all" ? leaderboardData.cwes[0] : cweFilter;
+  const ctx = document.getElementById("barChart");
+  if (!ctx) return;
 
-  // Aggregate by model for selected CWE
-  const modelScores = {};
+  // Get all models and CWEs in filtered data
+  const models = [...new Set(filteredData.map((p) => p.model))].sort();
+  const cwes = cweFilter === "all"
+    ? [...new Set(filteredData.map((p) => p.cwe))].sort()
+    : [cweFilter];
+
+  // Aggregate by model and CWE
+  const modelCweScores = {};
+  models.forEach((model) => {
+    modelCweScores[model] = {};
+    cwes.forEach((cwe) => {
+      modelCweScores[model][cwe] = [];
+    });
+  });
+
   filteredData.forEach((point) => {
-    if (point.cwe === selectedCwe) {
-      if (!modelScores[point.model]) {
-        modelScores[point.model] = [];
-      }
-      modelScores[point.model].push(point.score || 0);
+    if (modelCweScores[point.model] && modelCweScores[point.model][point.cwe]) {
+      modelCweScores[point.model][point.cwe].push(point.score || 0);
     }
   });
 
   // Calculate averages
-  const labels = Object.keys(modelScores).sort();
-  const data = labels.map((model) => {
-    const scores = modelScores[model];
-    return scores.length > 0 ? scores.reduce((a, b) => a + b) / scores.length : 0;
+  const cweColors = {
+    cwe22: "rgba(255, 99, 132, 0.6)",
+    cwe78: "rgba(54, 162, 235, 0.6)",
+    cwe79: "rgba(75, 192, 192, 0.6)",
+    cwe89: "rgba(255, 206, 86, 0.6)",
+    cwe94: "rgba(153, 102, 255, 0.6)",
+    cwe125: "rgba(255, 159, 64, 0.6)",
+    cwe352: "rgba(201, 203, 207, 0.6)",
+    cwe416: "rgba(255, 193, 7, 0.6)",
+    cwe787: "rgba(100, 200, 100, 0.6)",
+    cwe862: "rgba(200, 100, 100, 0.6)",
+  };
+
+  const datasets = cwes.map((cwe) => {
+    const data = models.map((model) => {
+      const scores = modelCweScores[model][cwe];
+      return scores.length > 0 ? scores.reduce((a, b) => a + b) / scores.length : 0;
+    });
+    const color = cweColors[cwe] || "rgba(100, 100, 100, 0.6)";
+    return {
+      label: cwe.toUpperCase(),
+      data: data,
+      backgroundColor: color,
+      borderColor: color.replace("0.6", "1"),
+      borderWidth: 1,
+    };
   });
 
-  const ctx = document.getElementById("barChart");
-  if (!ctx) return;
-
-  const colors = data.map((score) =>
-    score > 0.8 ? "rgba(75, 192, 75, 0.6)" : score > 0.6 ? "rgba(255, 193, 7, 0.6)" : "rgba(244, 67, 54, 0.6)"
-  );
-
   if (charts.bar) charts.bar.destroy();
+
+  const title = cweFilter === "all"
+    ? "Model Comparison - All CWEs"
+    : `Model Comparison - ${cweFilter.toUpperCase()}`;
 
   charts.bar = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: labels,
-      datasets: [
-        {
-          label: `Accuracy (${selectedCwe})`,
-          data: data,
-          backgroundColor: colors,
-          borderColor: colors.map((c) => c.replace("0.6", "1")),
-          borderWidth: 2,
-        },
-      ],
+      labels: models,
+      datasets: datasets,
     },
     options: {
       responsive: true,
@@ -210,9 +230,9 @@ function renderBarChart() {
       plugins: {
         title: {
           display: true,
-          text: `Model Comparison - ${selectedCwe.toUpperCase()}`,
+          text: title,
         },
-        legend: { display: false },
+        legend: { display: true, position: "top" },
       },
       scales: {
         y: {
