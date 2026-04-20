@@ -203,7 +203,6 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
               <th>Date</th>
               <th>Samples</th>
               <th>Accuracy</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -212,7 +211,6 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
     if entries:
         for cwe in sorted(entries.keys()):
             for entry in entries[cwe]:
-                status_badge = _get_status_badge(entry["status"])
                 # Format score
                 score_display = (
                     f"{entry['score']:.1%}" if entry["score"] is not None else "—"
@@ -238,7 +236,6 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
               <td>{entry['date']}</td>
               <td>{entry['samples']}</td>
               <td class="{score_color}"><strong>{score_display}</strong></td>
-              <td>{status_badge}</td>
             </tr>
 """
     else:
