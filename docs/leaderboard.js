@@ -81,7 +81,6 @@ function getFilteredData() {
 function renderAllCharts() {
   renderTimeSeriesChart();
   renderBarChart();
-  renderDeceptionPatternsChart();
   renderAxisTable();
 }
 
