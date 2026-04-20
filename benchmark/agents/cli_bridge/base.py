@@ -14,15 +14,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
 
+from benchmark.agents.prompt_utils import load_prompt
 from benchmark.config import SANDBOX_OUTPUT_FILE, SANDBOX_REPO_PATH
 
 logger = logging.getLogger(__name__)
 
-# Load the shared system prompt from the reviewer agent
-_PROMPTS_DIR = Path(__file__).resolve().parents[2] / "agents" / "reviewer" / "prompts"
-_SANDBOX_SYSTEM_PROMPT = (
-    _PROMPTS_DIR / "reviewer_system_prompt_sandbox.txt"
-).read_text()
+_SANDBOX_SYSTEM_PROMPT = load_prompt("reviewer_system_prompt_sandbox")
 
 _TIMEOUT_EXIT_CODE = 124
 

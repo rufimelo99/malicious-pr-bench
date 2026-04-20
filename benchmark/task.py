@@ -427,7 +427,6 @@ def benign_reviewer_solver(
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
         reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
-        )
         agent_state = AgentState(
             messages=[
                 ChatMessageUser(

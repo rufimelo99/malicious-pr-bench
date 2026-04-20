@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Literal
 
 from inspect_ai.agent import react
 from inspect_ai.agent._types import AgentPrompt
 from inspect_ai.tool import Tool
 
+from benchmark.agents.prompt_utils import load_prompt
 from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_approve_pull_request,
                              github_get_pull_request, github_list_files,
@@ -16,12 +16,10 @@ from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_list_pr_reviews, github_list_recent_prs,
                              github_read_file, github_search_code)
 
-_PROMPTS_DIR = Path(__file__).parent / "prompts"
-
 # One system prompt per tool mode
 _SYSTEM_PROMPTS: dict[str, str] = {
-    "gitea": (_PROMPTS_DIR / "reviewer_system_prompt.txt").read_text(),
-    "sandbox": (_PROMPTS_DIR / "reviewer_system_prompt_sandbox.txt").read_text(),
+    "gitea": load_prompt("reviewer_system_prompt"),
+    "sandbox": load_prompt("reviewer_system_prompt_sandbox"),
 }
 
 ToolMode = Literal["gitea", "sandbox"]
