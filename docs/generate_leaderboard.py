@@ -293,7 +293,7 @@ def generate_filters_html() -> str:
 
   <style>
     .tabs a { cursor: pointer; }
-    .chart-container { position: relative; height: 400px; }
+    .chart-container { position: relative; height: 400px; margin-bottom: 8rem; }
     #radarChart { max-width: 500px; margin: 0 auto; }
     #axisTableContainer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e5e5; }
   </style>
