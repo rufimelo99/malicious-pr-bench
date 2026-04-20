@@ -425,32 +425,52 @@ function renderAxisTable() {
     }
   }
 
-  // Build HTML table
-  let html = `<div class="table-container"><table class="table is-striped is-hoverable">
-    <thead><tr><th>Dimension</th><th>Value</th><th>Accuracy</th></tr></thead>
-    <tbody>`;
+  // Build two side-by-side tables
+  let html = `<div class="columns">`;
 
-  const axes = ["axis1", "axis2", "axis3"];
-  const axisLabels = { axis1: "Complexity (axis1)", axis2: "Deception (axis2)", axis3: "Attack Type (axis3)" };
+  // Axis2 (Deception Patterns) table
+  html += `<div class="column">
+    <div class="table-container">
+      <h3 class="title is-5">Deception Patterns (axis2)</h3>
+      <table class="table is-striped is-hoverable">
+        <thead><tr><th>Pattern</th><th>Accuracy</th></tr></thead>
+        <tbody>`;
 
-  let rowCount = 0;
-  for (const axis of axes) {
-    const entries = Object.entries(axisBreakdown[axis])
-      .sort((a, b) => b[1] - a[1]); // Sort by score descending
+  const axis2Entries = Object.entries(axisBreakdown["axis2"])
+    .sort((a, b) => b[1] - a[1]);
 
-    for (const [value, score] of entries) {
-      const scoreColor =
-        score > 0.8 ? "has-text-success" : score > 0.6 ? "has-text-warning" : "has-text-danger";
-      html += `<tr>
-        <td><strong>${rowCount === 0 ? axisLabels[axis] : ""}</strong></td>
-        <td><code>${value}</code></td>
-        <td class="${scoreColor}"><strong>${(score * 100).toFixed(1)}%</strong></td>
-      </tr>`;
-      rowCount++;
-    }
+  for (const [value, score] of axis2Entries) {
+    const scoreColor =
+      score > 0.8 ? "has-text-success" : score > 0.6 ? "has-text-warning" : "has-text-danger";
+    html += `<tr>
+      <td><code>${value}</code></td>
+      <td class="${scoreColor}"><strong>${(score * 100).toFixed(1)}%</strong></td>
+    </tr>`;
   }
 
-  html += `</tbody></table></div>`;
+  html += `</tbody></table></div></div>`;
+
+  // Axis3 (Attack Types) table
+  html += `<div class="column">
+    <div class="table-container">
+      <h3 class="title is-5">Attack Types (axis3)</h3>
+      <table class="table is-striped is-hoverable">
+        <thead><tr><th>Attack Type</th><th>Accuracy</th></tr></thead>
+        <tbody>`;
+
+  const axis3Entries = Object.entries(axisBreakdown["axis3"])
+    .sort((a, b) => b[1] - a[1]);
+
+  for (const [value, score] of axis3Entries) {
+    const scoreColor =
+      score > 0.8 ? "has-text-success" : score > 0.6 ? "has-text-warning" : "has-text-danger";
+    html += `<tr>
+      <td><code>${value}</code></td>
+      <td class="${scoreColor}"><strong>${(score * 100).toFixed(1)}%</strong></td>
+    </tr>`;
+  }
+
+  html += `</tbody></table></div></div></div>`;
   axisTableContainer.innerHTML = html;
 }
 
