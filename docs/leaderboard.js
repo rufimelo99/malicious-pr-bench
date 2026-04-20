@@ -17,6 +17,7 @@ async function loadData() {
 function initializeUI() {
   const harnessSelect = document.getElementById("harness-filter");
   const cweSelect = document.getElementById("cwe-filter");
+  const modelSelect = document.getElementById("model-filter");
 
   // Populate harness filter
   if (harnessSelect && leaderboardData.harnesses) {
@@ -47,6 +48,21 @@ function initializeUI() {
       cweSelect.appendChild(option);
     });
   }
+
+  // Populate model filter
+  if (modelSelect && leaderboardData.models) {
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "all";
+    defaultOption.textContent = "All Models";
+    modelSelect.appendChild(defaultOption);
+
+    leaderboardData.models.forEach((model) => {
+      const option = document.createElement("option");
+      option.value = model;
+      option.textContent = model;
+      modelSelect.appendChild(option);
+    });
+  }
 }
 
 function getFilteredData() {
@@ -64,6 +80,7 @@ function renderAllCharts() {
   renderTimeSeriesChart();
   renderBarChart();
   renderRadarChart();
+  renderAxisTable();
 }
 
 function renderTimeSeriesChart() {
@@ -291,17 +308,96 @@ function renderRadarChart() {
   });
 }
 
+function renderAxisTable() {
+  const filteredData = getFilteredData();
+  const modelSelect = document.getElementById("model-filter");
+
+  if (!modelSelect) return;
+
+  const selectedModel = modelSelect.value;
+  if (selectedModel === "all") {
+    document.getElementById("axisTableContainer").style.display = "none";
+    return;
+  }
+
+  document.getElementById("axisTableContainer").style.display = "block";
+
+  const modelData = filteredData.filter((p) => p.model === selectedModel);
+  if (modelData.length === 0) return;
+
+  // Aggregate axis data for this model
+  const axisBreakdown = {
+    axis1: {},
+    axis2: {},
+    axis3: {},
+  };
+
+  modelData.forEach((point) => {
+    if (point.axes) {
+      for (const [axis, values] of Object.entries(point.axes)) {
+        for (const [axisVal, score] of Object.entries(values)) {
+          if (!axisBreakdown[axis][axisVal]) {
+            axisBreakdown[axis][axisVal] = [];
+          }
+          axisBreakdown[axis][axisVal].push(score);
+        }
+      }
+    }
+  });
+
+  // Calculate averages
+  for (const axis of Object.keys(axisBreakdown)) {
+    for (const val of Object.keys(axisBreakdown[axis])) {
+      const scores = axisBreakdown[axis][val];
+      axisBreakdown[axis][val] = scores.reduce((a, b) => a + b) / scores.length;
+    }
+  }
+
+  // Build HTML table
+  const tableContainer = document.getElementById("axisTableContainer");
+  let html = `<div class="table-container"><table class="table is-striped is-hoverable">
+    <thead><tr><th>Dimension</th><th>Value</th><th>Accuracy</th></tr></thead>
+    <tbody>`;
+
+  const axes = ["axis1", "axis2", "axis3"];
+  const axisLabels = { axis1: "Complexity (axis1)", axis2: "Deception (axis2)", axis3: "Attack Type (axis3)" };
+
+  let rowCount = 0;
+  for (const axis of axes) {
+    const entries = Object.entries(axisBreakdown[axis])
+      .sort((a, b) => b[1] - a[1]); // Sort by score descending
+
+    for (const [value, score] of entries) {
+      const scoreColor =
+        score > 0.8 ? "has-text-success" : score > 0.6 ? "has-text-warning" : "has-text-danger";
+      html += `<tr>
+        <td><strong>${rowCount === 0 ? axisLabels[axis] : ""}</strong></td>
+        <td><code>${value}</code></td>
+        <td class="${scoreColor}"><strong>${(score * 100).toFixed(1)}%</strong></td>
+      </tr>`;
+      rowCount++;
+    }
+  }
+
+  html += `</tbody></table></div>`;
+  tableContainer.innerHTML = html;
+}
+
 // Event listeners
 document.addEventListener("DOMContentLoaded", () => {
   loadData();
 
   const harnessSelect = document.getElementById("harness-filter");
   const cweSelect = document.getElementById("cwe-filter");
+  const modelSelect = document.getElementById("model-filter");
 
   if (harnessSelect) {
     harnessSelect.addEventListener("change", renderAllCharts);
   }
   if (cweSelect) {
     cweSelect.addEventListener("change", renderAllCharts);
+  }
+  if (modelSelect) {
+    modelSelect.addEventListener("change", renderAllCharts);
   }
 });

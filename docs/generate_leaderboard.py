@@ -210,6 +210,16 @@ def generate_filters_html() -> str:
       <div class="columns">
         <div class="column">
           <div class="field">
+            <label class="label">Model</label>
+            <div class="control">
+              <div class="select">
+                <select id="model-filter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
             <label class="label">Harness</label>
             <div class="control">
               <div class="select">
@@ -240,6 +250,7 @@ def generate_filters_html() -> str:
           <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
           <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
           <li><a onclick="switchChart('radar')">🎯 Attack Types</a></li>
+          <li><a onclick="switchChart('axes')">📋 Axis Breakdown</a></li>
         </ul>
       </div>
 
@@ -257,6 +268,10 @@ def generate_filters_html() -> str:
         <h2 class="title is-4">Performance by Attack Type</h2>
         <canvas id="radarChart"></canvas>
       </div>
+
+      <div id="axisTableContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Model Performance by Axis</h2>
+      </div>
     </div>
   </section>
 
@@ -265,7 +280,8 @@ def generate_filters_html() -> str:
       const containers = {
         'timeSeries': 'timeSeriesContainer',
         'bar': 'barContainer',
-        'radar': 'radarContainer'
+        'radar': 'radarContainer',
+        'axes': 'axisTableContainer'
       };
 
       // Hide all containers

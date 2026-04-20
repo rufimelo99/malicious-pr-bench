@@ -533,6 +533,16 @@
       <div class="columns">
         <div class="column">
           <div class="field">
+            <label class="label">Model</label>
+            <div class="control">
+              <div class="select">
+                <select id="model-filter"></select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="column">
+          <div class="field">
             <label class="label">Harness</label>
             <div class="control">
               <div class="select">
@@ -563,6 +573,7 @@
           <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
           <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
           <li><a onclick="switchChart('radar')">🎯 Attack Types</a></li>
+          <li><a onclick="switchChart('axes')">📋 Axis Breakdown</a></li>
         </ul>
       </div>
 
@@ -580,6 +591,10 @@
         <h2 class="title is-4">Performance by Attack Type</h2>
         <canvas id="radarChart"></canvas>
       </div>
+
+      <div id="axisTableContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Model Performance by Axis</h2>
+      </div>
     </div>
   </section>
 
@@ -588,7 +603,8 @@
       const containers = {
         'timeSeries': 'timeSeriesContainer',
         'bar': 'barContainer',
-        'radar': 'radarContainer'
+        'radar': 'radarContainer',
+        'axes': 'axisTableContainer'
       };
 
       // Hide all containers
@@ -718,7 +734,7 @@
   <section class="section">
     <div class="container is-max-desktop has-text-centered has-text-grey-light">
       <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-04-19 21:15:14 UTC
+        Last updated: 2026-04-19 21:17:06 UTC
       </p>
     </div>
   </section>
