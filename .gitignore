@@ -26,3 +26,4 @@ summary_rejection_reasons.py
 HF_DATASET_README.md
 .coverage
 /proof_of_vulnerability/cpg_cache
+/proof_of_vulnerability
