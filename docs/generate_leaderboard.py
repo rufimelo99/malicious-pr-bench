@@ -25,12 +25,13 @@ def extract_model_and_harness(metadata: dict) -> tuple[str, str]:
     """Extract model name and harness from metadata.
 
     Harness is determined by:
-    - CLI agent (claude-code, copilot) takes priority
-    - Otherwise: inspect + tool_mode (gitea or sandbox)
+    - CLI agent (claude-code, copilot-cli) takes priority
+    - Otherwise: inspect + tool_mode (gitea, sandbox)
     """
     model_str = metadata.get("model", "unknown")
     task_args = metadata.get("task_args", {})
     agent = task_args.get("agent")
+    tool_mode = task_args.get("tool_mode")
 
     # Clean up model name
     if model_str and model_str != "none/none":
@@ -44,19 +45,12 @@ def extract_model_and_harness(metadata: dict) -> tuple[str, str]:
     if agent:
         # CLI agent (copilot, claude-code, etc.)
         harness = agent
-    else:
-        # Inspect AI + tool mode
-        sandbox_config = metadata.get("sandbox", {})
-        config_path = sandbox_config.get("config", "")
-
-        if "gitea" in config_path.lower():
-            tool_mode = "gitea"
-        elif "sandbox" in config_path.lower() or "compose" in config_path.lower():
-            tool_mode = "sandbox"
-        else:
-            tool_mode = "unknown"
-
+    elif tool_mode:
+        # Inspect AI + explicit tool mode
         harness = f"inspect + {tool_mode}"
+    else:
+        # Default to inspect (no tool mode specified)
+        harness = "inspect + gitea"
 
     return model, harness
 
@@ -97,15 +91,7 @@ def parse_logs(
 
         # Check tool mode if filtering
         if tool_modes:
-            sandbox_config = metadata.get("sandbox", {})
-            config_path = sandbox_config.get("config", "")
-            if "gitea" in config_path.lower():
-                detected_tool_mode = "gitea"
-            elif "sandbox" in config_path.lower() or "compose" in config_path.lower():
-                detected_tool_mode = "sandbox"
-            else:
-                detected_tool_mode = "unknown"
-
+            detected_tool_mode = task_args.get("tool_mode", "gitea")
             if detected_tool_mode not in tool_modes:
                 continue
 
@@ -218,16 +204,33 @@ def insert_leaderboard_content(
   </section>
 """
 
-    # Find insertion point - insert before the poster section
-    insertion_marker = "<!-- Paper poster -->"
+    # Find and replace the placeholder section
+    placeholder_start = "  <!-- 🔍 Malicious PR Detection Section -->"
 
-    if insertion_marker in template:
-        modified = template.replace(
-            insertion_marker, leaderboard_content + insertion_marker
-        )
+    if placeholder_start in template:
+        # Find the actual section
+        start_idx = template.find(placeholder_start)
+
+        # Find the end by looking for the next major comment or body closing
+        # The placeholder ends with: </section></body></html>
+        # We need to find where the timestamp section ends
+        end_search_start = start_idx + len(placeholder_start)
+        end_idx = template.find("</body>", end_search_start)
+
+        if start_idx != -1 and end_idx != -1:
+            # Replace placeholder with generated content (keep </body></html>)
+            modified = template[:start_idx] + leaderboard_content + template[end_idx:]
+        else:
+            modified = template
     else:
-        # Fallback: insert before closing body tag
-        modified = template.replace("</body>", leaderboard_content + "</body>")
+        # Fallback: insert before poster
+        insertion_marker = "<!-- Paper poster -->"
+        if insertion_marker in template:
+            modified = template.replace(
+                insertion_marker, leaderboard_content + insertion_marker
+            )
+        else:
+            modified = template
 
     return modified
 
