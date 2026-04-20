@@ -68,11 +68,13 @@ function initializeUI() {
 function getFilteredData() {
   const harnessFilter = document.getElementById("harness-filter")?.value || "all";
   const cweFilter = document.getElementById("cwe-filter")?.value || "all";
+  const modelFilter = document.getElementById("model-filter")?.value || "all";
 
   return leaderboardData.data_points.filter((point) => {
     const harnessMatch = harnessFilter === "all" || point.harness === harnessFilter;
     const cweMatch = cweFilter === "all" || point.cwe === cweFilter;
-    return harnessMatch && cweMatch;
+    const modelMatch = modelFilter === "all" || point.model === modelFilter;
+    return harnessMatch && cweMatch && modelMatch;
   });
 }
 
@@ -309,30 +311,34 @@ function renderRadarChart() {
 }
 
 function renderAxisTable() {
-  const filteredData = getFilteredData();
   const modelSelect = document.getElementById("model-filter");
+  const axisTableContainer = document.getElementById("axisTableContainer");
 
-  if (!modelSelect) return;
+  if (!modelSelect || !axisTableContainer) return;
 
   const selectedModel = modelSelect.value;
   if (selectedModel === "all") {
-    document.getElementById("axisTableContainer").style.display = "none";
+    axisTableContainer.innerHTML = '<div class="has-text-grey-light" style="padding: 2rem; text-align: center;"><p>Select a model to see axis breakdown details</p></div>';
+    axisTableContainer.style.display = "block";
     return;
   }
 
-  document.getElementById("axisTableContainer").style.display = "block";
+  axisTableContainer.style.display = "block";
 
-  const modelData = filteredData.filter((p) => p.model === selectedModel);
-  if (modelData.length === 0) return;
+  const filteredData = getFilteredData();
+  if (filteredData.length === 0) {
+    axisTableContainer.innerHTML = '<div class="has-text-grey-light" style="padding: 2rem; text-align: center;"><p>No data available for selected filters</p></div>';
+    return;
+  }
 
-  // Aggregate axis data for this model
+  // Aggregate axis data for filtered model
   const axisBreakdown = {
     axis1: {},
     axis2: {},
     axis3: {},
   };
 
-  modelData.forEach((point) => {
+  filteredData.forEach((point) => {
     if (point.axes) {
       for (const [axis, values] of Object.entries(point.axes)) {
         for (const [axisVal, score] of Object.entries(values)) {
@@ -354,7 +360,6 @@ function renderAxisTable() {
   }
 
   // Build HTML table
-  const tableContainer = document.getElementById("axisTableContainer");
   let html = `<div class="table-container"><table class="table is-striped is-hoverable">
     <thead><tr><th>Dimension</th><th>Value</th><th>Accuracy</th></tr></thead>
     <tbody>`;
@@ -380,7 +385,7 @@ function renderAxisTable() {
   }
 
   html += `</tbody></table></div>`;
-  tableContainer.innerHTML = html;
+  axisTableContainer.innerHTML = html;
 }
 
 // Event listeners
