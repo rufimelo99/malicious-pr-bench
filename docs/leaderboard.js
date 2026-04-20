@@ -183,28 +183,25 @@ function renderBarChart() {
     }
   });
 
-  // Calculate averages
-  const cweColors = {
-    cwe22: "rgba(255, 99, 132, 0.6)",
-    cwe78: "rgba(54, 162, 235, 0.6)",
-    cwe79: "rgba(75, 192, 192, 0.6)",
-    cwe89: "rgba(255, 206, 86, 0.6)",
-    cwe94: "rgba(153, 102, 255, 0.6)",
-    cwe125: "rgba(255, 159, 64, 0.6)",
-    cwe352: "rgba(201, 203, 207, 0.6)",
-    cwe416: "rgba(255, 193, 7, 0.6)",
-    cwe787: "rgba(100, 200, 100, 0.6)",
-    cwe862: "rgba(200, 100, 100, 0.6)",
+  // Model colors - consistent across all CWEs
+  const modelColors = {
+    "gpt-5.2": "rgba(255, 99, 132, 0.6)",
+    "claude-opus": "rgba(54, 162, 235, 0.6)",
+    "claude-sonnet": "rgba(75, 192, 192, 0.6)",
+    "gpt-4": "rgba(255, 206, 86, 0.6)",
+    "gemini": "rgba(153, 102, 255, 0.6)",
+    "llama": "rgba(255, 159, 64, 0.6)",
   };
 
-  const datasets = cwes.map((cwe) => {
-    const data = models.map((model) => {
+  // Create datasets - one per model
+  const datasets = models.map((model, idx) => {
+    const data = cwes.map((cwe) => {
       const scores = modelCweScores[model][cwe];
       return scores.length > 0 ? scores.reduce((a, b) => a + b) / scores.length : 0;
     });
-    const color = cweColors[cwe] || "rgba(100, 100, 100, 0.6)";
+    const color = modelColors[model] || `rgba(${100 + idx * 50}, ${100 + idx * 30}, ${100 + idx * 20}, 0.6)`;
     return {
-      label: cwe.toUpperCase(),
+      label: model,
       data: data,
       backgroundColor: color,
       borderColor: color.replace("0.6", "1"),
@@ -221,7 +218,7 @@ function renderBarChart() {
   charts.bar = new Chart(ctx, {
     type: "bar",
     data: {
-      labels: models,
+      labels: cwes.map((c) => c.toUpperCase()),
       datasets: datasets,
     },
     options: {
