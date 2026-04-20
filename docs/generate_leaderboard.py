@@ -9,6 +9,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
+# Load axis mapping from HuggingFace dataset
+AXIS_MAPPING = {}
+AXIS_MAPPING_PATH = Path(__file__).parent / "axis_mapping.json"
+if AXIS_MAPPING_PATH.exists():
+    with open(AXIS_MAPPING_PATH) as f:
+        AXIS_MAPPING = json.load(f)
+
 
 def parse_eval_file(eval_path: Path) -> Optional[dict[str, Any]]:
     """Parse .eval ZIP file to extract metadata and scores."""
@@ -33,6 +40,57 @@ def parse_eval_file(eval_path: Path) -> Optional[dict[str, Any]]:
                                 if scores:
                                     eval_meta["avg_score"] = sum(scores) / len(scores)
                                     eval_meta["score_count"] = len(scores)
+
+                                    # Extract axis data from sample IDs
+                                    # Format: repo-prN-axis1-axis2-axis3
+                                    axes_data = {
+                                        "axis1": {},
+                                        "axis2": {},
+                                        "axis3": {},
+                                    }
+                                    for sample, score in zip(samples, scores):
+                                        sample_id = sample.get("sample_id", "")
+                                        # Parse axis values from sample ID
+                                        # Use negative indices to handle repos with dashes
+                                        parts = sample_id.split("-")
+                                        if len(parts) >= 5:
+                                            try:
+                                                axis1 = parts[-3]
+                                                axis2 = parts[-2]
+                                                axis3 = parts[-1]
+
+                                                # Aggregate by axis
+                                                for axis_num, axis_val in [
+                                                    ("axis1", axis1),
+                                                    ("axis2", axis2),
+                                                    ("axis3", axis3),
+                                                ]:
+                                                    if (
+                                                        axis_val
+                                                        and axis_val != "undefined"
+                                                    ):
+                                                        if (
+                                                            axis_val
+                                                            not in axes_data[axis_num]
+                                                        ):
+                                                            axes_data[axis_num][
+                                                                axis_val
+                                                            ] = []
+                                                        axes_data[axis_num][
+                                                            axis_val
+                                                        ].append(score)
+                                            except (IndexError, ValueError):
+                                                pass
+
+                                    # Calculate average per axis
+                                    for axis_key in axes_data:
+                                        for key, values in axes_data[axis_key].items():
+                                            if values:
+                                                axes_data[axis_key][key] = sum(
+                                                    values
+                                                ) / len(values)
+
+                                    eval_meta["axes"] = axes_data
                             break
             except Exception:
                 pass
@@ -129,6 +187,7 @@ def parse_logs(
             "status": metadata.get("status", "unknown"),
             "created": created_str,
             "score": metadata.get("avg_score"),
+            "axes": metadata.get("axes", {}),
         }
 
         results[task][cwe].append(result)
@@ -142,7 +201,7 @@ def parse_logs(
 
 
 def generate_filters_html() -> str:
-    """Generate filter UI for leaderboard."""
+    """Generate filter UI and charts for leaderboard."""
     return """
   <!-- Filters Section -->
   <section class="section">
@@ -173,13 +232,61 @@ def generate_filters_html() -> str:
     </div>
   </section>
 
-  <!-- Chart Section -->
+  <!-- Charts Section -->
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-4">Score Over Time</h2>
-      <canvas id="timeSeriesChart"></canvas>
+      <div class="tabs">
+        <ul>
+          <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
+          <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
+          <li><a onclick="switchChart('radar')">🎯 Attack Types</a></li>
+        </ul>
+      </div>
+
+      <div id="timeSeriesContainer" class="chart-container">
+        <h2 class="title is-4">Score Over Time</h2>
+        <canvas id="timeSeriesChart"></canvas>
+      </div>
+
+      <div id="barContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Model Comparison</h2>
+        <canvas id="barChart"></canvas>
+      </div>
+
+      <div id="radarContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Performance by Attack Type</h2>
+        <canvas id="radarChart"></canvas>
+      </div>
     </div>
   </section>
+
+  <script>
+    function switchChart(chartType) {
+      const containers = {
+        'timeSeries': 'timeSeriesContainer',
+        'bar': 'barContainer',
+        'radar': 'radarContainer'
+      };
+
+      // Hide all containers
+      Object.values(containers).forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+
+      // Show selected container
+      document.getElementById(containers[chartType]).style.display = 'block';
+
+      // Update tab styling
+      document.querySelectorAll('.tabs li').forEach(li => li.classList.remove('is-active'));
+      event.target.closest('li').classList.add('is-active');
+    }
+  </script>
+
+  <style>
+    .tabs a { cursor: pointer; }
+    .chart-container { position: relative; height: 400px; }
+    #radarChart { max-width: 500px; margin: 0 auto; }
+  </style>
 """
 
 

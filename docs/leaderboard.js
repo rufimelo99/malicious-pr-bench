@@ -1,14 +1,14 @@
 // Leaderboard Data and Visualizations
 
 let leaderboardData = {};
-let chart = null;
+let charts = {};
 
 async function loadData() {
   try {
     const response = await fetch("leaderboard_data.json");
     leaderboardData = await response.json();
     initializeUI();
-    renderCharts();
+    renderAllCharts();
   } catch (error) {
     console.error("Error loading leaderboard data:", error);
   }
@@ -60,7 +60,13 @@ function getFilteredData() {
   });
 }
 
-function renderCharts() {
+function renderAllCharts() {
+  renderTimeSeriesChart();
+  renderBarChart();
+  renderRadarChart();
+}
+
+function renderTimeSeriesChart() {
   const filteredData = getFilteredData();
 
   // Prepare time-series data
@@ -82,40 +88,187 @@ function renderCharts() {
     timeSeriesData[key].sort((a, b) => new Date(a.date) - new Date(b.date));
   });
 
-  // Create chart
   const ctx = document.getElementById("timeSeriesChart");
   if (!ctx) return;
 
-  const datasets = Object.entries(timeSeriesData).map(([label, data], index) => {
-    const colors = [
-      "rgba(255, 99, 132, 0.6)",
-      "rgba(54, 162, 235, 0.6)",
-      "rgba(75, 192, 192, 0.6)",
-      "rgba(255, 206, 86, 0.6)",
-      "rgba(153, 102, 255, 0.6)",
-      "rgba(255, 159, 64, 0.6)",
-    ];
+  const colors = [
+    "rgba(255, 99, 132, 0.6)",
+    "rgba(54, 162, 235, 0.6)",
+    "rgba(75, 192, 192, 0.6)",
+    "rgba(255, 206, 86, 0.6)",
+    "rgba(153, 102, 255, 0.6)",
+    "rgba(255, 159, 64, 0.6)",
+  ];
 
-    return {
-      label: label,
-      data: data.map((d) => ({
-        x: new Date(d.date).toLocaleDateString(),
-        y: d.score,
-      })),
-      borderColor: colors[index % colors.length],
-      backgroundColor: colors[index % colors.length],
-      tension: 0.3,
-      fill: false,
-    };
+  const datasets = Object.entries(timeSeriesData).map(([label, data], index) => ({
+    label: label,
+    data: data.map((d) => ({
+      x: new Date(d.date).toLocaleDateString(),
+      y: d.score,
+    })),
+    borderColor: colors[index % colors.length],
+    backgroundColor: colors[index % colors.length],
+    tension: 0.3,
+    fill: false,
+  }));
+
+  if (charts.timeSeries) charts.timeSeries.destroy();
+
+  charts.timeSeries = new Chart(ctx, {
+    type: "line",
+    data: { datasets: datasets },
+    options: {
+      responsive: true,
+      plugins: {
+        title: { display: true, text: "Score Over Time" },
+        legend: { display: true, position: "top" },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: { display: true, text: "Score" },
+        },
+        x: {
+          title: { display: true, text: "Date" },
+        },
+      },
+    },
+  });
+}
+
+function renderBarChart() {
+  const filteredData = getFilteredData();
+  const cweFilter = document.getElementById("cwe-filter")?.value || "all";
+
+  // If no CWE filter, use the first CWE
+  const selectedCwe =
+    cweFilter === "all" ? leaderboardData.cwes[0] : cweFilter;
+
+  // Aggregate by model for selected CWE
+  const modelScores = {};
+  filteredData.forEach((point) => {
+    if (point.cwe === selectedCwe) {
+      if (!modelScores[point.model]) {
+        modelScores[point.model] = [];
+      }
+      modelScores[point.model].push(point.score || 0);
+    }
   });
 
-  if (chart) {
-    chart.destroy();
-  }
+  // Calculate averages
+  const labels = Object.keys(modelScores).sort();
+  const data = labels.map((model) => {
+    const scores = modelScores[model];
+    return scores.length > 0 ? scores.reduce((a, b) => a + b) / scores.length : 0;
+  });
 
-  chart = new Chart(ctx, {
-    type: "line",
+  const ctx = document.getElementById("barChart");
+  if (!ctx) return;
+
+  const colors = data.map((score) =>
+    score > 0.8 ? "rgba(75, 192, 75, 0.6)" : score > 0.6 ? "rgba(255, 193, 7, 0.6)" : "rgba(244, 67, 54, 0.6)"
+  );
+
+  if (charts.bar) charts.bar.destroy();
+
+  charts.bar = new Chart(ctx, {
+    type: "bar",
     data: {
+      labels: labels,
+      datasets: [
+        {
+          label: `Accuracy (${selectedCwe})`,
+          data: data,
+          backgroundColor: colors,
+          borderColor: colors.map((c) => c.replace("0.6", "1")),
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      indexAxis: "x",
+      plugins: {
+        title: {
+          display: true,
+          text: `Model Comparison - ${selectedCwe.toUpperCase()}`,
+        },
+        legend: { display: false },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 1,
+          title: { display: true, text: "Accuracy" },
+        },
+      },
+    },
+  });
+}
+
+function renderRadarChart() {
+  const filteredData = getFilteredData();
+
+  // Get unique models
+  const models = [...new Set(filteredData.map((p) => p.model))];
+
+  if (models.length === 0) return;
+
+  // Aggregate axis3 data by model from axes field
+  const modelAxis3Scores = {};
+  models.forEach((model) => {
+    modelAxis3Scores[model] = {};
+  });
+
+  filteredData.forEach((point) => {
+    if (point.axes && point.axes.axis3) {
+      const axis3Data = point.axes.axis3;
+      for (const [attackType, score] of Object.entries(axis3Data)) {
+        if (!modelAxis3Scores[point.model][attackType]) {
+          modelAxis3Scores[point.model][attackType] = [];
+        }
+        modelAxis3Scores[point.model][attackType].push(score);
+      }
+    }
+  });
+
+  // Get unique axis3 attack types across all models
+  const axis3Types = [...new Set(
+    Object.values(modelAxis3Scores).flatMap(obj => Object.keys(obj))
+  )].sort();
+
+  if (axis3Types.length === 0) return;
+
+  const ctx = document.getElementById("radarChart");
+  if (!ctx) return;
+
+  const colors = [
+    "rgba(255, 99, 132, 0.2)",
+    "rgba(54, 162, 235, 0.2)",
+    "rgba(75, 192, 192, 0.2)",
+    "rgba(255, 206, 86, 0.2)",
+    "rgba(153, 102, 255, 0.2)",
+    "rgba(255, 159, 64, 0.2)",
+  ];
+
+  const datasets = models.slice(0, 6).map((model, idx) => ({
+    label: model,
+    data: axis3Types.map((attackType) => {
+      const scores = modelAxis3Scores[model][attackType] || [];
+      return scores.length > 0 ? scores.reduce((a, b) => a + b) / scores.length : 0;
+    }),
+    borderColor: colors[idx].replace("0.2", "1"),
+    backgroundColor: colors[idx],
+    borderWidth: 2,
+  }));
+
+  if (charts.radar) charts.radar.destroy();
+
+  charts.radar = new Chart(ctx, {
+    type: "radar",
+    data: {
+      labels: axis3Types,
       datasets: datasets,
     },
     options: {
@@ -123,27 +276,15 @@ function renderCharts() {
       plugins: {
         title: {
           display: true,
-          text: "Benchmark Score Over Time",
+          text: "Model Performance by Attack Type (axis3)",
         },
-        legend: {
-          display: true,
-          position: "top",
-        },
+        legend: { display: true, position: "top" },
       },
       scales: {
-        y: {
+        r: {
           beginAtZero: true,
           max: 1,
-          title: {
-            display: true,
-            text: "Score",
-          },
-        },
-        x: {
-          title: {
-            display: true,
-            text: "Date",
-          },
+          title: { display: true, text: "Accuracy" },
         },
       },
     },
@@ -158,9 +299,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const cweSelect = document.getElementById("cwe-filter");
 
   if (harnessSelect) {
-    harnessSelect.addEventListener("change", renderCharts);
+    harnessSelect.addEventListener("change", renderAllCharts);
   }
   if (cweSelect) {
-    cweSelect.addEventListener("change", renderCharts);
+    cweSelect.addEventListener("change", renderAllCharts);
   }
 });

@@ -555,13 +555,61 @@
     </div>
   </section>
 
-  <!-- Chart Section -->
+  <!-- Charts Section -->
   <section class="section">
     <div class="container is-max-desktop">
-      <h2 class="title is-4">Score Over Time</h2>
-      <canvas id="timeSeriesChart"></canvas>
+      <div class="tabs">
+        <ul>
+          <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
+          <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
+          <li><a onclick="switchChart('radar')">🎯 Attack Types</a></li>
+        </ul>
+      </div>
+
+      <div id="timeSeriesContainer" class="chart-container">
+        <h2 class="title is-4">Score Over Time</h2>
+        <canvas id="timeSeriesChart"></canvas>
+      </div>
+
+      <div id="barContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Model Comparison</h2>
+        <canvas id="barChart"></canvas>
+      </div>
+
+      <div id="radarContainer" class="chart-container" style="display:none;">
+        <h2 class="title is-4">Performance by Attack Type</h2>
+        <canvas id="radarChart"></canvas>
+      </div>
     </div>
   </section>
+
+  <script>
+    function switchChart(chartType) {
+      const containers = {
+        'timeSeries': 'timeSeriesContainer',
+        'bar': 'barContainer',
+        'radar': 'radarContainer'
+      };
+
+      // Hide all containers
+      Object.values(containers).forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+
+      // Show selected container
+      document.getElementById(containers[chartType]).style.display = 'block';
+
+      // Update tab styling
+      document.querySelectorAll('.tabs li').forEach(li => li.classList.remove('is-active'));
+      event.target.closest('li').classList.add('is-active');
+    }
+  </script>
+
+  <style>
+    .tabs a { cursor: pointer; }
+    .chart-container { position: relative; height: 400px; }
+    #radarChart { max-width: 500px; margin: 0 auto; }
+  </style>
 
   <!-- 🔍 Malicious PR Detection Section -->
   <section class="section">
@@ -670,7 +718,7 @@
   <section class="section">
     <div class="container is-max-desktop has-text-centered has-text-grey-light">
       <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-04-19 21:01:56 UTC
+        Last updated: 2026-04-19 21:15:14 UTC
       </p>
     </div>
   </section>
