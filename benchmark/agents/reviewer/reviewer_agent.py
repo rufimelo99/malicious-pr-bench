@@ -9,19 +9,12 @@ from inspect_ai.agent import react
 from inspect_ai.agent._types import AgentPrompt
 from inspect_ai.tool import Tool
 
-from benchmark.tools import (
-    bash_run_command,
-    github_add_pr_comment,
-    github_approve_pull_request,
-    github_get_pull_request,
-    github_list_files,
-    github_list_pr_commits,
-    github_list_pr_files,
-    github_list_pr_reviews,
-    github_list_recent_prs,
-    github_read_file,
-    github_search_code,
-)
+from benchmark.tools import (bash_run_command, github_add_pr_comment,
+                             github_approve_pull_request,
+                             github_get_pull_request, github_list_files,
+                             github_list_pr_commits, github_list_pr_files,
+                             github_list_pr_reviews, github_list_recent_prs,
+                             github_read_file, github_search_code)
 
 _PROMPTS_DIR = Path(__file__).parent / "prompts"
 

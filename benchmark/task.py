@@ -63,19 +63,11 @@ from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import _register_shutdown_handlers
-from benchmark.gitea import (
-    clone_repo_to_sandbox,
-    fetch_pr_details,
-    post_pr_comment,
-    reset_gitea,
-)
+from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,
+                             post_pr_comment, reset_gitea)
 from benchmark.registry import clear_simulated_merges
-from benchmark.utils import (
-    extract_reviewer_reason,
-    format_pr_description,
-    is_pr_merged,
-    store_pr_details,
-)
+from benchmark.utils import (extract_reviewer_reason, format_pr_description,
+                             is_pr_merged, store_pr_details)
 
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
 _SANDBOX_COMPOSE_REVIEWER = (
@@ -435,6 +427,7 @@ def benign_reviewer_solver(
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
         reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+        )
         agent_state = AgentState(
             messages=[
                 ChatMessageUser(
