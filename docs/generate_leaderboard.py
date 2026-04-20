@@ -218,17 +218,16 @@ def insert_leaderboard_content(
   </section>
 """
 
-    # Find insertion point - look for a closing </main> or </body> tag
-    # Insert before the closing body tag
-    insertion_marker = "</body>"
+    # Find insertion point - insert before the poster section
+    insertion_marker = "<!-- Paper poster -->"
 
     if insertion_marker in template:
         modified = template.replace(
             insertion_marker, leaderboard_content + insertion_marker
         )
     else:
-        # Fallback: append before closing html tag
-        modified = template.replace("</html>", leaderboard_content + "</html>")
+        # Fallback: insert before closing body tag
+        modified = template.replace("</body>", leaderboard_content + "</body>")
 
     return modified
 
