@@ -250,7 +250,6 @@ def generate_filters_html() -> str:
           <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
           <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
           <li><a onclick="switchChart('deception')">🎭 Deception Patterns</a></li>
-          <li><a onclick="switchChart('radar')">🎯 Attack Types</a></li>
           <li><a onclick="switchChart('axes')">📋 Axis Breakdown</a></li>
         </ul>
       </div>
@@ -270,11 +269,6 @@ def generate_filters_html() -> str:
         <canvas id="deceptionChart"></canvas>
       </div>
 
-      <div id="radarContainer" class="chart-container" style="display:none;">
-        <h2 class="title is-4">Performance by Attack Type</h2>
-        <canvas id="radarChart"></canvas>
-      </div>
-
       <div id="axisTableContainer" class="chart-container" style="display:none; margin-top: 4rem;">
         <h2 class="title is-4">Model Performance by Axis</h2>
       </div>
@@ -287,7 +281,6 @@ def generate_filters_html() -> str:
         'timeSeries': 'timeSeriesContainer',
         'bar': 'barContainer',
         'deception': 'deceptionContainer',
-        'radar': 'radarContainer',
         'axes': 'axisTableContainer'
       };
 

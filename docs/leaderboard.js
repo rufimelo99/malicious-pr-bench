@@ -82,7 +82,6 @@ function renderAllCharts() {
   renderTimeSeriesChart();
   renderBarChart();
   renderDeceptionPatternsChart();
-  renderRadarChart();
   renderAxisTable();
 }
 
