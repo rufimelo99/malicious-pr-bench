@@ -26,13 +26,9 @@ jobs:
 
       - name: Generate leaderboard
         run: |
-          # Backup original template if it doesn't exist
-          if [ ! -f docs/index.html.bak ]; then
-            cp docs/index.html docs/index.html.bak
-          fi
           python docs/generate_leaderboard.py \
             --logs docs/logs \
-            --template docs/index.html.bak \
+            --template docs/template.html \
             --output docs/index.html
 
       - name: Commit & push

@@ -551,8 +551,8 @@ def main():
     parser.add_argument(
         "--template",
         type=Path,
-        default=Path("docs/index.html"),
-        help="Academic template HTML (default: docs/index.html)",
+        default=Path("docs/template.html"),
+        help="Academic template HTML (default: docs/template.html)",
     )
     parser.add_argument(
         "--output",
