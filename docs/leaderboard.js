@@ -399,11 +399,16 @@ function renderAxisTable() {
 
   if (!modelSelect || !axisTableContainer) return;
 
-  const selectedModel = modelSelect.value;
+  let selectedModel = modelSelect.value;
+
+  // If no model selected, use first model for display only (don't change filter)
   if (selectedModel === "all") {
-    axisTableContainer.innerHTML = '<div class="has-text-grey-light" style="padding: 2rem; text-align: center;"><p>Select a model to see axis breakdown details</p></div>';
-    axisTableContainer.style.display = "block";
-    return;
+    if (!leaderboardData.models || leaderboardData.models.length === 0) {
+      axisTableContainer.innerHTML = '<div class="has-text-grey-light" style="padding: 2rem; text-align: center;"><p>Select a model to see axis breakdown details</p></div>';
+      axisTableContainer.style.display = "block";
+      return;
+    }
+    selectedModel = leaderboardData.models[0];
   }
 
   axisTableContainer.style.display = "block";
