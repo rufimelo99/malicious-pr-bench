@@ -57,7 +57,9 @@ from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
 from benchmark.cli_solver import cli_solver
-from benchmark.config import BENIGN_IMAGE_TEMPLATE
+from benchmark.config import (BENIGN_IMAGE_TEMPLATE,
+                              DEFAULT_BENIGN_DATASET_VERSION,
+                              DEFAULT_DATASET_VERSION)
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import (HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE,
@@ -267,7 +269,7 @@ def reviewer_benchmark(
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
-    version: str = "gpt5.2-filtered",
+    version: str = DEFAULT_DATASET_VERSION,
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
@@ -395,7 +397,7 @@ def benign_reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: str = "gpt5.2_v2",
+    version: str = DEFAULT_BENIGN_DATASET_VERSION,
     tool_mode: ToolMode = ToolMode.SANDBOX,
     prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Solver:
