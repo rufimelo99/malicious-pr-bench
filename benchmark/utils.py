@@ -2,7 +2,7 @@ import os
 
 from inspect_ai.model import ChatMessageAssistant
 
-from benchmark.config import HTTP_TIMEOUT, SIMULATE_MERGES
+from benchmark.config import HTTP_TIMEOUT, SIMULATE_MERGES, PromptVariant, ToolMode
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 
@@ -79,3 +79,21 @@ def extract_reviewer_reason(messages: list) -> str:
             if text:
                 return text[:1000]
     return "The reviewer declined this pull request without leaving a reason."
+
+
+def convert_tool_mode(value: ToolMode | str) -> ToolMode:
+    if isinstance(value, ToolMode):
+        return value
+    try:
+        return ToolMode(value)
+    except ValueError:
+        raise ValueError(f"Invalid tool_mode: {value}")
+    
+def convert_prompt_variant(value: PromptVariant | str) -> PromptVariant:
+    if isinstance(value, PromptVariant):
+        return value
+    try:
+        return PromptVariant(value)
+    except ValueError:
+        raise ValueError(f"Invalid prompt_variant: {value}")
+    

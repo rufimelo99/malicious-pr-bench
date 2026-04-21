@@ -1,6 +1,7 @@
 """Centralised configuration for the benchmark."""
 
 import os
+from enum import Enum
 
 # Timeout (seconds) for all outbound HTTP requests to GitHub / Gitea APIs.
 HTTP_TIMEOUT = 60
@@ -25,18 +26,34 @@ SUPPORTED_CWES: frozenset[str] = frozenset(
 )
 
 # Dataset version identifiers — these are path segments inside the HF repo.
-SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset(
-    {
-        "gpt5.2",
-        "gpt5.2-filtered",
-    }
-)
-SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset(
-    {
-        "gpt5.2",
-        "gpt5.2_v2",
-    }
-)
+SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2-filtered"})
+DEFAULT_DATASET_VERSION: str = "gpt5.2-filtered"
+
+SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2_v2"})
+DEFAULT_BENIGN_DATASET_VERSION: str = "gpt5.2_v2"
+
+
+# Supported modes and variants
+class ToolMode(str, Enum):
+    """Tool mode for reviewer agent."""
+
+    GITEA = "gitea"
+    SANDBOX = "sandbox"
+
+
+class PromptVariant(str, Enum):
+    """Prompt variant for reviewer agent."""
+
+    SECURITY = "security"
+    PLAIN = "plain"
+
+
+# Prompt file mappings for each variant
+PROMPT_FILES: dict[PromptVariant, str] = {
+    PromptVariant.SECURITY: "reviewer_system_prompt_security",
+    PromptVariant.PLAIN: "reviewer_system_prompt_plain",
+}
+
 # GitHub / Gitea API constants.
 GITHUB_ACCEPT = "application/vnd.github+json"
 GITHUB_API_VERSION = "2022-11-28"
