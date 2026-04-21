@@ -267,7 +267,7 @@ def reviewer_benchmark(
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
-    version: MaliciousVersion = "gpt5.2-filtered",
+    version: str = "gpt5.2-filtered",
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
