@@ -45,7 +45,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Literal
 
 from inspect_ai import Task, task
 from inspect_ai.agent import AgentState
@@ -58,14 +57,12 @@ from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 from benchmark.agents.reviewer.reviewer_agent import (PromptVariant, ToolMode,
                                                       build_reviewer_agent)
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
-
-MaliciousVersion = Literal["v0.0.0", "gpt5.2-filtered", "v0.1.0"]
-BenignVersion = Literal["gpt5.2_v2"]
 from benchmark.cli_solver import cli_solver
 from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
-from benchmark.config import HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE
+from benchmark.config import (HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE,
+                              BenignVersion, MaliciousVersion)
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import _register_shutdown_handlers
 from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,

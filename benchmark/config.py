@@ -1,6 +1,7 @@
 """Centralised configuration for the benchmark."""
 
 import os
+from typing import Literal
 
 # Timeout (seconds) for all outbound HTTP requests to GitHub / Gitea APIs.
 HTTP_TIMEOUT = 60
@@ -37,6 +38,11 @@ SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset(
         "gpt5.2_v2",
     }
 )
+
+# Type aliases for dataset versions
+MaliciousVersion = Literal["v0.0.0", "gpt5.2-filtered", "v0.1.0"]
+BenignVersion = Literal["gpt5.2_v2"]
+
 # GitHub / Gitea API constants.
 GITHUB_ACCEPT = "application/vnd.github+json"
 GITHUB_API_VERSION = "2022-11-28"
