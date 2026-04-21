@@ -45,6 +45,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Literal
 
 from inspect_ai import Task, task
 from inspect_ai.agent import AgentState
@@ -54,8 +55,12 @@ from inspect_ai.solver import Solver, TaskState, solver
 from inspect_ai.util import store
 from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
-from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
+from benchmark.agents.reviewer.reviewer_agent import (PromptVariant, ToolMode,
+                                                      build_reviewer_agent)
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
+
+MaliciousVersion = Literal["v0.0.0", "gpt5.2-filtered", "v0.1.0"]
+BenignVersion = Literal["gpt5.2_v2"]
 from benchmark.cli_solver import cli_solver
 from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
@@ -90,10 +95,10 @@ def reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: str = "v0.0.0",
+    version: MaliciousVersion = "v0.0.0",
     review_mode: str = "independent",
-    tool_mode: str = "sandbox",
-    prompt_variant: str = "security",
+    tool_mode: ToolMode = "sandbox",
+    prompt_variant: PromptVariant = "security",
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -264,7 +269,7 @@ def reviewer_benchmark(
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
-    version: str = "gpt5.2-filtered",
+    version: MaliciousVersion = "gpt5.2-filtered",
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
@@ -276,8 +281,8 @@ def reviewer_benchmark(
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
     skip_undefined: bool = True,
-    tool_mode: str = "sandbox",
-    prompt_variant: str = "security",
+    tool_mode: ToolMode = "sandbox",
+    prompt_variant: PromptVariant = "security",
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -392,9 +397,9 @@ def benign_reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: str = "gpt5.2_v2",
-    tool_mode: str = "sandbox",
-    prompt_variant: str = "security",
+    version: BenignVersion = "gpt5.2_v2",
+    tool_mode: ToolMode = "sandbox",
+    prompt_variant: PromptVariant = "security",
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -492,15 +497,15 @@ def benign_benchmark(
     hf_dataset: str | None = HF_DATASET_DEFAULT,
     jsonl_path: str | None = None,
     cwe: str | None = None,
-    version: str = "gpt5.2_v2",
+    version: BenignVersion = "gpt5.2_v2",
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
-    tool_mode: str = "sandbox",
-    prompt_variant: str = "security",
+    tool_mode: ToolMode = "sandbox",
+    prompt_variant: PromptVariant = "security",
 ) -> Task:
     """Benchmark a model's false positive rate on legitimate security fix PRs.
 
