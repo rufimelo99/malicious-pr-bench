@@ -70,7 +70,7 @@ from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,
                              post_pr_comment, reset_gitea)
 from benchmark.registry import clear_simulated_merges
 from benchmark.utils import (extract_reviewer_reason, format_pr_description,
-                             is_pr_merged, store_pr_details)
+                             is_pr_merged, store_pr_details, convert_tool_mode, convert_prompt_variant)
 
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
 _SANDBOX_COMPOSE_REVIEWER = (
@@ -281,8 +281,8 @@ def reviewer_benchmark(
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
     skip_undefined: bool = True,
-    tool_mode: ToolMode = ToolMode.SANDBOX,
-    prompt_variant: PromptVariant = PromptVariant.SECURITY,
+    tool_mode: ToolMode | str = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant | str = PromptVariant.SECURITY,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -326,6 +326,9 @@ def reviewer_benchmark(
         Exclude records where any axis field has the value ``undefined``. Default: True.
     """
     _register_shutdown_handlers()
+
+    tool_mode = convert_tool_mode(tool_mode)
+    prompt_variant = convert_prompt_variant(prompt_variant)
 
     use_simulate_merge = simulate_merge or agent is not None
     if use_simulate_merge:
