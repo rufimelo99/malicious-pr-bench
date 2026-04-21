@@ -1,7 +1,7 @@
 """Centralised configuration for the benchmark."""
 
 import os
-from typing import Literal
+from enum import Enum
 
 # Timeout (seconds) for all outbound HTTP requests to GitHub / Gitea APIs.
 HTTP_TIMEOUT = 60
@@ -29,14 +29,26 @@ SUPPORTED_CWES: frozenset[str] = frozenset(
 SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2-filtered"})
 SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2_v2"})
 
+
 # Supported modes and variants
-ToolMode = Literal["gitea", "sandbox"]
-PromptVariant = Literal["security", "plain"]
+class ToolMode(str, Enum):
+    """Tool mode for reviewer agent."""
+
+    GITEA = "gitea"
+    SANDBOX = "sandbox"
+
+
+class PromptVariant(str, Enum):
+    """Prompt variant for reviewer agent."""
+
+    SECURITY = "security"
+    PLAIN = "plain"
+
 
 # Prompt file mappings for each variant
-PROMPT_FILES: dict[str, str] = {
-    "security": "reviewer_system_prompt_security",
-    "plain": "reviewer_system_prompt_plain",
+PROMPT_FILES: dict[PromptVariant, str] = {
+    PromptVariant.SECURITY: "reviewer_system_prompt_security",
+    PromptVariant.PLAIN: "reviewer_system_prompt_plain",
 }
 
 # GitHub / Gitea API constants.

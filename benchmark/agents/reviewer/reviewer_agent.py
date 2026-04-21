@@ -17,12 +17,12 @@ from benchmark.tools import (bash_run_command, github_add_pr_comment,
 
 # Prompts by variant (loaded from config)
 _VARIANT_PROMPTS = {
-    variant: load_prompt(filename) for variant, filename in PROMPT_FILES.items()
+    variant.value: load_prompt(filename) for variant, filename in PROMPT_FILES.items()
 }
 
 # Prompts by tool mode and variant
 _SYSTEM_PROMPTS: dict[str, dict[str, str]] = {
-    tool_mode: _VARIANT_PROMPTS.copy() for tool_mode in ("gitea", "sandbox")
+    tool_mode.value: _VARIANT_PROMPTS.copy() for tool_mode in ToolMode
 }
 
 
