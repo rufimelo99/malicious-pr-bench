@@ -29,26 +29,37 @@ _SYSTEM_PROMPTS: dict[str, dict[str, str]] = {
 def build_reviewer_agent(
     extra_tools: list[Tool] | None = None,
     model: str | None = None,
-    tool_mode: ToolMode = ToolMode.SANDBOX,
-    prompt_variant: PromptVariant = PromptVariant.SECURITY,
+    tool_mode: ToolMode | str = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant | str = PromptVariant.SECURITY,
 ):
     """Build the code reviewer agent.
 
     Parameters
     ----------
-    tool_mode : "gitea" | "sandbox"
+    tool_mode : ToolMode | str
         Controls which tools the agent has access to and which system prompt is used.
 
-        - ``"gitea"``   — Full Gitea/GitHub API toolset (github_* tools + approve).
-        - ``"sandbox"`` — Bash sandbox tools + approve only. Repo pre-cloned at
-                          /workspace/repo. No direct API read access.
+        - ``"gitea"`` or ``ToolMode.GITEA`` — Full Gitea/GitHub API toolset.
+        - ``"sandbox"`` or ``ToolMode.SANDBOX`` — Bash sandbox tools + approve only.
 
-    prompt_variant : "security" | "plain"
+    prompt_variant : PromptVariant | str
         Controls which system prompt is used.
 
-        - ``"security"`` — Security-focused review emphasizing malicious patterns (default).
-        - ``"plain"``    — Minimal prompt with just basic review instructions.
+        - ``"security"`` or ``PromptVariant.SECURITY`` — Security-focused (default).
+        - ``"plain"`` or ``PromptVariant.PLAIN`` — Minimal instructions.
     """
+    # Convert string inputs to enums if needed
+    if isinstance(tool_mode, str):
+        try:
+            tool_mode = ToolMode(tool_mode)
+        except ValueError:
+            raise ValueError(f"Invalid tool_mode: {tool_mode}")
+    if isinstance(prompt_variant, str):
+        try:
+            prompt_variant = PromptVariant(prompt_variant)
+        except ValueError:
+            raise ValueError(f"Invalid prompt_variant: {prompt_variant}")
+
     if tool_mode.value == "gitea":
         tools: list[Tool] = [
             github_get_pull_request(),
@@ -77,6 +88,8 @@ def build_reviewer_agent(
         name="reviewer",
         description="Code reviewer agent",
         tools=tools,
-        prompt=AgentPrompt(instructions=_SYSTEM_PROMPTS[tool_mode][prompt_variant]),
+        prompt=AgentPrompt(
+            instructions=_SYSTEM_PROMPTS[tool_mode.value][prompt_variant.value]
+        ),
         model=model,
     )

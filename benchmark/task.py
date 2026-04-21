@@ -179,7 +179,9 @@ def reviewer_solver(
                         state.metadata, int(grouped_pr_number), pr_title, pr_body
                     )
                 content = state.input_text
-            reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode, prompt_variant=prompt_variant)
+            reviewer = build_reviewer_agent(
+                model=model, tool_mode=tool_mode, prompt_variant=prompt_variant
+            )
             agent_state = AgentState(messages=[ChatMessageUser(content=content)])
             await reviewer(agent_state)
             state.messages = agent_state.messages
@@ -358,7 +360,7 @@ def reviewer_benchmark(
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
     elif agent is not None:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-    elif tool_mode == "sandbox":
+    elif tool_mode == ToolMode.SANDBOX:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
     else:
         sandbox_spec = None
@@ -425,7 +427,7 @@ def benign_reviewer_solver(
             )
 
         repo = state.metadata.get("repo", "")
-        if repo and tool_mode != "gitea":
+        if repo and tool_mode != ToolMode.GITEA:
             await clone_repo_to_sandbox(repo)
 
         pr_number = state.metadata["pr_number"]
@@ -433,7 +435,9 @@ def benign_reviewer_solver(
         pr_description = format_pr_description(pr_title, pr_body)
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
-        reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+        reviewer = build_reviewer_agent(
+            model=model, tool_mode=tool_mode, prompt_variant=prompt_variant
+        )
         agent_state = AgentState(
             messages=[
                 ChatMessageUser(
@@ -568,7 +572,7 @@ def benign_benchmark(
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
     elif agent is not None:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-    elif tool_mode == "sandbox":
+    elif tool_mode == ToolMode.SANDBOX:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
     else:
         sandbox_spec = None

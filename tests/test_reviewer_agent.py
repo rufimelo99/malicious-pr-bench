@@ -9,15 +9,17 @@ class TestBuildReviewerAgent:
     def test_gitea_mode_builds_without_error(self):
         from benchmark.agents.reviewer.reviewer_agent import \
             build_reviewer_agent
+        from benchmark.config import ToolMode
 
-        agent = build_reviewer_agent(tool_mode="gitea")
+        agent = build_reviewer_agent(tool_mode=ToolMode.GITEA)
         assert agent is not None
 
     def test_sandbox_mode_builds_without_error(self):
         from benchmark.agents.reviewer.reviewer_agent import \
             build_reviewer_agent
+        from benchmark.config import ToolMode
 
-        agent = build_reviewer_agent(tool_mode="sandbox")
+        agent = build_reviewer_agent(tool_mode=ToolMode.SANDBOX)
         assert agent is not None
 
     def test_invalid_tool_mode_raises(self):
@@ -51,15 +53,17 @@ class TestBuildReviewerAgent:
 
         from benchmark.agents.reviewer.reviewer_agent import \
             build_reviewer_agent
+        from benchmark.config import ToolMode
 
         extra = MagicMock()
         # Should not raise
-        agent = build_reviewer_agent(tool_mode="sandbox", extra_tools=[extra])
+        agent = build_reviewer_agent(tool_mode=ToolMode.SANDBOX, extra_tools=[extra])
         assert agent is not None
 
     def test_model_parameter_accepted(self):
         from benchmark.agents.reviewer.reviewer_agent import \
             build_reviewer_agent
+        from benchmark.config import ToolMode
 
-        agent = build_reviewer_agent(tool_mode="sandbox", model="openai/gpt-4o")
+        agent = build_reviewer_agent(tool_mode=ToolMode.SANDBOX, model="openai/gpt-4o")
         assert agent is not None
