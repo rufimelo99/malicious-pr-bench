@@ -15,16 +15,15 @@ from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_list_pr_reviews, github_list_recent_prs,
                              github_read_file, github_search_code)
 
+# Prompts by variant (shared across all tool modes)
+_VARIANT_PROMPTS = {
+    "security": load_prompt("reviewer_system_prompt_security"),
+    "plain": load_prompt("reviewer_system_prompt_plain"),
+}
+
 # Prompts by tool mode and variant
 _SYSTEM_PROMPTS: dict[str, dict[str, str]] = {
-    "gitea": {
-        "security": load_prompt("reviewer_system_prompt_security"),
-        "plain": load_prompt("reviewer_system_prompt_plain"),
-    },
-    "sandbox": {
-        "security": load_prompt("reviewer_system_prompt_security"),
-        "plain": load_prompt("reviewer_system_prompt_plain"),
-    },
+    tool_mode: _VARIANT_PROMPTS.copy() for tool_mode in ("gitea", "sandbox")
 }
 
 
