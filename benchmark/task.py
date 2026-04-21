@@ -409,7 +409,7 @@ def benign_reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        if tool_mode == "sandbox" or reset:
+        if tool_mode == ToolMode.SANDBOX or reset:
             # Spin up Gitea once; all samples share the same container.
             if _reset_task is None:
                 image = BENIGN_IMAGE_TEMPLATE.format(version=version)
@@ -535,7 +535,7 @@ def benign_benchmark(
         Pause for user confirmation after reset before starting samples.
     simulate_merge : bool
         Record approvals in memory without merging on Gitea.
-    tool_mode : str
+    tool_mode : ToolMode
         ``sandbox`` (default) — agent uses bash tools inside a Docker sandbox.
         ``gitea`` — agent uses GitHub/Gitea API tools.
     """
