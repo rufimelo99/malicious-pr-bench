@@ -57,17 +57,20 @@ from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
 from benchmark.cli_solver import cli_solver
-from benchmark.config import BENIGN_IMAGE_TEMPLATE
+from benchmark.config import (BENIGN_IMAGE_TEMPLATE,
+                              DEFAULT_BENIGN_DATASET_VERSION,
+                              DEFAULT_DATASET_VERSION)
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
-from benchmark.config import HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE
+from benchmark.config import (HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE,
+                              PromptVariant, ToolMode)
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import _register_shutdown_handlers
 from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,
                              post_pr_comment, reset_gitea)
 from benchmark.registry import clear_simulated_merges
 from benchmark.utils import (extract_reviewer_reason, format_pr_description,
-                             is_pr_merged, store_pr_details)
+                             is_pr_merged, store_pr_details, convert_tool_mode, convert_prompt_variant)
 
 _SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
 _SANDBOX_COMPOSE_REVIEWER = (
@@ -92,7 +95,8 @@ def reviewer_solver(
     pause_after_reset: bool = False,
     version: str = "v0.0.0",
     review_mode: str = "independent",
-    tool_mode: str = "sandbox",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -102,7 +106,7 @@ def reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        if (tool_mode == "sandbox" or reset) and cwe:
+        if (tool_mode.value == "sandbox" or reset) and cwe:
             # Spin up Gitea once; all samples share the same container.
             if _reset_task is None:
                 image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
@@ -122,7 +126,7 @@ def reviewer_solver(
             )
 
         repo = state.metadata.get("repo", "")
-        if repo and tool_mode != "gitea":
+        if repo and tool_mode.value != "gitea":
             await clone_repo_to_sandbox(repo)
 
         if review_mode == "independent":
@@ -137,7 +141,9 @@ def reviewer_solver(
                 store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
                 pr_description = format_pr_description(pr_title, pr_body)
                 description_block = f"\n\n{pr_description}" if pr_description else ""
-                reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+                reviewer = build_reviewer_agent(
+                    model=model, tool_mode=tool_mode, prompt_variant=prompt_variant
+                )
                 agent_state = AgentState(
                     messages=[
                         ChatMessageUser(
@@ -175,7 +181,9 @@ def reviewer_solver(
                         state.metadata, int(grouped_pr_number), pr_title, pr_body
                     )
                 content = state.input_text
-            reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+            reviewer = build_reviewer_agent(
+                model=model, tool_mode=tool_mode, prompt_variant=prompt_variant
+            )
             agent_state = AgentState(messages=[ChatMessageUser(content=content)])
             await reviewer(agent_state)
             state.messages = agent_state.messages
@@ -261,7 +269,7 @@ def reviewer_benchmark(
     jsonl_path: str | None = None,
     repo: str = "gitadmin/test-repo",
     cwe: str | None = None,
-    version: str = "gpt5.2-filtered",
+    version: str = DEFAULT_DATASET_VERSION,
     axis1: str | None = None,
     axis2: str | None = None,
     axis3: str | None = None,
@@ -273,7 +281,8 @@ def reviewer_benchmark(
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
     skip_undefined: bool = True,
-    tool_mode: str = "sandbox",
+    tool_mode: ToolMode | str = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant | str = PromptVariant.SECURITY,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -318,6 +327,9 @@ def reviewer_benchmark(
     """
     _register_shutdown_handlers()
 
+    tool_mode = convert_tool_mode(tool_mode)
+    prompt_variant = convert_prompt_variant(prompt_variant)
+
     use_simulate_merge = simulate_merge or agent is not None
     if use_simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
@@ -335,6 +347,7 @@ def reviewer_benchmark(
             version=version,
             review_mode=review_mode,
             tool_mode=tool_mode,
+            prompt_variant=prompt_variant,
         )
         if agent is None
         else cli_solver(
@@ -352,7 +365,7 @@ def reviewer_benchmark(
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
     elif agent is not None:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-    elif tool_mode == "sandbox":
+    elif tool_mode == ToolMode.SANDBOX:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
     else:
         sandbox_spec = None
@@ -387,8 +400,9 @@ def benign_reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: str = "gpt5.2_v2",
-    tool_mode: str = "sandbox",
+    version: str = DEFAULT_BENIGN_DATASET_VERSION,
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -398,7 +412,7 @@ def benign_reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        if tool_mode == "sandbox" or reset:
+        if tool_mode == ToolMode.SANDBOX or reset:
             # Spin up Gitea once; all samples share the same container.
             if _reset_task is None:
                 image = BENIGN_IMAGE_TEMPLATE.format(version=version)
@@ -418,7 +432,7 @@ def benign_reviewer_solver(
             )
 
         repo = state.metadata.get("repo", "")
-        if repo and tool_mode != "gitea":
+        if repo and tool_mode != ToolMode.GITEA:
             await clone_repo_to_sandbox(repo)
 
         pr_number = state.metadata["pr_number"]
@@ -426,7 +440,9 @@ def benign_reviewer_solver(
         pr_description = format_pr_description(pr_title, pr_body)
         description_block = f"\n\n{pr_description}" if pr_description else ""
 
-        reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+        reviewer = build_reviewer_agent(
+            model=model, tool_mode=tool_mode, prompt_variant=prompt_variant
+        )
         agent_state = AgentState(
             messages=[
                 ChatMessageUser(
@@ -493,7 +509,8 @@ def benign_benchmark(
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
-    tool_mode: str = "sandbox",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Task:
     """Benchmark a model's false positive rate on legitimate security fix PRs.
 
@@ -521,7 +538,7 @@ def benign_benchmark(
         Pause for user confirmation after reset before starting samples.
     simulate_merge : bool
         Record approvals in memory without merging on Gitea.
-    tool_mode : str
+    tool_mode : ToolMode
         ``sandbox`` (default) — agent uses bash tools inside a Docker sandbox.
         ``gitea`` — agent uses GitHub/Gitea API tools.
     """
@@ -542,6 +559,7 @@ def benign_benchmark(
             pause_after_reset=pause_after_reset,
             version=version,
             tool_mode=tool_mode,
+            prompt_variant=prompt_variant,
         )
         if agent is None
         else cli_solver(
@@ -559,7 +577,7 @@ def benign_benchmark(
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
     elif agent is not None:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-    elif tool_mode == "sandbox":
+    elif tool_mode == ToolMode.SANDBOX:
         sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
     else:
         sandbox_spec = None
