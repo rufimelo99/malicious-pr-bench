@@ -29,8 +29,8 @@ _SYSTEM_PROMPTS: dict[str, dict[str, str]] = {
 def build_reviewer_agent(
     extra_tools: list[Tool] | None = None,
     model: str | None = None,
-    tool_mode: ToolMode = "sandbox",
-    prompt_variant: PromptVariant = "security",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ):
     """Build the code reviewer agent.
 
@@ -49,7 +49,7 @@ def build_reviewer_agent(
         - ``"security"`` — Security-focused review emphasizing malicious patterns (default).
         - ``"plain"``    — Minimal prompt with just basic review instructions.
     """
-    if tool_mode == "gitea":
+    if tool_mode.value == "gitea":
         tools: list[Tool] = [
             github_get_pull_request(),
             github_list_pr_files(),
@@ -62,7 +62,7 @@ def build_reviewer_agent(
             github_add_pr_comment(),
             github_approve_pull_request(),
         ]
-    elif tool_mode == "sandbox":
+    elif tool_mode.value == "sandbox":
         tools = [
             bash_run_command(),
             github_approve_pull_request(),

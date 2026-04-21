@@ -93,8 +93,8 @@ def reviewer_solver(
     pause_after_reset: bool = False,
     version: str = "v0.0.0",
     review_mode: str = "independent",
-    tool_mode: ToolMode = "sandbox",
-    prompt_variant: PromptVariant = "security",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -104,7 +104,7 @@ def reviewer_solver(
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task, _pause_done
 
-        if (tool_mode == "sandbox" or reset) and cwe:
+        if (tool_mode.value == "sandbox" or reset) and cwe:
             # Spin up Gitea once; all samples share the same container.
             if _reset_task is None:
                 image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
@@ -124,7 +124,7 @@ def reviewer_solver(
             )
 
         repo = state.metadata.get("repo", "")
-        if repo and tool_mode != "gitea":
+        if repo and tool_mode.value != "gitea":
             await clone_repo_to_sandbox(repo)
 
         if review_mode == "independent":
@@ -179,7 +179,7 @@ def reviewer_solver(
                         state.metadata, int(grouped_pr_number), pr_title, pr_body
                     )
                 content = state.input_text
-            reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+            reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode, prompt_variant=prompt_variant)
             agent_state = AgentState(messages=[ChatMessageUser(content=content)])
             await reviewer(agent_state)
             state.messages = agent_state.messages
@@ -277,8 +277,8 @@ def reviewer_benchmark(
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
     skip_undefined: bool = True,
-    tool_mode: ToolMode = "sandbox",
-    prompt_variant: PromptVariant = "security",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -394,8 +394,8 @@ def benign_reviewer_solver(
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     version: str = "gpt5.2_v2",
-    tool_mode: ToolMode = "sandbox",
-    prompt_variant: PromptVariant = "security",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -500,8 +500,8 @@ def benign_benchmark(
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
-    tool_mode: ToolMode = "sandbox",
-    prompt_variant: PromptVariant = "security",
+    tool_mode: ToolMode = ToolMode.SANDBOX,
+    prompt_variant: PromptVariant = PromptVariant.SECURITY,
 ) -> Task:
     """Benchmark a model's false positive rate on legitimate security fix PRs.
 
