@@ -61,8 +61,7 @@ from benchmark.config import BENIGN_IMAGE_TEMPLATE
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import (HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE,
-                              BenignVersion, MaliciousVersion, PromptVariant,
-                              ToolMode)
+                              PromptVariant, ToolMode)
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import _register_shutdown_handlers
 from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,
@@ -92,7 +91,7 @@ def reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: MaliciousVersion = "v0.0.0",
+    version: str = "v0.0.0",
     review_mode: str = "independent",
     tool_mode: ToolMode = "sandbox",
     prompt_variant: PromptVariant = "security",
@@ -394,7 +393,7 @@ def benign_reviewer_solver(
     reset: bool = False,
     gitea_port: int = 3001,
     pause_after_reset: bool = False,
-    version: BenignVersion = "gpt5.2_v2",
+    version: str = "gpt5.2_v2",
     tool_mode: ToolMode = "sandbox",
     prompt_variant: PromptVariant = "security",
 ) -> Solver:
@@ -494,7 +493,7 @@ def benign_benchmark(
     hf_dataset: str | None = HF_DATASET_DEFAULT,
     jsonl_path: str | None = None,
     cwe: str | None = None,
-    version: BenignVersion = "gpt5.2_v2",
+    version: str = "gpt5.2_v2",
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,

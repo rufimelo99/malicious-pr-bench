@@ -25,17 +25,11 @@ SUPPORTED_CWES: frozenset[str] = frozenset(
     }
 )
 
-# Dataset versions — single source of truth
-_MALICIOUS_VERSIONS = ("gpt5.2-filtered",)
-_BENIGN_VERSIONS = ("gpt5.2_v2",)
-
 # Dataset version identifiers — these are path segments inside the HF repo.
-SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset(_MALICIOUS_VERSIONS)
-SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset(_BENIGN_VERSIONS)
+SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2-filtered"})
+SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2_v2"})
 
-# Type aliases for dataset versions and modes
-MaliciousVersion = Literal["gpt5.2-filtered"]  # type: ignore
-BenignVersion = Literal["gpt5.2_v2"]  # type: ignore
+# Supported modes and variants
 ToolMode = Literal["gitea", "sandbox"]
 PromptVariant = Literal["security", "plain"]
 
