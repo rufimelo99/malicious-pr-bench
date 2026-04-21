@@ -28,13 +28,11 @@ SUPPORTED_CWES: frozenset[str] = frozenset(
 # Dataset version identifiers — these are path segments inside the HF repo.
 SUPPORTED_DATASET_VERSIONS: frozenset[str] = frozenset(
     {
-        "gpt5.2",
         "gpt5.2-filtered",
     }
 )
 SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset(
     {
-        "gpt5.2",
         "gpt5.2_v2",
     }
 )
