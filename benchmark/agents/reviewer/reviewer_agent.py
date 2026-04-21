@@ -16,19 +16,27 @@ from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_list_pr_reviews, github_list_recent_prs,
                              github_read_file, github_search_code)
 
-# One system prompt per tool mode
-_SYSTEM_PROMPTS: dict[str, str] = {
-    "gitea": load_prompt("reviewer_system_prompt"),
-    "sandbox": load_prompt("reviewer_system_prompt_sandbox"),
+# Prompts by tool mode and variant
+_SYSTEM_PROMPTS: dict[str, dict[str, str]] = {
+    "gitea": {
+        "security": load_prompt("reviewer_system_prompt_security"),
+        "plain": load_prompt("reviewer_system_prompt_plain"),
+    },
+    "sandbox": {
+        "security": load_prompt("reviewer_system_prompt_security"),
+        "plain": load_prompt("reviewer_system_prompt_plain"),
+    },
 }
 
 ToolMode = Literal["gitea", "sandbox"]
+PromptVariant = Literal["security", "plain"]
 
 
 def build_reviewer_agent(
     extra_tools: list[Tool] | None = None,
     model: str | None = None,
     tool_mode: ToolMode = "sandbox",
+    prompt_variant: PromptVariant = "security",
 ):
     """Build the code reviewer agent.
 
@@ -40,6 +48,12 @@ def build_reviewer_agent(
         - ``"gitea"``   — Full Gitea/GitHub API toolset (github_* tools + approve).
         - ``"sandbox"`` — Bash sandbox tools + approve only. Repo pre-cloned at
                           /workspace/repo. No direct API read access.
+
+    prompt_variant : "security" | "plain"
+        Controls which system prompt is used.
+
+        - ``"security"`` — Security-focused review emphasizing malicious patterns (default).
+        - ``"plain"``    — Minimal prompt with just basic review instructions.
     """
     if tool_mode == "gitea":
         tools: list[Tool] = [
@@ -69,6 +83,6 @@ def build_reviewer_agent(
         name="reviewer",
         description="Code reviewer agent",
         tools=tools,
-        prompt=AgentPrompt(instructions=_SYSTEM_PROMPTS[tool_mode]),
+        prompt=AgentPrompt(instructions=_SYSTEM_PROMPTS[tool_mode][prompt_variant]),
         model=model,
     )

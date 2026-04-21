@@ -93,6 +93,7 @@ def reviewer_solver(
     version: str = "v0.0.0",
     review_mode: str = "independent",
     tool_mode: str = "sandbox",
+    prompt_variant: str = "security",
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -137,7 +138,9 @@ def reviewer_solver(
                 store_pr_details(state.metadata, int(pr_number), pr_title, pr_body)
                 pr_description = format_pr_description(pr_title, pr_body)
                 description_block = f"\n\n{pr_description}" if pr_description else ""
-                reviewer = build_reviewer_agent(model=model, tool_mode=tool_mode)
+                reviewer = build_reviewer_agent(
+                    model=model, tool_mode=tool_mode, prompt_variant=prompt_variant
+                )
                 agent_state = AgentState(
                     messages=[
                         ChatMessageUser(
@@ -274,6 +277,7 @@ def reviewer_benchmark(
     simulate_merge: bool = False,
     skip_undefined: bool = True,
     tool_mode: str = "sandbox",
+    prompt_variant: str = "security",
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -335,6 +339,7 @@ def reviewer_benchmark(
             version=version,
             review_mode=review_mode,
             tool_mode=tool_mode,
+            prompt_variant=prompt_variant,
         )
         if agent is None
         else cli_solver(
@@ -389,6 +394,7 @@ def benign_reviewer_solver(
     pause_after_reset: bool = False,
     version: str = "gpt5.2_v2",
     tool_mode: str = "sandbox",
+    prompt_variant: str = "security",
 ) -> Solver:
     import asyncio as _asyncio
 
@@ -494,6 +500,7 @@ def benign_benchmark(
     pause_after_reset: bool = False,
     simulate_merge: bool = False,
     tool_mode: str = "sandbox",
+    prompt_variant: str = "security",
 ) -> Task:
     """Benchmark a model's false positive rate on legitimate security fix PRs.
 
@@ -542,6 +549,7 @@ def benign_benchmark(
             pause_after_reset=pause_after_reset,
             version=version,
             tool_mode=tool_mode,
+            prompt_variant=prompt_variant,
         )
         if agent is None
         else cli_solver(
