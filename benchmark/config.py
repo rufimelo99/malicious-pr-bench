@@ -33,6 +33,12 @@ SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset({"gpt5.2_v2"})
 ToolMode = Literal["gitea", "sandbox"]
 PromptVariant = Literal["security", "plain"]
 
+# Prompt file mappings for each variant
+PROMPT_FILES: dict[str, str] = {
+    "security": "reviewer_system_prompt_security",
+    "plain": "reviewer_system_prompt_plain",
+}
+
 # GitHub / Gitea API constants.
 GITHUB_ACCEPT = "application/vnd.github+json"
 GITHUB_API_VERSION = "2022-11-28"

@@ -7,7 +7,7 @@ from inspect_ai.agent._types import AgentPrompt
 from inspect_ai.tool import Tool
 
 from benchmark.agents.prompt_utils import load_prompt
-from benchmark.config import PromptVariant, ToolMode
+from benchmark.config import PROMPT_FILES, PromptVariant, ToolMode
 from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_approve_pull_request,
                              github_get_pull_request, github_list_files,
@@ -15,10 +15,9 @@ from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_list_pr_reviews, github_list_recent_prs,
                              github_read_file, github_search_code)
 
-# Prompts by variant (shared across all tool modes)
+# Prompts by variant (loaded from config)
 _VARIANT_PROMPTS = {
-    "security": load_prompt("reviewer_system_prompt_security"),
-    "plain": load_prompt("reviewer_system_prompt_plain"),
+    variant: load_prompt(filename) for variant, filename in PROMPT_FILES.items()
 }
 
 # Prompts by tool mode and variant
