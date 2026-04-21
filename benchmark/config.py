@@ -50,10 +50,16 @@ class PromptVariant(str, Enum):
     PLAIN = "plain"
 
 
-# Prompt file mappings for each variant
-PROMPT_FILES: dict[PromptVariant, str] = {
-    PromptVariant.SECURITY: "reviewer_system_prompt_security",
-    PromptVariant.PLAIN: "reviewer_system_prompt_plain",
+# Prompt file mappings for each variant and agent type
+PROMPT_FILES: dict[str, dict[PromptVariant, str]] = {
+    "reviewer": {
+        PromptVariant.SECURITY: "reviewer_system_prompt_security",
+        PromptVariant.PLAIN: "reviewer_system_prompt_plain",
+    },
+    "cli": {
+        PromptVariant.SECURITY: "cli_reviewer_system_prompt_security",
+        PromptVariant.PLAIN: "cli_reviewer_system_prompt_plain",
+    },
 }
 
 # GitHub / Gitea API constants.
