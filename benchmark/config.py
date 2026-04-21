@@ -2,9 +2,11 @@
 
 import os
 from enum import Enum
+from pathlib import Path
 
 # Timeout (seconds) for all outbound HTTP requests to GitHub / Gitea APIs.
 HTTP_TIMEOUT = 60
+CLI_TIMEOUT = 600
 
 # Default dataset to use for evaluation.
 HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
@@ -93,3 +95,11 @@ FORWARDED_ENV_VARS = [
     "CLAUDE_CODE_OAUTH_TOKEN",
     "COPILOT_GITHUB_TOKEN",
 ]
+
+SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
+SANDBOX_COMPOSE_REVIEWER = (
+    Path(__file__).parent.parent / "scripts" / "sandbox-compose-reviewer.yaml"
+)
+SANDBOX_COMPOSE_COPILOT = (
+    Path(__file__).parent.parent / "scripts" / "sandbox-compose-copilot.yaml"
+)

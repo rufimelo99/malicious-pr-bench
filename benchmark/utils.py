@@ -1,8 +1,17 @@
 import os
 
 from inspect_ai.model import ChatMessageAssistant
+from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
-from benchmark.config import HTTP_TIMEOUT, SIMULATE_MERGES, PromptVariant, ToolMode
+from benchmark.config import (
+    HTTP_TIMEOUT,
+    SANDBOX_COMPOSE,
+    SANDBOX_COMPOSE_COPILOT,
+    SANDBOX_COMPOSE_REVIEWER,
+    SIMULATE_MERGES,
+    PromptVariant,
+    ToolMode,
+)
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 
@@ -88,7 +97,8 @@ def convert_tool_mode(value: ToolMode | str) -> ToolMode:
         return ToolMode(value)
     except ValueError:
         raise ValueError(f"Invalid tool_mode: {value}")
-    
+
+
 def convert_prompt_variant(value: PromptVariant | str) -> PromptVariant:
     if isinstance(value, PromptVariant):
         return value
@@ -96,4 +106,16 @@ def convert_prompt_variant(value: PromptVariant | str) -> PromptVariant:
         return PromptVariant(value)
     except ValueError:
         raise ValueError(f"Invalid prompt_variant: {value}")
-    
+
+
+def get_sandbox_spec(
+    agent: str | None, tool_mode: ToolMode
+) -> SandboxEnvironmentSpec | None:
+    if agent == "copilot-cli":
+        return SandboxEnvironmentSpec("docker", str(SANDBOX_COMPOSE_COPILOT))
+    elif agent is not None:
+        return SandboxEnvironmentSpec("docker", str(SANDBOX_COMPOSE))
+    elif tool_mode == ToolMode.SANDBOX:
+        return SandboxEnvironmentSpec("docker", str(SANDBOX_COMPOSE_REVIEWER))
+    else:
+        return None
