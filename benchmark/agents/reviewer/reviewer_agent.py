@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Literal
-
 from inspect_ai.agent import react
 from inspect_ai.agent._types import AgentPrompt
 from inspect_ai.tool import Tool
 
 from benchmark.agents.prompt_utils import load_prompt
+from benchmark.config import PromptVariant, ToolMode
 from benchmark.tools import (bash_run_command, github_add_pr_comment,
                              github_approve_pull_request,
                              github_get_pull_request, github_list_files,
@@ -27,9 +26,6 @@ _SYSTEM_PROMPTS: dict[str, dict[str, str]] = {
         "plain": load_prompt("reviewer_system_prompt_plain"),
     },
 }
-
-ToolMode = Literal["gitea", "sandbox"]
-PromptVariant = Literal["security", "plain"]
 
 
 def build_reviewer_agent(

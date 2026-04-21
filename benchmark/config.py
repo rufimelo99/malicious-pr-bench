@@ -39,9 +39,11 @@ SUPPORTED_BENIGN_DATASET_VERSIONS: frozenset[str] = frozenset(
     }
 )
 
-# Type aliases for dataset versions
+# Type aliases for dataset versions and modes
 MaliciousVersion = Literal["v0.0.0", "gpt5.2-filtered", "v0.1.0"]
 BenignVersion = Literal["gpt5.2_v2"]
+ToolMode = Literal["gitea", "sandbox"]
+PromptVariant = Literal["security", "plain"]
 
 # GitHub / Gitea API constants.
 GITHUB_ACCEPT = "application/vnd.github+json"
