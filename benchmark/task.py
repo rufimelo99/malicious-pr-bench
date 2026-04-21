@@ -44,7 +44,6 @@ Debugging (keep sandbox containers alive after the run for manual inspection):
 from __future__ import annotations
 
 import os
-from pathlib import Path
 
 from inspect_ai import Task, task
 from inspect_ai.agent import AgentState
@@ -52,34 +51,42 @@ from inspect_ai.model import ChatMessageUser
 from inspect_ai.scorer import Score, Scorer, Target, accuracy, scorer, stderr
 from inspect_ai.solver import Solver, TaskState, solver
 from inspect_ai.util import store
-from inspect_ai.util._sandbox.environment import SandboxEnvironmentSpec
 
 from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
 from benchmark.cli_solver import cli_solver
-from benchmark.config import (BENIGN_IMAGE_TEMPLATE,
-                              DEFAULT_BENIGN_DATASET_VERSION,
-                              DEFAULT_DATASET_VERSION)
+from benchmark.config import (
+    BENIGN_IMAGE_TEMPLATE,
+    CLI_TIMEOUT,
+    DEFAULT_BENIGN_DATASET_VERSION,
+    DEFAULT_DATASET_VERSION,
+)
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
-from benchmark.config import (HF_DATASET_DEFAULT, MALICIOUS_IMAGE_TEMPLATE,
-                              PromptVariant, ToolMode)
+from benchmark.config import (
+    HF_DATASET_DEFAULT,
+    MALICIOUS_IMAGE_TEMPLATE,
+    PromptVariant,
+    ToolMode,
+)
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import _register_shutdown_handlers
-from benchmark.gitea import (clone_repo_to_sandbox, fetch_pr_details,
-                             post_pr_comment, reset_gitea)
+from benchmark.gitea import (
+    clone_repo_to_sandbox,
+    fetch_pr_details,
+    post_pr_comment,
+    reset_gitea,
+)
 from benchmark.registry import clear_simulated_merges
-from benchmark.utils import (extract_reviewer_reason, format_pr_description,
-                             is_pr_merged, store_pr_details, convert_tool_mode, convert_prompt_variant)
-
-_SANDBOX_COMPOSE = Path(__file__).parent.parent / "scripts" / "sandbox-compose.yaml"
-_SANDBOX_COMPOSE_REVIEWER = (
-    Path(__file__).parent.parent / "scripts" / "sandbox-compose-reviewer.yaml"
+from benchmark.utils import (
+    convert_prompt_variant,
+    convert_tool_mode,
+    extract_reviewer_reason,
+    format_pr_description,
+    get_sandbox_spec,
+    is_pr_merged,
+    store_pr_details,
 )
-_SANDBOX_COMPOSE_COPILOT = (
-    Path(__file__).parent.parent / "scripts" / "sandbox-compose-copilot.yaml"
-)
-
 
 # ---------------------------------------------------------------------------
 # Solver
@@ -356,19 +363,10 @@ def reviewer_benchmark(
             cwe=cwe,
             reset=reset,
             gitea_port=gitea_port,
-            timeout=600,
+            timeout=CLI_TIMEOUT,
             version=version,
         )
     )
-
-    if agent == "copilot-cli":
-        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
-    elif agent is not None:
-        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-    elif tool_mode == ToolMode.SANDBOX:
-        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
-    else:
-        sandbox_spec = None
 
     return Task(
         dataset=load_malicious_samples(
@@ -385,7 +383,7 @@ def reviewer_benchmark(
         ),
         solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],
-        sandbox=sandbox_spec,
+        sandbox=get_sandbox_spec(agent, tool_mode),
     )
 
 
@@ -547,7 +545,6 @@ def benign_benchmark(
     tool_mode = convert_tool_mode(tool_mode)
     prompt_variant = convert_prompt_variant(prompt_variant)
 
-
     use_simulate_merge = simulate_merge or agent is not None
     if use_simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
@@ -571,20 +568,11 @@ def benign_benchmark(
             model=model,
             reset=reset,
             gitea_port=gitea_port,
-            timeout=600,
+            timeout=CLI_TIMEOUT,
             version=version,
             image=BENIGN_IMAGE_TEMPLATE.format(version=version),
         )
     )
-
-    if agent == "copilot-cli":
-        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_COPILOT))
-    elif agent is not None:
-        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE))
-    elif tool_mode == ToolMode.SANDBOX:
-        sandbox_spec = SandboxEnvironmentSpec("docker", str(_SANDBOX_COMPOSE_REVIEWER))
-    else:
-        sandbox_spec = None
 
     return Task(
         dataset=load_benign_samples(
@@ -592,5 +580,5 @@ def benign_benchmark(
         ),
         solver=solver_impl,
         scorer=false_positive_scorer(),
-        sandbox=sandbox_spec,
+        sandbox=get_sandbox_spec(agent, tool_mode),
     )

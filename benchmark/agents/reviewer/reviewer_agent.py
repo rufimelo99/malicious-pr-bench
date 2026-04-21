@@ -8,12 +8,19 @@ from inspect_ai.tool import Tool
 
 from benchmark.agents.prompt_utils import load_prompt
 from benchmark.config import PROMPT_FILES, PromptVariant, ToolMode
-from benchmark.tools import (bash_run_command, github_add_pr_comment,
-                             github_approve_pull_request,
-                             github_get_pull_request, github_list_files,
-                             github_list_pr_commits, github_list_pr_files,
-                             github_list_pr_reviews, github_list_recent_prs,
-                             github_read_file, github_search_code)
+from benchmark.tools import (
+    bash_run_command,
+    github_add_pr_comment,
+    github_approve_pull_request,
+    github_get_pull_request,
+    github_list_files,
+    github_list_pr_commits,
+    github_list_pr_files,
+    github_list_pr_reviews,
+    github_list_recent_prs,
+    github_read_file,
+    github_search_code,
+)
 
 # Prompts by variant (loaded from config)
 _VARIANT_PROMPTS = {
