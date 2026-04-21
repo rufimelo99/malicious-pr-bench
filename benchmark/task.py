@@ -544,6 +544,10 @@ def benign_benchmark(
     """
     _register_shutdown_handlers()
 
+    tool_mode = convert_tool_mode(tool_mode)
+    prompt_variant = convert_prompt_variant(prompt_variant)
+
+
     use_simulate_merge = simulate_merge or agent is not None
     if use_simulate_merge:
         os.environ["SIMULATE_MERGES"] = "1"
