@@ -79,6 +79,17 @@ def _matches_filter(
     return True
 
 
+def _filter_undefined_axes(records: list[dict]) -> list[dict]:
+    """Filter out records with undefined axis values."""
+    return [
+        r
+        for r in records
+        if r.get("axis1") != "undefined"
+        and r.get("axis2") != "undefined"
+        and r.get("axis3") != "undefined"
+    ]
+
+
 def load_malicious_samples(
     jsonl_path: str | None,
     hf_dataset: str | None,
@@ -107,13 +118,7 @@ def load_malicious_samples(
 
     # TODO(Rui): This is being temporarily disabled.
     # if skip_undefined:
-    #     records = [
-    #         r
-    #         for r in records
-    #         if r.get("axis1") != "undefined"
-    #         and r.get("axis2") != "undefined"
-    #         and r.get("axis3") != "undefined"
-    #     ]
+    #     records = _filter_undefined_axes(records)
 
     # Pre-compute group membership
     group_prs: dict[str, list[tuple[int, int]]] = {}
