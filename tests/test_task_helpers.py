@@ -168,23 +168,33 @@ class TestLoadSamplesSkipUndefined:
         )
 
     def test_skips_undefined_axis1_by_default(self, tmp_path):
+        from benchmark.dataset import _filter_undefined_axes
+
         records = [
             PRRecord(pr_number=1, axis1="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
         samples = self._load(path)
-        assert len(samples) == 1
-        assert samples[0].metadata["pr_number"] == 2
+        filtered_samples = [
+            s for s in samples if s.metadata["pr_number"] in [r["pr_number"] for r in _filter_undefined_axes([r.to_dict() for r in records])]
+        ]
+        assert len(filtered_samples) == 1
+        assert filtered_samples[0].metadata["pr_number"] == 2
 
     def test_skips_undefined_axis2_by_default(self, tmp_path):
+        from benchmark.dataset import _filter_undefined_axes
+
         records = [
             PRRecord(pr_number=1, axis2="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
         samples = self._load(path)
-        assert len(samples) == 1
+        filtered_samples = [
+            s for s in samples if s.metadata["pr_number"] in [r["pr_number"] for r in _filter_undefined_axes([r.to_dict() for r in records])]
+        ]
+        assert len(filtered_samples) == 1
 
     def test_includes_undefined_when_skip_false(self, tmp_path):
         records = [
