@@ -72,19 +72,32 @@ def extract_metadata(log_file: Path) -> dict[str, str | int]:
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in _journal/start.json: {e}") from e
 
-    # Extract required parameters from the journal
-    params = start_data.get("params", {})
+    # Extract parameters - they may be nested under eval.task_args_passed or eval.task_args
+    params = start_data.get("eval", {}).get("task_args_passed", {})
+    if not params:
+        params = start_data.get("eval", {}).get("task_args", {})
 
-    required_fields = ["cwe", "version", "gitea_port", "gitea_project_name"]
+    # For project name, check the plan if not in task args
+    if "gitea_project" not in params:
+        plan_steps = start_data.get("plan", {}).get("steps", [])
+        if plan_steps:
+            params["gitea_project"] = plan_steps[0].get("params", {}).get("gitea_project")
+
+    required_fields = ["cwe", "version", "gitea_port"]
     for field in required_fields:
         if field not in params:
             raise ValueError(f"Missing required field in log file: {field}")
+
+    # Use gitea_project if available, otherwise use a default project name
+    project_name = params.get("gitea_project")
+    if not project_name:
+        project_name = f"mprb-{params.get('cwe', 'unknown')}"
 
     return {
         "port": int(params["gitea_port"]),
         "cwe": params["cwe"],
         "version": params["version"],
-        "project_name": params["gitea_project_name"],
+        "project_name": project_name,
         "tool_mode": params.get("tool_mode", "sandbox"),
     }
 
