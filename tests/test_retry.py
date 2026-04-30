@@ -94,3 +94,11 @@ def test_build_image_name_benign():
 
     image = build_image_name(cwe="benign", version="gpt5.2_v2", tool_mode="sandbox")
     assert image == "rufimelo/benign-pull-requests:gpt5.2_v2"
+
+
+# TODO: Add integration test with real .eval file from a failed benchmark run
+# Integration test would verify:
+#   1. Metadata extraction from real file
+#   2. Docker container startup
+#   3. inspect eval-retry invocation
+# Requires an actual failed eval log file to test against
