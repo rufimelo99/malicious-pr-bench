@@ -66,8 +66,21 @@ PROMPT_FILES: dict[str, dict[PromptVariant, str]] = {
 GITHUB_ACCEPT = "application/vnd.github+json"
 GITHUB_API_VERSION = "2022-11-28"
 
-# Whether to simulate merges in-memory instead of hitting Gitea.
-SIMULATE_MERGES: bool = os.environ.get("SIMULATE_MERGES", "true").lower()
+def env_flag(name: str, default: bool = False) -> bool:
+    """Parse a boolean environment flag."""
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def simulate_merges_enabled() -> bool:
+    """Return whether approvals should be recorded in memory."""
+    return env_flag("SIMULATE_MERGES", False)
+
+
+# Backwards-compatible snapshot for callers that only need import-time defaults.
+SIMULATE_MERGES: bool = simulate_merges_enabled()
 
 # Docker image name templates for Gitea benchmark containers.
 # Format: MALICIOUS_IMAGE_TEMPLATE.format(cwe="cwe79", version="gpt5.2-filtered")
@@ -89,6 +102,16 @@ SANDBOX_QUERY_FILE = "/workspace/query.sc"
 
 # Environment variables forwarded from the host into sandbox containers.
 FORWARDED_ENV_VARS = [
+    "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
+    "OPENAI_ORG_ID",
+    "OPENAI_ORGANIZATION",
+    "OPENAI_PROJECT",
+    "AZURE_OPENAI_API_KEY",
+    "AZUREAI_OPENAI_API_KEY",
+    "AZURE_OPENAI_ENDPOINT",
+    "AZURE_OPENAI_API_VERSION",
+    "CODEX_HOME",
     "ANTHROPIC_API_KEY",
     "CLAUDE_CODE_USE_BEDROCK",
     "AWS_REGION",

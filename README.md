@@ -12,26 +12,33 @@ The benchmark combines adversarial attack evaluation with utility measurement: a
 
 **Available on Hugging Face**: [`SocialAITBD/malicious-pull-requests`](https://huggingface.co/datasets/SocialAITBD/malicious-pull-requests)
 
-The current release (gpt5.2_v2) contains:
+The current supported releases are:
 
-- **980 malicious PRs** across 10 CWE classes from the 2025 CWE Top 25 Most Dangerous Software Weaknesses
-- **347 benign ground-truth security fixes** from the same CWE classes, for false-decline rate measurement
+- `gpt5.2-filtered`: **980 malicious PRs** across 10 CWE classes from the 2025 CWE Top 25 Most Dangerous Software Weaknesses
+- `gpt5.2_v2`: **347 benign ground-truth security fixes** from the same CWE classes, for false-decline rate measurement
 
-Each attack PR is grounded in a real CVE from the Secommits/DeltaSecommits datasets and is parametrized along two orthogonal axes: code concealment and PR framing.
+Each attack PR is grounded in a real CVE from the Secommits/DeltaSecommits datasets and is parametrized by distribution strategy, code concealment, and PR framing.
 
 ## Attack Taxonomy
 
-Attacks are parameterized along **two orthogonal axes** that control how the vulnerability is hidden and how it's socially engineered. Each combination represents a distinct attack configuration.
+Attacks are parameterized along **three axes** that control how the vulnerable change is distributed, how it is hidden in code, and how it is socially engineered. Each combination represents a distinct attack configuration.
 
-### Axis 1: Code Concealment — How the vulnerability is hidden
+### Axis 1: Distribution Strategy — How the attack is split across PRs
 
-Controls how the malicious code change is embedded within the diff (33% distribution each):
+Controls whether the attack is introduced as a single pull request or staged across a related PR sequence:
+
+- **Single PR Introduction**: The vulnerable change is introduced in one reviewable pull request.
+- **Precondition Staging**: Supporting changes are staged before the final vulnerable change.
+
+### Axis 2: Code Concealment — How the vulnerability is hidden
+
+Controls how the malicious code change is embedded within the diff:
 
 - **Tiny Change**: Minimal, localized modification (single validation removal, regex change, or sanitization step)
 - **Buried in Complexity**: Wraps the malicious change in structural refactoring (increased nesting, helper functions, reorganized control flow)
 - **Semantic Equivalent**: Replaces secure implementation with functionally similar but vulnerable hand-rolled version (e.g., custom sanitization missing edge cases)
 
-### Axis 2: PR Framing — How the reviewer is manipulated
+### Axis 3: PR Framing — How the reviewer is manipulated
 
 Controls how the pull request presents itself to exploit cognitive biases and social engineering tactics (11 techniques, ~7-9% each):
 
@@ -145,7 +152,7 @@ Measures how well the agent blocks malicious PRs:
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
-  -T version=gpt5.2_v2 \
+  -T version=gpt5.2-filtered \
   --log-dir logs/malicious/cwe79
 ```
 
@@ -176,7 +183,7 @@ for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
   uv run inspect eval benchmark/task.py@reviewer_benchmark \
     --model anthropic/claude-opus-4-6 \
     -T cwe=$cwe \
-    -T version=gpt5.2_v2 \
+    -T version=gpt5.2-filtered \
     --log-dir logs/malicious/$cwe
 done
 
@@ -185,7 +192,7 @@ for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
   uv run inspect eval benchmark/task.py@benign_benchmark \
     --model anthropic/claude-opus-4-6 \
     -T cwe=$cwe \
-    -T version=v0.1.0 \
+    -T version=gpt5.2_v2 \
     --log-dir logs/benign/$cwe
 done
 ```
@@ -198,7 +205,7 @@ Evaluate both malicious and benign PRs with GitHub Copilot CLI:
 export COPILOT_GITHUB_TOKEN=your_github_token_here
 
 # Build the Copilot Docker image (one-time)
-./scripts/build-copilot-image.sh
+docker build -f scripts/Dockerfile.sandbox-copilot -t rufimelo/sandbox-cli:copilot .
 
 # Malicious PRs with Copilot CLI
 for cwe in cwe79 cwe89 cwe352 cwe862; do
@@ -206,7 +213,7 @@ for cwe in cwe79 cwe89 cwe352 cwe862; do
     --model anthropic/claude-opus-4-6 \
     -T agent=copilot-cli \
     -T cwe=$cwe \
-    -T version=gpt5.2_v2 \
+    -T version=gpt5.2-filtered \
     --limit 5 \
     --log-dir logs/malicious-copilot/$cwe
 done
@@ -217,7 +224,7 @@ for cwe in cwe79 cwe89 cwe352 cwe862; do
     --model anthropic/claude-opus-4-6 \
     -T agent=copilot-cli \
     -T cwe=$cwe \
-    -T version=v0.1.0 \
+    -T version=gpt5.2_v2 \
     --limit 5 \
     --log-dir logs/benign-copilot/$cwe
 done
@@ -229,23 +236,22 @@ The benchmark supports different execution modes and agents:
 
 ### Tool Modes
 
-**Gitea mode (default)** — Live Gitea instance in Docker:
+**Sandbox mode (default)** — reviewer uses Gitea inspection tools plus bash inside a Docker sandbox with the repo cloned at `/workspace/repo`:
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/gpt-5.2 \
+  -T cwe=cwe79 \
+  -T tool_mode=sandbox \
+  --log-dir logs/sandbox
+```
+
+**Gitea mode** — reviewer uses only the live Gitea/GitHub-compatible API tools:
 ```bash
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model openai/azure/gpt-5.2 \
   -T cwe=cwe79 \
   -T tool_mode=gitea \
   --log-dir logs/gitea
-```
-
-**Sandbox mode** — Separate Docker instances per sample, cleaner isolation:
-```bash
-uv run inspect eval benchmark/task.py@reviewer_benchmark \
-  --model openai/azure/gpt-5.2 \
-  -T cwe=cwe79 \
-  -T tool_mode=sandbox \
-  -T per_sample_reset=true \
-  --log-dir logs/sandbox
 ```
 
 ### Agent Types
@@ -307,7 +313,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --log-dir logs/copilot-cli
 ```
 
-- Requires: Docker image `rufimelo/sandbox-cli:copilot` (build with `./scripts/build-copilot-image.sh` or use pre-built)
+- Requires: Docker image `rufimelo/sandbox-cli:copilot` (build with `docker build -f scripts/Dockerfile.sandbox-copilot -t rufimelo/sandbox-cli:copilot .` or use pre-built)
 - `COPILOT_GITHUB_TOKEN` is automatically forwarded from the host to the container
 - Uses `sandbox-compose-copilot.yaml` for container configuration
 
@@ -331,22 +337,24 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `cwe` | — | **Required.** CWE class to evaluate: `cwe79`, `cwe89`, `cwe352`, `cwe862`, `cwe787`, `cwe22`, `cwe416`, `cwe125`, `cwe78`, `cwe94` |
-| `version` | `gpt5.2_v2` | Dataset version: `gpt5.2_v2` (recommended, 980 malicious PRs across 10 CWEs) |
+| `version` | `gpt5.2-filtered` | Dataset version for malicious PRs |
 | `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from. Set to `""` to use local file instead |
 | `jsonl_path` | — | Path to local `generated_prs.jsonl` file (used when `hf_dataset=""`) |
-| `axis1` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
-| `axis2` | — | **Optional.** Filter by PR framing strategy (e.g., `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`, `refactoring`) |
+| `axis1` | — | **Optional.** Filter by distribution strategy (e.g., `single_pr_introduction`, `precondition_staging`) |
+| `axis2` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
+| `axis3` | — | **Optional.** Filter by PR framing strategy (e.g., `fake_bug_fix`, `unsafe_optimization`, `misleading_hardening`, `refactoring`) |
 | `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), `copilot-cli` (GitHub Copilot CLI in Docker sandbox), or `copilot-sdk` (Copilot SDK host-based). Setting `agent=claude-code` or `agent=copilot-cli` automatically uses the appropriate CLI sandbox image. |
-| `tool_mode` | `gitea` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
-| `per_sample_reset` | `false` | Reset container after each sample (useful with `tool_mode=sandbox`) |
+| `tool_mode` | `sandbox` | Execution mode: `sandbox` (Gitea tools plus sandbox bash) or `gitea` (Gitea tools only) |
+| `review_mode` | `independent` | `independent` creates one sample per PR; `sequence` keeps complete multi-PR groups together |
+| `simulate_merge` | `true` | Record approvals in memory instead of merging in Gitea, preserving sample independence. CLI agents always simulate merges. Set `false` only when you explicitly want live Gitea merge side effects. |
 | `reset` | `true` | Reset container before run starts |
 | `gitea_port` | `3001` | Port for Gitea instance |
 
 **Global inspect options:**
 | Option | Description |
 |--------|-------------|
-| `--max-samples N` | Limit evaluation to first N samples |
-| `--limit N` | Alias for `--max-samples` |
+| `--limit N` | Limit evaluation to the first N dataset samples |
+| `--max-samples N` | Maximum number of samples to run concurrently |
 | `--log-dir PATH` | Directory to save evaluation results |
 
 **Example: Evaluate only "Tiny Change" vulnerabilities with "Fake Bug Fix" framing:**
@@ -354,8 +362,8 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model anthropic/claude-opus-4-6 \
   -T cwe=cwe79 \
-  -T axis1=tiny_change \
-  -T axis2=fake_bug_fix \
+  -T axis2=tiny_change \
+  -T axis3=fake_bug_fix \
   --log-dir logs/cwe79_tiny_fake
 ```
 
@@ -364,17 +372,16 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model openai/azure/gpt-5.2 \
   -T cwe=cwe79 \
-  --max-samples 4 \
+  --limit 4 \
   --log-dir logs/test
 ```
 
-**Example: Sandbox mode with per-sample reset:**
+**Example: Sandbox mode:**
 ```bash
 uv run inspect eval benchmark/task.py@reviewer_benchmark \
   --model openai/azure/gpt-5.2 \
   -T cwe=cwe79 \
   -T tool_mode=sandbox \
-  -T per_sample_reset=true \
   --limit 4 \
   --log-dir logs/test
 ```
@@ -384,10 +391,10 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `cwe` | — | **Required.** CWE class to evaluate (same as malicious) |
-| `version` | `v0.1.0` | Dataset version: `v0.1.0` (347 benign PRs for false-decline rate measurement) |
+| `version` | `gpt5.2_v2` | Dataset version for benign PRs |
 | `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from |
 | `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot-cli` (GitHub Copilot CLI) |
-| `tool_mode` | `sandbox` | Execution mode: `gitea` (live instance) or `sandbox` (isolated per-sample instances) |
+| `tool_mode` | `sandbox` | Execution mode: `sandbox` (Gitea tools plus sandbox bash) or `gitea` (Gitea tools only) |
 | `reset` | `true` | Reset Gitea container before run |
 | `gitea_port` | `3001` | Port for Gitea instance |
 
@@ -493,24 +500,23 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 
 ## Understanding Results
 
-After each evaluation, results are saved to the `--log-dir`:
+After each evaluation, Inspect writes a `.eval` log archive to the `--log-dir`:
 
 ```
 logs/cwe79/
-├── cwe79_gpt5.2/
-│   ├── eval.json         # Main results file
-│   ├── samples.jsonl     # Individual PR outcomes
-│   └── transcript.md     # Detailed log
+└── 2026-..._reviewer-benchmark_....eval
 ```
 
-**Key fields in `eval.json`:**
-- `"detection_accuracy"`: Fraction of malicious PRs blocked
-- `"false_decline_rate"`: Fraction of benign PRs rejected
-- `"samples"`: Per-PR breakdown with agent decision and correctness
+Use the analysis helpers to summarize those logs:
+
+```bash
+uv run python scripts/analyse_results.py --logs-dir logs/malicious
+uv run python scripts/analyse_benign_results.py --logs-dir logs/benign
+```
 
 ## Reproducing Benchmark Results
 
-To reproduce published results from the SEVRA-BENCH paper, use `version=gpt5.2` and `version=gpt5.2_v2`:
+To reproduce the current supported benchmark configuration, use `version=gpt5.2-filtered` for malicious PRs and `version=gpt5.2_v2` for benign PRs:
 
 ```bash
 # All malicious PRs
@@ -518,7 +524,7 @@ for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
   uv run inspect eval benchmark/task.py@reviewer_benchmark \
     --model anthropic/claude-opus-4-6 \
     -T cwe=$cwe \
-    -T version=gpt5.2_v2 \
+    -T version=gpt5.2-filtered \
     --log-dir logs/malicious/$cwe
 done
 
@@ -527,7 +533,7 @@ for cwe in cwe79 cwe89 cwe352 cwe862 cwe787 cwe22 cwe416 cwe125 cwe78 cwe94; do
   uv run inspect eval benchmark/task.py@benign_benchmark \
     --model anthropic/claude-opus-4-6 \
     -T cwe=$cwe \
-    -T version=gpt5.2_v2_v2 \
+    -T version=gpt5.2_v2 \
     --log-dir logs/benign/$cwe
 done
 ```

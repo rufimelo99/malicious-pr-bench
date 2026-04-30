@@ -20,6 +20,15 @@ from rich.rule import Rule
 from rich.table import Table
 
 console = Console()
+INVALID_REVIEW_ANSWER = "invalid_review"
+EXCLUDED_FROM_METRICS_KEY = "excluded_from_metrics"
+
+
+def _score_excluded_from_metrics(score) -> bool:
+    metadata = getattr(score, "metadata", None) or {}
+    return getattr(score, "answer", None) == INVALID_REVIEW_ANSWER or bool(
+        metadata.get(EXCLUDED_FROM_METRICS_KEY)
+    )
 
 
 class SampleResult(NamedTuple):
@@ -34,8 +43,14 @@ class SampleResult(NamedTuple):
     )  # 1.0 = security-motivated, 0.0 = other, None = N/A
 
 
-def load_results(log_paths: list[Path]) -> list[SampleResult]:
+class ResultSet(NamedTuple):
+    samples: list[SampleResult]
+    invalid_reviews: int
+
+
+def load_results_with_counts(log_paths: list[Path]) -> ResultSet:
     results: list[SampleResult] = []
+    invalid_reviews = 0
     for path in log_paths:
         try:
             log = read_eval_log(str(path))
@@ -51,10 +66,17 @@ def load_results(log_paths: list[Path]) -> list[SampleResult]:
             det = scores.get("detection_scorer")
             if det is None:
                 continue
+            if _score_excluded_from_metrics(det):
+                invalid_reviews += 1
+                continue
 
             sec = scores.get("security_reason_scorer")
             sec_val: float | None = None
-            if sec is not None and sec.answer != "not_applicable":
+            if (
+                sec is not None
+                and sec.answer != "not_applicable"
+                and not _score_excluded_from_metrics(sec)
+            ):
                 try:
                     sec_val = float(sec.value)
                 except (TypeError, ValueError):
@@ -86,7 +108,11 @@ def load_results(log_paths: list[Path]) -> list[SampleResult]:
                     security_reason_score=sec_val,
                 )
             )
-    return results
+    return ResultSet(samples=results, invalid_reviews=invalid_reviews)
+
+
+def load_results(log_paths: list[Path]) -> list[SampleResult]:
+    return load_results_with_counts(log_paths).samples
 
 
 def _repo_table(results: list[SampleResult]) -> Table:
@@ -183,20 +209,31 @@ def main() -> None:
         sys.exit(1)
 
     console.print(f"[dim]Loading {len(paths)} log file(s)…[/dim]")
-    results = load_results(paths)
+    result_set = load_results_with_counts(paths)
+    results = result_set.samples
+    invalid_reviews = result_set.invalid_reviews
 
     if not results:
-        console.print("[red]No scored samples found in the provided logs.[/red]")
+        if invalid_reviews:
+            console.print(
+                "[red]No valid scored samples found in the provided logs.[/red] "
+                f"[yellow]Invalid CLI reviews: {invalid_reviews}[/yellow]"
+            )
+        else:
+            console.print("[red]No scored samples found in the provided logs.[/red]")
         sys.exit(1)
 
     n = len(results)
+    total_scored = n + invalid_reviews
     detected = sum(r.detection_score for r in results)
     fooled = n - detected
 
     console.print()
     console.print(Rule("[bold]malicious-pr-bench — Results Summary[/bold]"))
     console.print(
-        f"  Samples: [bold]{n}[/bold]  |  "
+        f"  Valid samples: [bold]{n}[/bold]  |  "
+        f"Invalid CLI reviews: [yellow]{invalid_reviews}[/yellow] "
+        f"({100 * invalid_reviews / total_scored:.1f}% of scored samples)  |  "
         f"Detected: [green]{int(detected)}[/green] ({100 * detected / n:.1f}%)  |  "
         f"Fooled: [red]{int(fooled)}[/red] ({100 * fooled / n:.1f}%)"
     )

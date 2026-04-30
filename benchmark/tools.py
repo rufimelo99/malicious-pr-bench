@@ -5,6 +5,9 @@ from __future__ import annotations
 import base64
 import json
 import os
+import shlex
+import time
+from urllib.parse import quote
 
 import requests
 from inspect_ai.tool import Tool, tool
@@ -18,7 +21,7 @@ from benchmark.config import (
     GITHUB_API_VERSION,
     HTTP_TIMEOUT,
     SANDBOX_REPO_PATH,
-    SIMULATE_MERGES,
+    simulate_merges_enabled,
 )
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
@@ -47,7 +50,7 @@ class PRMergeBody(BaseModel):
 
 
 def _api_url() -> str:
-    # Per-sample store() takes precedence (set when per_sample_reset=True).
+    # Per-sample store() takes precedence when a task provisions its own Gitea.
     return store().get(GITEA_STORE_API_URL) or os.environ.get(
         "GITHUB_API_URL", "https://api.github.com"
     )
@@ -65,8 +68,8 @@ def _headers() -> dict[str, str]:
     return h
 
 
-def _get(path: str):
-    r = requests.get(f"{_api_url()}{path}", headers=_headers(), timeout=HTTP_TIMEOUT)
+def _get(path: str, timeout: int = HTTP_TIMEOUT):
+    r = requests.get(f"{_api_url()}{path}", headers=_headers(), timeout=timeout)
     r.raise_for_status()
     return r.json()
 
@@ -82,8 +85,18 @@ def _post(path: str, body: BaseModel):
     return r.json() if r.content else {}
 
 
-def _read_file_content(repo: str, path: str, branch: str = "main") -> str:
-    data = _get(f"/repos/{repo}/contents/{path}?ref={branch}")
+def _contents_api_path(repo: str, path: str, branch: str) -> str:
+    encoded_path = (
+        "/".join(quote(part, safe="") for part in path.split("/")) if path else ""
+    )
+    encoded_branch = quote(branch, safe="")
+    return f"/repos/{repo}/contents/{encoded_path}?ref={encoded_branch}"
+
+
+def _read_file_content(
+    repo: str, path: str, branch: str = "main", timeout: int = HTTP_TIMEOUT
+) -> str:
+    data = _get(_contents_api_path(repo, path, branch), timeout=timeout)
     if isinstance(data, list):
         return f"Error: '{path}' is a directory, not a file. Use list_files to browse directories."
     return base64.b64decode(data["content"]).decode("utf-8")
@@ -106,7 +119,7 @@ def github_list_files() -> Tool:
             branch: Branch to list files from.
         """
         try:
-            data = _get(f"/repos/{repo}/contents/{path}?ref={branch}")
+            data = _get(_contents_api_path(repo, path, branch))
         except requests.HTTPError as e:
             return f"Error listing '{path}' (HTTP {e.response.status_code if e.response else '?'})"
         if isinstance(data, dict):
@@ -300,16 +313,33 @@ def github_list_recent_prs() -> Tool:
 def github_search_code() -> Tool:
     """Search for a pattern across all files in the repository on a given branch."""
 
-    async def execute(repo: str, query: str, branch: str = "main") -> str:
-        """Grep for query across all text files in the repository tree.
+    async def execute(
+        repo: str,
+        query: str,
+        branch: str = "main",
+        offset: int = 0,
+        max_files: int = 50,
+        limit: int = 30,
+        max_seconds: int = 15,
+    ) -> str:
+        """Grep for query across a bounded page of text files in the repository tree.
 
         Args:
             repo: Repository in owner/name format (e.g. 'gitadmin/my-repo').
             query: String or pattern to search for (case-insensitive substring).
             branch: Branch to search on (default: main).
+            offset: Candidate file offset to start scanning from.
+            max_files: Maximum number of candidate files to scan in this call, capped at 50.
+            limit: Maximum number of matching lines to return.
+            max_seconds: Maximum wall-clock seconds to spend scanning files (capped at 30).
         """
+        offset = max(offset, 0)
+        limit = max(1, min(limit, 100))
+        max_seconds = max(1, min(max_seconds, 30))
+
         try:
-            tree = _get(f"/repos/{repo}/git/trees/{branch}?recursive=1")
+            encoded_branch = quote(branch, safe="")
+            tree = _get(f"/repos/{repo}/git/trees/{encoded_branch}?recursive=1")
         except requests.HTTPError as e:
             return f"Error fetching repo tree: {e}"
         files = [
@@ -320,21 +350,58 @@ def github_search_code() -> Tool:
                 (".png", ".jpg", ".gif", ".ico", ".zip", ".lock")
             )
         ]
+        total_files = len(files)
+        if max_files is None or max_files <= 0:
+            max_files = 50
+        else:
+            max_files = max(1, min(max_files, 50))
+        files_page = files[offset : offset + max_files]
+        if not files_page:
+            return (
+                f"No candidate files to search at offset {offset}. "
+                f"Total candidate files: {total_files}."
+            )
+
         matches = []
         query_lower = query.lower()
-        for path in files[:80]:
+        scanned = 0
+        started = time.monotonic()
+        for path in files_page:
+            if time.monotonic() - started >= max_seconds:
+                break
+            scanned += 1
             try:
-                content = _read_file_content(repo, path, branch)
+                content = _read_file_content(repo, path, branch, timeout=5)
                 for i, line in enumerate(content.splitlines(), 1):
                     if query_lower in line.lower():
                         matches.append(f"{path}:{i}: {line.strip()}")
-                        if len(matches) >= 30:
+                        if len(matches) >= limit:
                             break
             except Exception:
                 continue
-            if len(matches) >= 30:
+            if len(matches) >= limit:
                 break
-        return "\n".join(matches) if matches else f"No matches for '{query}'."
+
+        next_offset = offset + scanned
+        hit_time_limit = time.monotonic() - started >= max_seconds
+        search_complete = (
+            next_offset >= total_files or len(matches) >= limit
+        ) and not hit_time_limit
+        status = (
+            f"Search for '{query}' scanned files {offset}-{offset + scanned - 1} "
+            f"of {total_files} candidate files."
+        )
+        if hit_time_limit:
+            status += f" Stopped after {max_seconds}s."
+        if not search_complete:
+            status += (
+                f" Search incomplete; call github_search_code with "
+                f"offset={next_offset} to continue."
+            )
+
+        if matches:
+            return f"{status}\n\n" + "\n".join(matches)
+        return f"{status}\n\nNo matches for '{query}' in this search page."
 
     return execute
 
@@ -380,7 +447,7 @@ def github_approve_pull_request() -> Tool:
 
         # Simulation mode: record the approval decision without touching Gitea.
         # Otherwise, merging conflict would happen between different samples from a given benchmark.
-        if SIMULATE_MERGES:
+        if simulate_merges_enabled():
             SIMULATED_MERGES_REGISTRY.setdefault(repo, set()).add(pr_number)
             return json.dumps({"pr": pr_number, "state": "merged"})
 
@@ -423,29 +490,41 @@ def bash_run_command() -> Tool:
             command: Bash command to execute (e.g., 'git log --oneline -5').
                      Supported operations: git, grep, find, ls, cat, head, tail, etc.
         """
-        # Security: only allow safe commands for inspection
-        allowed_prefixes = (
-            "git ",
-            "grep ",
-            "find ",
-            "ls ",
-            "cat ",
-            "head ",
-            "tail ",
-            "wc ",
-            "file ",
-            "stat ",
+        allowed_commands = {
+            "git",
+            "grep",
+            "find",
+            "ls",
+            "cat",
+            "head",
+            "tail",
+            "wc",
+            "file",
+            "stat",
             "pwd",
-            "echo ",
-            "which ",
-        )
+            "echo",
+            "which",
+        }
+        if any(
+            operator in command for operator in (";", "&&", "||", "|", ">", "<", "\n")
+        ):
+            return "Error: command not allowed. Supported: git, grep, find, ls, cat, head, tail, wc, file, stat, pwd, echo, which"
 
-        if not any(command.strip().startswith(prefix) for prefix in allowed_prefixes):
-            return f"Error: command not allowed. Supported: git, grep, find, ls, cat, head, tail, wc, file, stat, pwd, echo, which"
+        try:
+            args = shlex.split(command)
+        except ValueError as exc:
+            return f"Error: command not allowed: {exc}"
+
+        if (
+            not args
+            or args[0] not in allowed_commands
+            or any("\n" in token for token in args)
+        ):
+            return "Error: command not allowed. Supported: git, grep, find, ls, cat, head, tail, wc, file, stat, pwd, echo, which"
 
         try:
             result = await sandbox().exec(
-                cmd=["bash", "-c", command],
+                cmd=args,
                 cwd=SANDBOX_REPO_PATH,
                 timeout=30,
             )

@@ -201,6 +201,14 @@ class TestGithubListFiles:
         assert "file: src/main.py" in result
         assert "dir: src/utils" in result
 
+    def test_url_encodes_path_and_ref(self):
+        execute = self._make_execute()
+        with patch("benchmark.tools._get", return_value=[]) as mock_get:
+            asyncio.run(execute("owner/repo", "src/weird file.py", "feature/a b"))
+        assert mock_get.call_args.args[0] == (
+            "/repos/owner/repo/contents/src/weird%20file.py?ref=feature%2Fa%20b"
+        )
+
     def test_returns_file_message_for_single_file(self):
         execute = self._make_execute()
         with patch("benchmark.tools._get", return_value={"name": "file.py"}):
@@ -237,6 +245,15 @@ class TestGithubReadFile:
         with patch("benchmark.tools._get", return_value=payload):
             result = asyncio.run(execute("owner/repo", "script.py"))
         assert result == "print('hello')\n"
+
+    def test_url_encodes_path_and_ref(self):
+        execute = self._make_execute()
+        payload = {"content": _b64("x"), "encoding": "base64"}
+        with patch("benchmark.tools._get", return_value=payload) as mock_get:
+            asyncio.run(execute("owner/repo", "src/a#b.py", "feature/a?b"))
+        assert mock_get.call_args.args[0] == (
+            "/repos/owner/repo/contents/src/a%23b.py?ref=feature%2Fa%3Fb"
+        )
 
     def test_returns_error_on_http_error(self):
         execute = self._make_execute()
@@ -474,6 +491,87 @@ class TestGithubListRecentPrs:
 
 
 # ---------------------------------------------------------------------------
+# github_search_code
+# ---------------------------------------------------------------------------
+
+
+class TestGithubSearchCode:
+    def _make_execute(self):
+        from benchmark.tools import github_search_code
+
+        return github_search_code()
+
+    def test_search_offset_can_scan_files_beyond_first_page(self):
+        execute = self._make_execute()
+        tree = {
+            "tree": [
+                {"type": "blob", "path": f"src/file_{i}.py"} for i in range(85)
+            ]
+        }
+
+        def _read(_repo, path, _branch, timeout=60):
+            return "needle\n" if path == "src/file_84.py" else "haystack\n"
+
+        with (
+            patch("benchmark.tools._get", return_value=tree),
+            patch("benchmark.tools._read_file_content", side_effect=_read),
+        ):
+            result = asyncio.run(execute("owner/repo", "needle", offset=80))
+
+        assert "src/file_84.py:1: needle" in result
+
+    def test_search_reports_next_offset_when_page_incomplete(self):
+        execute = self._make_execute()
+        tree = {
+            "tree": [
+                {"type": "blob", "path": f"src/file_{i}.py"} for i in range(150)
+            ]
+        }
+
+        with (
+            patch("benchmark.tools._get", return_value=tree),
+            patch("benchmark.tools._read_file_content", return_value="haystack\n"),
+        ):
+            result = asyncio.run(execute("owner/repo", "needle", max_files=100))
+
+        assert "scanned files 0-49 of 150" in result
+        assert "Search incomplete" in result
+        assert "offset=50" in result
+
+    def test_search_offset_scans_next_file_page(self):
+        execute = self._make_execute()
+        tree = {
+            "tree": [
+                {"type": "blob", "path": f"src/file_{i}.py"} for i in range(150)
+            ]
+        }
+        read_paths = []
+
+        def _read(_repo, path, _branch, timeout=60):
+            read_paths.append(path)
+            return "needle\n" if path == "src/file_120.py" else "haystack\n"
+
+        with (
+            patch("benchmark.tools._get", return_value=tree),
+            patch("benchmark.tools._read_file_content", side_effect=_read),
+        ):
+            result = asyncio.run(execute("owner/repo", "needle", offset=100))
+
+        assert read_paths[0] == "src/file_100.py"
+        assert "src/file_120.py:1: needle" in result
+
+    def test_url_encodes_slash_branch_name(self):
+        execute = self._make_execute()
+        tree = {"tree": []}
+        with patch("benchmark.tools._get", return_value=tree) as mock_get:
+            asyncio.run(execute("owner/repo", "needle", branch="security/fix"))
+
+        assert mock_get.call_args.args[0] == (
+            "/repos/owner/repo/git/trees/security%2Ffix?recursive=1"
+        )
+
+
+# ---------------------------------------------------------------------------
 # github_add_pr_comment
 # ---------------------------------------------------------------------------
 
@@ -520,7 +618,7 @@ class TestGithubApprovePullRequestReal:
 
         execute = github_approve_pull_request()
         with (
-            patch("benchmark.tools.SIMULATE_MERGES", False),
+            patch.dict("os.environ", {"SIMULATE_MERGES": "0"}),
             patch("benchmark.tools._post", return_value={}),
             patch("benchmark.tools._review_approve_event", return_value="APPROVED"),
         ):
@@ -536,7 +634,7 @@ class TestGithubApprovePullRequestReal:
         mock_resp = MagicMock()
         mock_resp.status_code = 500
         with (
-            patch("benchmark.tools.SIMULATE_MERGES", False),
+            patch.dict("os.environ", {"SIMULATE_MERGES": "0"}),
             patch(
                 "benchmark.tools._post",
                 side_effect=requests.HTTPError(response=mock_resp),
@@ -562,7 +660,7 @@ class TestGithubApprovePullRequestReal:
             return {}
 
         with (
-            patch("benchmark.tools.SIMULATE_MERGES", False),
+            patch.dict("os.environ", {"SIMULATE_MERGES": "0"}),
             patch("benchmark.tools._post", side_effect=_post_side_effect),
             patch("benchmark.tools._review_approve_event", return_value="APPROVED"),
         ):
@@ -637,6 +735,20 @@ class TestBashRunCommand:
         ],
     )
     def test_disallowed_commands_rejected(self, cmd):
+        execute = self._make_execute()
+        result = asyncio.run(execute(cmd))
+        assert "not allowed" in result.lower()
+
+    @pytest.mark.parametrize(
+        "cmd",
+        [
+            "git status && rm -rf /workspace/repo",
+            "echo ok; rm -rf /workspace/repo",
+            "ls | cat",
+            "cat README.md > /tmp/out",
+        ],
+    )
+    def test_rejects_shell_chaining_for_allowed_commands(self, cmd):
         execute = self._make_execute()
         result = asyncio.run(execute(cmd))
         assert "not allowed" in result.lower()

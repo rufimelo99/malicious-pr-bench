@@ -15,8 +15,12 @@ if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
 
 from benchmark.agents.prompt_utils import load_prompt
-from benchmark.config import (PROMPT_FILES, SANDBOX_OUTPUT_FILE,
-                              SANDBOX_REPO_PATH, PromptVariant)
+from benchmark.config import (
+    PROMPT_FILES,
+    SANDBOX_OUTPUT_FILE,
+    SANDBOX_REPO_PATH,
+    PromptVariant,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +60,7 @@ class CLIAgentBridge(ABC):
     @staticmethod
     def _load_dotenv() -> None:
         """Source .env from the project root if present."""
-        env_file = Path(__file__).resolve().parents[2] / ".env"
+        env_file = Path(__file__).resolve().parents[3] / ".env"
         if not env_file.exists():
             return
         for line in env_file.read_text().splitlines():

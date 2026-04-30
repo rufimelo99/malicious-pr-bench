@@ -16,7 +16,7 @@ from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
 from benchmark.config import HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
 from benchmark.gitea import clone_repo_to_sandbox, reset_gitea
 from benchmark.logger import logger
-from benchmark.registry import SIMULATED_MERGES_REGISTRY
+from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges_for
 from benchmark.tools import _api_url, _headers
 from benchmark.utils import store_pr_details
 
@@ -68,6 +68,8 @@ def cli_solver(
 
     async def solve(state: TaskState, generate) -> TaskState:
         nonlocal _reset_task
+        os.environ["SIMULATE_MERGES"] = "1"
+        state.metadata["simulate_merge"] = True
 
         # Reset Gitea once before the first sample; all samples share it.
         if image or cwe:
@@ -90,6 +92,8 @@ def cli_solver(
             or state.metadata.get("group_pr_numbers")
             or [state.metadata["pr_number"]]
         )
+        pr_numbers = [int(pr_number) for pr_number in pr_numbers]
+        clear_simulated_merges_for(repo, pr_numbers)
 
         await clone_repo_to_sandbox(repo)
         sb = _sandbox()

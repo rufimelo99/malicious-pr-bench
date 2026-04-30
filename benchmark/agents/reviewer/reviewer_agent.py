@@ -41,7 +41,8 @@ def build_reviewer_agent(
         Controls which tools the agent has access to and which system prompt is used.
 
         - ``"gitea"`` or ``ToolMode.GITEA`` — Full Gitea/GitHub API toolset.
-        - ``"sandbox"`` or ``ToolMode.SANDBOX`` — Bash sandbox tools + approve only.
+        - ``"sandbox"`` or ``ToolMode.SANDBOX`` — Gitea/GitHub API toolset plus
+          bash inspection inside the sandbox.
 
     prompt_variant : PromptVariant | str
         Controls which system prompt is used.

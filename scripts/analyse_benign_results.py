@@ -23,6 +23,15 @@ from rich.rule import Rule
 from rich.table import Table
 
 console = Console()
+INVALID_REVIEW_ANSWER = "invalid_review"
+EXCLUDED_FROM_METRICS_KEY = "excluded_from_metrics"
+
+
+def _score_excluded_from_metrics(score) -> bool:
+    metadata = getattr(score, "metadata", None) or {}
+    return getattr(score, "answer", None) == INVALID_REVIEW_ANSWER or bool(
+        metadata.get(EXCLUDED_FROM_METRICS_KEY)
+    )
 
 
 class BenignSampleResult(NamedTuple):
@@ -32,8 +41,14 @@ class BenignSampleResult(NamedTuple):
     approved: bool  # True = correctly approved, False = false positive
 
 
-def load_results(log_paths: list[Path]) -> list[BenignSampleResult]:
+class BenignResultSet(NamedTuple):
+    samples: list[BenignSampleResult]
+    invalid_reviews: int
+
+
+def load_results_with_counts(log_paths: list[Path]) -> BenignResultSet:
     results: list[BenignSampleResult] = []
+    invalid_reviews = 0
     for path in log_paths:
         try:
             log = read_eval_log(str(path))
@@ -49,6 +64,9 @@ def load_results(log_paths: list[Path]) -> list[BenignSampleResult]:
 
             fp = scores.get("false_positive_scorer")
             if fp is None:
+                continue
+            if _score_excluded_from_metrics(fp):
+                invalid_reviews += 1
                 continue
 
             raw_repo = meta.get("repo", "unknown")
@@ -78,17 +96,24 @@ def load_results(log_paths: list[Path]) -> list[BenignSampleResult]:
                     approved=fp.answer == "approved",
                 )
             )
-    return results
+    return BenignResultSet(samples=results, invalid_reviews=invalid_reviews)
 
 
-def _summary_table(results: list[BenignSampleResult]) -> None:
+def load_results(log_paths: list[Path]) -> list[BenignSampleResult]:
+    return load_results_with_counts(log_paths).samples
+
+
+def _summary_table(results: list[BenignSampleResult], invalid_reviews: int) -> None:
     n = len(results)
+    total_scored = n + invalid_reviews
     approved = sum(r.approved for r in results)
     blocked = n - approved
     fpr = 100 * blocked / n if n else 0.0
 
     console.print(
-        f"  Samples: [bold]{n}[/bold]  |  "
+        f"  Valid samples: [bold]{n}[/bold]  |  "
+        f"Invalid CLI reviews: [yellow]{invalid_reviews}[/yellow] "
+        f"({100 * invalid_reviews / total_scored:.1f}% of scored samples)  |  "
         f"Correctly approved: [green]{approved}[/green] ({100 * approved / n:.1f}%)  |  "
         f"False positives: [red]{blocked}[/red] ({fpr:.1f}%)"
     )
@@ -214,15 +239,23 @@ def main() -> None:
         sys.exit(1)
 
     console.print(f"[dim]Loading {len(paths)} log file(s)…[/dim]")
-    results = load_results(paths)
+    result_set = load_results_with_counts(paths)
+    results = result_set.samples
+    invalid_reviews = result_set.invalid_reviews
 
     if not results:
-        console.print("[red]No scored samples found in the provided logs.[/red]")
+        if invalid_reviews:
+            console.print(
+                "[red]No valid scored samples found in the provided logs.[/red] "
+                f"[yellow]Invalid CLI reviews: {invalid_reviews}[/yellow]"
+            )
+        else:
+            console.print("[red]No scored samples found in the provided logs.[/red]")
         sys.exit(1)
 
     console.print()
     console.print(Rule("[bold]benign-pr-bench — False Positive Rate Analysis[/bold]"))
-    _summary_table(results)
+    _summary_table(results, invalid_reviews)
     console.print()
 
     console.print(_cwe_table(results))

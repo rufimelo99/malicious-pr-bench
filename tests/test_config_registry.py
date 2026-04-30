@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 # ---------------------------------------------------------------------------
 # config.py
 # ---------------------------------------------------------------------------
@@ -47,6 +49,22 @@ class TestConfig:
         from benchmark.config import HF_DATASET_DEFAULT
 
         assert "malicious" in HF_DATASET_DEFAULT.lower()
+
+    def test_env_flag_parses_false_values(self):
+        from benchmark.config import env_flag
+
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "false"}):
+            assert env_flag("SIMULATE_MERGES") is False
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "0"}):
+            assert env_flag("SIMULATE_MERGES") is False
+
+    def test_env_flag_parses_true_values(self):
+        from benchmark.config import env_flag
+
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "true"}):
+            assert env_flag("SIMULATE_MERGES") is True
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "1"}):
+            assert env_flag("SIMULATE_MERGES") is True
 
 
 # ---------------------------------------------------------------------------
