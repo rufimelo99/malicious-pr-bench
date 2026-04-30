@@ -140,6 +140,35 @@ def start_gitea(image: str, port: int, project_name: str) -> tuple[str, str]:
         raise
 
 
+def run_retry(log_file: Path) -> int:
+    """Run inspect eval-retry to restart failed tasks.
+
+    Parameters
+    ----------
+    log_file : Path
+        Path to the .eval log file to retry.
+
+    Returns
+    -------
+    int
+        Exit code from inspect eval-retry (0 = success, non-zero = failure).
+    """
+    print(f"\n{'='*60}")
+    print(f"Running inspect eval-retry")
+    print(f"  Log file: {log_file}")
+    print(f"{'='*60}\n")
+
+    # Run inspect eval-retry with the log file
+    cmd = ["uv", "run", "inspect", "eval-retry", str(log_file)]
+
+    result = subprocess.run(cmd)
+
+    if result.returncode != 0:
+        print(f"\nwarning: inspect eval-retry exited with code {result.returncode}", file=sys.stderr)
+
+    return result.returncode
+
+
 def main() -> int:
     """Main entry point for the retry script."""
     parser = argparse.ArgumentParser(
