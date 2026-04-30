@@ -96,6 +96,50 @@ def build_image_name(cwe: str, version: str, tool_mode: str) -> str:
     return f"rufimelo/malicious-pr-{cwe}:{version}"
 
 
+def start_gitea(image: str, port: int, project_name: str) -> tuple[str, str]:
+    """Start a Gitea container using the existing reset_gitea function.
+
+    Parameters
+    ----------
+    image : str
+        Full Docker image name (e.g., "rufimelo/malicious-pr-cwe79:gpt5.2-filtered").
+    port : int
+        Host port for Gitea to listen on.
+    project_name : str
+        Docker Compose project name for this container.
+
+    Returns
+    -------
+    tuple[str, str]
+        (api_url, token) for accessing the Gitea API.
+
+    Raises
+    ------
+    RuntimeError
+        If Docker container fails to start or Gitea is not healthy.
+    """
+    # Import here to avoid adding benchmark dependency at module level
+    from benchmark.gitea import reset_gitea
+
+    print(f"\n{'='*60}")
+    print(f"Starting Gitea container for retry")
+    print(f"  Image: {image}")
+    print(f"  Port: {port}")
+    print(f"  Project: {project_name}")
+    print(f"{'='*60}\n")
+
+    try:
+        api_url, token = reset_gitea(image=image, port=port, project_name=project_name)
+        print(f"\n{'='*60}")
+        print(f"Gitea started successfully")
+        print(f"  API URL: {api_url}")
+        print(f"{'='*60}\n")
+        return api_url, token
+    except RuntimeError as e:
+        print(f"\nError starting Gitea: {e}", file=sys.stderr)
+        raise
+
+
 def main() -> int:
     """Main entry point for the retry script."""
     parser = argparse.ArgumentParser(
