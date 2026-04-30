@@ -82,6 +82,37 @@ class TestGiteaReset:
         assert calls[-1][1]["GITEA_ROOT_URL"] == "http://localhost:4567/"
 
 
+class TestDockerCleanup:
+    def test_cleanup_all_only_stops_tracked_projects(self, monkeypatch):
+        from benchmark import docker_cleanup
+
+        cleaned = []
+        orphan_cleanup_called = False
+
+        def fake_cleanup_project(project_name, compose_file):
+            cleaned.append((project_name, compose_file))
+
+        def fake_cleanup_orphaned_containers():
+            nonlocal orphan_cleanup_called
+            orphan_cleanup_called = True
+
+        monkeypatch.setattr(
+            docker_cleanup, "_active_projects", {("mprb-one", "compose.yml")}
+        )
+        monkeypatch.setattr(docker_cleanup, "_cleanup_project", fake_cleanup_project)
+        monkeypatch.setattr(
+            docker_cleanup,
+            "_cleanup_orphaned_containers",
+            fake_cleanup_orphaned_containers,
+        )
+
+        docker_cleanup._cleanup_all()
+
+        assert cleaned == [("mprb-one", "compose.yml")]
+        assert docker_cleanup._active_projects == set()
+        assert orphan_cleanup_called is False
+
+
 # ---------------------------------------------------------------------------
 # _matches_filter
 # ---------------------------------------------------------------------------

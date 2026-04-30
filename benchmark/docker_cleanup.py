@@ -96,14 +96,12 @@ def _cleanup_orphaned_containers() -> None:
 
 
 def _cleanup_all() -> None:
-    """Clean up all tracked docker-compose projects and orphaned containers."""
+    """Clean up only the Docker Compose projects tracked by this process."""
     if _active_projects:
         logger.info(f"Shutting down {len(_active_projects)} Docker containers...")
         for project_name, compose_file in list(_active_projects):
             _cleanup_project(project_name, compose_file)
             _active_projects.discard((project_name, compose_file))
-
-    _cleanup_orphaned_containers()
 
 
 def _register_shutdown_handlers() -> None:
