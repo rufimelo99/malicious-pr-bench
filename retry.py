@@ -140,6 +140,35 @@ def start_gitea(image: str, port: int, project_name: str) -> tuple[str, str]:
         raise
 
 
+def validate_metadata(metadata: dict[str, str | int]) -> None:
+    """Validate extracted metadata for required fields and reasonable values.
+
+    Raises
+    ------
+    ValueError
+        If any metadata field is invalid.
+    """
+    # Port should be reasonable
+    port = metadata.get("port", 0)
+    if not isinstance(port, int) or port < 1 or port > 65535:
+        raise ValueError(f"Invalid port number: {port}")
+
+    # CWE should not be empty
+    cwe = metadata.get("cwe")
+    if not cwe or not isinstance(cwe, str):
+        raise ValueError(f"Invalid CWE: {cwe}")
+
+    # Version should not be empty
+    version = metadata.get("version")
+    if not version or not isinstance(version, str):
+        raise ValueError(f"Invalid version: {version}")
+
+    # Project name should not be empty
+    project_name = metadata.get("project_name")
+    if not project_name or not isinstance(project_name, str):
+        raise ValueError(f"Invalid project name: {project_name}")
+
+
 def run_retry(log_file: Path) -> int:
     """Run inspect eval-retry to restart failed tasks.
 
@@ -161,10 +190,14 @@ def run_retry(log_file: Path) -> int:
     # Run inspect eval-retry with the log file
     cmd = ["uv", "run", "inspect", "eval-retry", str(log_file)]
 
-    result = subprocess.run(cmd)
+    try:
+        result = subprocess.run(cmd, check=False)
+    except FileNotFoundError:
+        print(f"\nError: Could not find 'uv' command. Make sure it's installed and in PATH.", file=sys.stderr)
+        return 127
 
     if result.returncode != 0:
-        print(f"\nwarning: inspect eval-retry exited with code {result.returncode}", file=sys.stderr)
+        print(f"\nWarning: inspect eval-retry exited with code {result.returncode}", file=sys.stderr)
 
     return result.returncode
 
@@ -195,6 +228,7 @@ def main() -> int:
     # Step 1: Extract metadata from the log file
     try:
         metadata = extract_metadata(args.log_file)
+        validate_metadata(metadata)
         print(f"\nExtracted metadata:")
         print(f"  CWE: {metadata['cwe']}")
         print(f"  Version: {metadata['version']}")
