@@ -185,6 +185,7 @@ class TestLoadSamplesIndependent:
         assert self._load(path) == []
 
 
+
 # ---------------------------------------------------------------------------
 # _load_samples — skip_undefined
 # ---------------------------------------------------------------------------
@@ -236,6 +237,15 @@ class TestLoadSamplesSkipUndefined:
             in [r["pr_number"] for r in _filter_undefined_axes([r.to_dict() for r in records])]
         ]
         assert len(filtered_samples) == 1
+
+    def test_includes_undefined_when_skip_false(self, tmp_path):
+        records = [
+            PRRecord(pr_number=1, axis1="undefined"),
+            PRRecord(pr_number=2),
+        ]
+        path = _write_jsonl(tmp_path, records)
+        samples = self._load(path, skip_undefined=False)
+        assert len(samples) == 2
 
     def test_no_hf_or_jsonl_raises(self):
         from benchmark.dataset import load_malicious_samples
