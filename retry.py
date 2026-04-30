@@ -192,7 +192,50 @@ def main() -> int:
 
     print(f"Processing eval log: {args.log_file}")
 
-    return 0
+    # Step 1: Extract metadata from the log file
+    try:
+        metadata = extract_metadata(args.log_file)
+        print(f"\nExtracted metadata:")
+        print(f"  CWE: {metadata['cwe']}")
+        print(f"  Version: {metadata['version']}")
+        print(f"  Port: {metadata['port']}")
+        print(f"  Project: {metadata['project_name']}")
+        print(f"  Tool Mode: {metadata['tool_mode']}")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error extracting metadata: {e}", file=sys.stderr)
+        return 1
+
+    # Step 2: Build the Docker image name
+    image = build_image_name(
+        cwe=metadata["cwe"],
+        version=metadata["version"],
+        tool_mode=metadata["tool_mode"]
+    )
+
+    # Step 3: Start Gitea
+    try:
+        api_url, token = start_gitea(
+            image=image,
+            port=metadata["port"],
+            project_name=metadata["project_name"]
+        )
+    except RuntimeError as e:
+        print(f"Failed to start Gitea: {e}", file=sys.stderr)
+        return 1
+
+    # Step 4: Run inspect eval-retry
+    exit_code = run_retry(args.log_file)
+
+    if exit_code == 0:
+        print(f"\n{'='*60}")
+        print(f"Retry completed successfully!")
+        print(f"{'='*60}")
+    else:
+        print(f"\n{'='*60}")
+        print(f"Retry completed with exit code {exit_code}")
+        print(f"{'='*60}")
+
+    return exit_code
 
 
 if __name__ == "__main__":
