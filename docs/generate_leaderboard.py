@@ -16,6 +16,16 @@ if AXIS_MAPPING_PATH.exists():
     with open(AXIS_MAPPING_PATH) as f:
         AXIS_MAPPING = json.load(f)
 
+INVALID_REVIEW_ANSWER = "invalid_review"
+EXCLUDED_FROM_METRICS_KEY = "excluded_from_metrics"
+
+
+def score_excluded_from_metrics(score: dict[str, Any]) -> bool:
+    metadata = score.get("metadata") or {}
+    return score.get("answer") == INVALID_REVIEW_ANSWER or bool(
+        metadata.get(EXCLUDED_FROM_METRICS_KEY)
+    )
+
 
 def parse_eval_file(eval_path: Path) -> Optional[dict[str, Any]]:
     """Parse .eval ZIP file to extract metadata and scores."""
@@ -34,12 +44,21 @@ def parse_eval_file(eval_path: Path) -> Optional[dict[str, Any]]:
                     # Get the first reducer (usually detection_scorer)
                     for reduction in reductions:
                         if reduction.get("scorer") == "detection_scorer":
-                            samples = reduction.get("samples", [])
+                            raw_samples = reduction.get("samples", [])
+                            samples = [
+                                sample
+                                for sample in raw_samples
+                                if not score_excluded_from_metrics(sample)
+                            ]
+                            eval_meta["score_count"] = len(samples)
+                            eval_meta["invalid_score_count"] = len(raw_samples) - len(
+                                samples
+                            )
+                            eval_meta["total_score_count"] = len(raw_samples)
                             if samples:
                                 scores = [s.get("value", 0) for s in samples]
                                 if scores:
                                     eval_meta["avg_score"] = sum(scores) / len(scores)
-                                    eval_meta["score_count"] = len(scores)
 
                                     # Extract axis data from sample IDs
                                     # Format: repo-prN-axis1-axis2-axis3
@@ -129,7 +148,7 @@ def extract_model_and_harness(metadata: dict) -> tuple[str, str]:
         harness = f"inspect + {tool_mode}"
     else:
         # Default to inspect (no tool mode specified)
-        harness = "inspect + gitea"
+        harness = "inspect + sandbox"
 
     return model, harness
 
@@ -170,7 +189,7 @@ def parse_logs(
 
         # Check tool mode if filtering
         if tool_modes:
-            detected_tool_mode = task_args.get("tool_mode", "gitea")
+            detected_tool_mode = task_args.get("tool_mode", "sandbox")
             if detected_tool_mode not in tool_modes:
                 continue
 
@@ -182,7 +201,12 @@ def parse_logs(
             "model": model,
             "harness": harness,
             "date": date_str,
-            "samples": metadata.get("dataset", {}).get("samples", 0),
+            "samples": metadata.get("score_count", 0),
+            "valid_samples": metadata.get("score_count", 0),
+            "invalid_samples": metadata.get("invalid_score_count", 0),
+            "total_samples": metadata.get(
+                "total_score_count", metadata.get("dataset", {}).get("samples", 0)
+            ),
             "cwe": cwe,
             "status": metadata.get("status", "unknown"),
             "created": created_str,
@@ -332,6 +356,9 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
                 score_display = (
                     f"{entry['score']:.1%}" if entry["score"] is not None else "—"
                 )
+                sample_display = str(entry["samples"])
+                if entry.get("invalid_samples"):
+                    sample_display += f" (+{entry['invalid_samples']} invalid)"
                 score_color = (
                     "has-text-success"
                     if entry["score"] and entry["score"] > 0.8
@@ -351,7 +378,7 @@ def generate_table_html(task_name: str, entries: dict[str, list[dict]]) -> str:
               <td><code>{entry['harness']}</code></td>
               <td><code>{entry['cwe']}</code></td>
               <td>{entry['date']}</td>
-              <td>{entry['samples']}</td>
+              <td>{sample_display}</td>
               <td class="{score_color}"><strong>{score_display}</strong></td>
             </tr>
 """
@@ -544,6 +571,7 @@ def main():
     )
     parser.add_argument(
         "--logs",
+        "--log-dir",
         type=Path,
         default=Path("docs/logs"),
         help="Input logs directory (default: docs/logs)",
