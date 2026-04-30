@@ -8,6 +8,16 @@ services:
     extra_hosts:
       - "gitea:host-gateway"
     environment:
+      - OPENAI_API_KEY
+      - OPENAI_BASE_URL
+      - OPENAI_ORG_ID
+      - OPENAI_ORGANIZATION
+      - OPENAI_PROJECT
+      - AZURE_OPENAI_API_KEY
+      - AZUREAI_OPENAI_API_KEY
+      - AZURE_OPENAI_ENDPOINT
+      - AZURE_OPENAI_API_VERSION
+      - CODEX_HOME
       - ANTHROPIC_API_KEY
       - CLAUDE_CODE_USE_BEDROCK
       - AWS_REGION

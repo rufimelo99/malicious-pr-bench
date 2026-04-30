@@ -82,6 +82,9 @@ class CopilotCLIBridge(CLIAgentBridge):
             "--add-dir",
             workdir,
             "--allow-all",
+            "--output-format",
+            "json",
+            "--no-ask-user",
         ]
         if self.model:
             args.extend(["--model", self.model])
@@ -132,6 +135,9 @@ class CopilotCLIBridge(CLIAgentBridge):
 
                 # Extract content from various JSONL event formats
                 content = event.get("content") or event.get("text") or ""
+                data = event.get("data")
+                if not content and isinstance(data, dict):
+                    content = data.get("content") or data.get("text") or ""
                 if not isinstance(content, str) or not content:
                     continue
 
