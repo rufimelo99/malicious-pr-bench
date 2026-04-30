@@ -77,15 +77,6 @@ def build_reviewer_agent(
         ]
     elif tool_mode.value == "sandbox":
         tools = [
-            github_get_pull_request(),
-            github_list_pr_files(),
-            github_list_files(),
-            github_read_file(),
-            github_list_pr_commits(),
-            github_list_pr_reviews(),
-            github_list_recent_prs(),
-            github_search_code(),
-            github_add_pr_comment(),
             bash_run_command(),
             github_approve_pull_request(),
         ]

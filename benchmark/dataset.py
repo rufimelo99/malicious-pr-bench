@@ -116,8 +116,9 @@ def load_malicious_samples(
 
     records = [r for r in records if r.get("axis1")]
 
-    if skip_undefined:
-        records = _filter_undefined_axes(records)
+    # TODO(Rui): This is being temporarily disabled.
+    # if skip_undefined:
+    #     records = _filter_undefined_axes(records)
 
     # Pre-compute group membership
     group_prs: dict[str, list[tuple[int, int]]] = {}
