@@ -1,13 +1,31 @@
 #!/usr/bin/env python3
 """Helper script to retry failed evaluation tasks.
 
-Usage:
+This script takes an .eval log file from a failed `inspect eval` run and:
+1. Extracts metadata (port, CWE, version, project name)
+2. Starts a Gitea Docker container with those parameters
+3. Runs `inspect eval-retry` to restart failed tasks
+
+Usage
+-----
     uv run python retry <log_file>
 
-The script will:
-1. Extract metadata from the .eval file (port, image, project name)
-2. Start a Gitea container with those parameters
-3. Run `inspect eval-retry` to restart failed tasks
+Example
+-------
+    # Retry a failed evaluation
+    uv run python retry 2026-04-30T04-50-13-00-00_reviewer-benchmark_dWbUX3enBBZ2tzrpz8mgHU.eval
+
+Requirements
+------------
+- The .eval file must be from a `malicious_pr_bench` benchmark run
+- Docker and docker-compose must be installed and running
+- The script uses the existing benchmark/gitea.py and benchmark/docker_cleanup.py utilities
+
+Notes
+-----
+- The Gitea container will be started on the same port as the original run
+- The container will be cleaned up on script exit via signal handlers
+- For debugging, use `docker ps` to see running containers
 """
 
 from __future__ import annotations
