@@ -8,7 +8,7 @@ services:
       - GITEA__security__INSTALL_LOCK=true
       - GITEA__security__SECRET_KEY=localdevonlysecretkey
       - GITEA__security__INTERNAL_TOKEN=localdevonlyinternaltoken
-      - GITEA__server__ROOT_URL=http://localhost:3001/
+      - GITEA__server__ROOT_URL=${GITEA_ROOT_URL:-http://localhost:3001/}
       - GITEA__server__HTTP_PORT=3001
       - GITEA__service__DISABLE_REGISTRATION=true
       - GITEA__log__LEVEL=Warn

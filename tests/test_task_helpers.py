@@ -31,6 +31,88 @@ class TestFreePort:
         assert len(ports) >= 1
 
 
+class TestGiteaReset:
+    def test_unique_project_name_is_compose_safe(self):
+        from benchmark.docker_cleanup import unique_docker_project_name
+
+        name = unique_docker_project_name("Reviewer", "codex", "CWE-79")
+        assert name.startswith("mprb-reviewer-codex-cwe-79-")
+        assert len(name) <= 63
+        assert all(c.islower() or c.isdigit() or c in "-_" for c in name)
+
+    def test_reset_gitea_uses_ephemeral_port_and_project_name(self, monkeypatch):
+        import subprocess
+
+        from benchmark import gitea
+
+        calls = []
+
+        def fake_run(cmd, env=None, **kwargs):
+            calls.append((cmd, env, kwargs))
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return b'{"sha1": "token"}'
+
+        monkeypatch.setattr(gitea, "_free_port", lambda: 4567)
+        monkeypatch.setattr(gitea, "track_project", lambda *_, **__: None)
+        monkeypatch.setattr(gitea.subprocess, "run", fake_run)
+        monkeypatch.setattr(
+            gitea.urllib.request, "urlopen", lambda *_, **__: FakeResponse()
+        )
+
+        api_url, token = gitea.reset_gitea(
+            "rufimelo/malicious-pr-cwe79:test",
+            port=0,
+            project_name="mprb-test",
+        )
+
+        assert api_url == "http://localhost:4567/api/v1"
+        assert token == "token"
+        assert all("--project-name" in call[0] for call in calls)
+        assert all("mprb-test" in call[0] for call in calls)
+        assert calls[-1][1]["GITEA_PORT"] == "4567"
+        assert calls[-1][1]["GITEA_ROOT_URL"] == "http://localhost:4567/"
+
+
+class TestDockerCleanup:
+    def test_cleanup_all_only_stops_tracked_projects(self, monkeypatch):
+        from benchmark import docker_cleanup
+
+        cleaned = []
+        orphan_cleanup_called = False
+
+        def fake_cleanup_project(project_name, compose_file):
+            cleaned.append((project_name, compose_file))
+
+        def fake_cleanup_orphaned_containers():
+            nonlocal orphan_cleanup_called
+            orphan_cleanup_called = True
+
+        monkeypatch.setattr(
+            docker_cleanup, "_active_projects", {("mprb-one", "compose.yml")}
+        )
+        monkeypatch.setattr(docker_cleanup, "_cleanup_project", fake_cleanup_project)
+        monkeypatch.setattr(
+            docker_cleanup,
+            "_cleanup_orphaned_containers",
+            fake_cleanup_orphaned_containers,
+        )
+
+        docker_cleanup._cleanup_all()
+
+        assert cleaned == [("mprb-one", "compose.yml")]
+        assert docker_cleanup._active_projects == set()
+        assert orphan_cleanup_called is False
+
+
 # ---------------------------------------------------------------------------
 # _matches_filter
 # ---------------------------------------------------------------------------
