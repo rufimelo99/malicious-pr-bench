@@ -15,16 +15,12 @@ if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
 
 from benchmark.agents.prompt_utils import load_prompt
-from benchmark.config import (
-    PROMPT_FILES,
-    SANDBOX_OUTPUT_FILE,
-    SANDBOX_REPO_PATH,
-    PromptVariant,
-)
+from benchmark.config import (PROMPT_FILES, SANDBOX_OUTPUT_FILE,
+                              SANDBOX_REPO_PATH, PromptVariant)
 
 logger = logging.getLogger(__name__)
 
-_SANDBOX_SYSTEM_PROMPT = load_prompt(PROMPT_FILES[PromptVariant.SECURITY])
+_SANDBOX_SYSTEM_PROMPT = load_prompt(PROMPT_FILES["cli"][PromptVariant.SECURITY])
 
 _TIMEOUT_EXIT_CODE = 124
 
