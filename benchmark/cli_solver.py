@@ -43,14 +43,15 @@ def cli_solver(
     timeout: int = 600,
     cwe: str | None = None,
     reset: bool = False,
-    gitea_port: int = 3001,
+    gitea_port: int = 0,
+    gitea_project: str | None = None,
     version: str = "v0.0.0",
     image: str | None = None,
 ) -> Solver:
     """Inspect solver that dispatches PR reviews to a local CLI coding agent.
 
     CLI agents always run inside the per-sample sandbox container.
-    Each sample gets its own Gitea instance on an ephemeral port.
+    Each benchmark run gets its own Gitea instance by default.
     """
     import asyncio as _asyncio
 
@@ -78,7 +79,12 @@ def cli_solver(
                     cwe=cwe, version=version
                 )
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(reset_gitea, _image, gitea_port)
+                    _asyncio.to_thread(
+                        reset_gitea,
+                        _image,
+                        gitea_port,
+                        project_name=gitea_project,
+                    )
                 )
             api_url, gitea_token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url

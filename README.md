@@ -170,7 +170,7 @@ uv run inspect eval benchmark/task.py@benign_benchmark \
 ### Monitoring
 
 While the benchmark runs:
-- **Real-time PR review**: Visit `http://localhost:3001` to watch PRs being reviewed live
+- **Real-time PR review**: The run prints the `GITHUB_API_URL` for its Gitea instance. Use the same host/port without `/api/v1` to watch PRs live.
 - **Container reset**: The Gitea Docker container is automatically reset at the start of each run (set `reset=false` to preserve state)
 
 ### Full Example: Multi-CWE Evaluation
@@ -348,7 +348,8 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | `review_mode` | `independent` | `independent` creates one sample per PR; `sequence` keeps complete multi-PR groups together |
 | `simulate_merge` | `true` | Record approvals in memory instead of merging in Gitea, preserving sample independence. CLI agents always simulate merges. Set `false` only when you explicitly want live Gitea merge side effects. |
 | `reset` | `true` | Reset container before run starts |
-| `gitea_port` | `3001` | Port for Gitea instance |
+| `gitea_port` | `0` | Port for Gitea instance. `0` allocates a free host port for this run |
+| `gitea_project` | auto | Docker Compose project name for Gitea. Defaults to a unique run name so parallel evals do not reset each other |
 
 **Global inspect options:**
 | Option | Description |
@@ -356,6 +357,23 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | `--limit N` | Limit evaluation to the first N dataset samples |
 | `--max-samples N` | Maximum number of samples to run concurrently |
 | `--log-dir PATH` | Directory to save evaluation results |
+
+**Parallel runs:**
+By default each evaluation allocates a free Gitea host port and a unique Docker Compose project name. This lets you run two agents side by side as separate `inspect eval` processes, as long as their log directories are distinct:
+```bash
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model <kimi-model-id> \
+  -T cwe=cwe79 \
+  --log-dir logs/kimi-cwe79
+
+uv run inspect eval benchmark/task.py@reviewer_benchmark \
+  --model openai/azure/gpt-5.2 \
+  -T agent=codex \
+  -T model=gpt-5.3-codex \
+  -T cwe=cwe79 \
+  --log-dir logs/codex-cwe79
+```
+Pass explicit `-T gitea_port=3001 -T gitea_project=my-run` only when you need a stable local Gitea URL for debugging.
 
 **Example: Evaluate only "Tiny Change" vulnerabilities with "Fake Bug Fix" framing:**
 ```bash
@@ -396,7 +414,8 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 | `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot-cli` (GitHub Copilot CLI) |
 | `tool_mode` | `sandbox` | Execution mode: `sandbox` (Gitea tools plus sandbox bash) or `gitea` (Gitea tools only) |
 | `reset` | `true` | Reset Gitea container before run |
-| `gitea_port` | `3001` | Port for Gitea instance |
+| `gitea_port` | `0` | Port for Gitea instance. `0` allocates a free host port for this run |
+| `gitea_project` | auto | Docker Compose project name for Gitea. Defaults to a unique run name so parallel evals do not reset each other |
 
 **Note:** Benign PRs are deterministically generated from official CVE fixes without social engineering framing. They serve to measure how often the agent incorrectly rejects legitimate security improvements (false-positive rate).
 

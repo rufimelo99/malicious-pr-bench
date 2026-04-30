@@ -5,10 +5,12 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 import socket
 import subprocess
 import time
 import urllib.request
+import uuid
 from pathlib import Path
 
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
@@ -28,9 +30,24 @@ def _free_port() -> int:
     return port
 
 
+def _compose_project_name(raw: str) -> str:
+    """Return a Docker Compose-safe project name."""
+    name = re.sub(r"[^a-z0-9_-]+", "-", raw.lower()).strip("-_")
+    if not name or not re.match(r"^[a-z0-9]", name):
+        name = f"benchmark-{name}"
+    return name[:63].rstrip("-_")
+
+
+def unique_gitea_project_name(*parts: object) -> str:
+    """Build a unique Docker Compose project name for one benchmark run."""
+    labels = [str(part) for part in parts if part not in (None, "")]
+    suffix = f"{os.getpid()}-{int(time.time() * 1000)}-{uuid.uuid4().hex[:8]}"
+    return _compose_project_name("-".join(["mprb", *labels, suffix]))
+
+
 def reset_gitea(
     image: str,
-    port: int = 3001,
+    port: int = 0,
     project_name: str | None = None,
 ) -> tuple[str, str]:
     """Tear down and restart a Gitea container, return (api_url, token).
@@ -40,18 +57,32 @@ def reset_gitea(
     image:
         Full Docker image name, e.g. ``rufimelo/malicious-pr-cwe79:gpt5.2-filtered``.
     port:
-        Host port Gitea will listen on.
+        Host port Gitea will listen on. Pass ``0`` to allocate a free port.
     project_name:
         Optional compose project name; use a unique value per sample to allow
         parallel containers without collisions.
     """
-    logger.info("Resetting Gitea container", image=image, port=port)
-    env = {**os.environ, "DOCKER_IMAGE": image, "GITEA_PORT": str(port)}
-    compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
-    if project_name:
-        compose += ["--project-name", project_name]
-    else:
+    if port <= 0:
+        port = _free_port()
+    if project_name is None:
         project_name = "benchmark"
+    project_name = _compose_project_name(project_name)
+
+    logger.info("Resetting Gitea container", image=image, port=port)
+    env = {
+        **os.environ,
+        "DOCKER_IMAGE": image,
+        "GITEA_PORT": str(port),
+        "GITEA_ROOT_URL": f"http://localhost:{port}/",
+    }
+    compose = [
+        "docker",
+        "compose",
+        "-f",
+        str(_COMPOSE_FILE),
+        "--project-name",
+        project_name,
+    ]
 
     track_project(project_name, _COMPOSE_FILE)
 

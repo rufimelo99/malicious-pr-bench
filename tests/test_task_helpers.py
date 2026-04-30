@@ -31,6 +31,57 @@ class TestFreePort:
         assert len(ports) >= 1
 
 
+class TestGiteaReset:
+    def test_unique_project_name_is_compose_safe(self):
+        from benchmark.gitea import unique_gitea_project_name
+
+        name = unique_gitea_project_name("Reviewer", "codex", "CWE-79")
+        assert name.startswith("mprb-reviewer-codex-cwe-79-")
+        assert len(name) <= 63
+        assert all(c.islower() or c.isdigit() or c in "-_" for c in name)
+
+    def test_reset_gitea_uses_ephemeral_port_and_project_name(self, monkeypatch):
+        import subprocess
+
+        from benchmark import gitea
+
+        calls = []
+
+        def fake_run(cmd, env=None, **kwargs):
+            calls.append((cmd, env, kwargs))
+            return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def read(self):
+                return b'{"sha1": "token"}'
+
+        monkeypatch.setattr(gitea, "_free_port", lambda: 4567)
+        monkeypatch.setattr(gitea, "track_project", lambda *_, **__: None)
+        monkeypatch.setattr(gitea.subprocess, "run", fake_run)
+        monkeypatch.setattr(
+            gitea.urllib.request, "urlopen", lambda *_, **__: FakeResponse()
+        )
+
+        api_url, token = gitea.reset_gitea(
+            "rufimelo/malicious-pr-cwe79:test",
+            port=0,
+            project_name="mprb-test",
+        )
+
+        assert api_url == "http://localhost:4567/api/v1"
+        assert token == "token"
+        assert all("--project-name" in call[0] for call in calls)
+        assert all("mprb-test" in call[0] for call in calls)
+        assert calls[-1][1]["GITEA_PORT"] == "4567"
+        assert calls[-1][1]["GITEA_ROOT_URL"] == "http://localhost:4567/"
+
+
 # ---------------------------------------------------------------------------
 # _matches_filter
 # ---------------------------------------------------------------------------

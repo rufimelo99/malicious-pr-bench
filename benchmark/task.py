@@ -76,6 +76,7 @@ from benchmark.gitea import (
     fetch_pr_details,
     post_pr_comment,
     reset_gitea,
+    unique_gitea_project_name,
 )
 from benchmark.registry import clear_simulated_merges, clear_simulated_merges_for
 from benchmark.scoring import (
@@ -114,7 +115,8 @@ def reviewer_solver(
     model: str | None = None,
     cwe: str | None = None,
     reset: bool = False,
-    gitea_port: int = 3001,
+    gitea_port: int = 0,
+    gitea_project: str | None = None,
     pause_after_reset: bool = False,
     version: str = "v0.0.0",
     review_mode: str = "independent",
@@ -140,7 +142,12 @@ def reviewer_solver(
             if _reset_task is None:
                 image = MALICIOUS_IMAGE_TEMPLATE.format(cwe=cwe, version=version)
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(reset_gitea, image, gitea_port)
+                    _asyncio.to_thread(
+                        reset_gitea,
+                        image,
+                        gitea_port,
+                        project_name=gitea_project,
+                    )
                 )
             api_url, token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url
@@ -318,7 +325,8 @@ def reviewer_benchmark(
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,
-    gitea_port: int = 3001,
+    gitea_port: int = 0,
+    gitea_project: str | None = None,
     pause_after_reset: bool = False,
     simulate_merge: bool = True,
     skip_undefined: bool = True,
@@ -359,7 +367,12 @@ def reviewer_benchmark(
         Tear down and restart the Gitea container once before running (gitea mode only).
         In sandbox mode each sample automatically gets its own container. Default: True.
     gitea_port : int
-        Local port Gitea is (or will be) listening on (default: 3001).
+        Local port Gitea is (or will be) listening on. Pass ``0`` to allocate
+        a free port for this run (default).
+    gitea_project : str | None
+        Docker Compose project name for the Gitea container. By default a
+        unique project name is generated so parallel benchmark runs do not
+        tear each other down.
     pause_after_reset : bool
         If True, pause for user confirmation after reset before starting samples.
     simulate_merge : bool
@@ -379,12 +392,17 @@ def reviewer_benchmark(
     else:
         os.environ.pop("SIMULATE_MERGES", None)
 
+    run_project = gitea_project or unique_gitea_project_name(
+        "reviewer", agent or "default", cwe or "all"
+    )
+
     solver_impl = (
         reviewer_solver(
             model=model,
             cwe=cwe,
             reset=reset,
             gitea_port=gitea_port,
+            gitea_project=run_project,
             pause_after_reset=pause_after_reset,
             version=version,
             review_mode=review_mode,
@@ -399,6 +417,7 @@ def reviewer_benchmark(
             cwe=cwe,
             reset=reset,
             gitea_port=gitea_port,
+            gitea_project=run_project,
             timeout=CLI_TIMEOUT,
             version=version,
         )
@@ -432,7 +451,8 @@ def reviewer_benchmark(
 def benign_reviewer_solver(
     model: str | None = None,
     reset: bool = False,
-    gitea_port: int = 3001,
+    gitea_port: int = 0,
+    gitea_project: str | None = None,
     pause_after_reset: bool = False,
     version: str = DEFAULT_BENIGN_DATASET_VERSION,
     tool_mode: ToolMode = ToolMode.SANDBOX,
@@ -457,7 +477,12 @@ def benign_reviewer_solver(
             if _reset_task is None:
                 image = BENIGN_IMAGE_TEMPLATE.format(version=version)
                 _reset_task = _asyncio.create_task(
-                    _asyncio.to_thread(reset_gitea, image, gitea_port)
+                    _asyncio.to_thread(
+                        reset_gitea,
+                        image,
+                        gitea_port,
+                        project_name=gitea_project,
+                    )
                 )
             api_url, token = await _reset_task
             os.environ["GITHUB_API_URL"] = api_url
@@ -557,7 +582,8 @@ def benign_benchmark(
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,
-    gitea_port: int = 3001,
+    gitea_port: int = 0,
+    gitea_project: str | None = None,
     pause_after_reset: bool = False,
     simulate_merge: bool = True,
     tool_mode: ToolMode = ToolMode.SANDBOX,
@@ -584,7 +610,12 @@ def benign_benchmark(
     reset : bool
         Tear down and restart the Gitea container once before running. Default: True.
     gitea_port : int
-        Local port Gitea is (or will be) listening on (default: 3001).
+        Local port Gitea is (or will be) listening on. Pass ``0`` to allocate
+        a free port for this run (default).
+    gitea_project : str | None
+        Docker Compose project name for the Gitea container. By default a
+        unique project name is generated so parallel benchmark runs do not
+        tear each other down.
     pause_after_reset : bool
         Pause for user confirmation after reset before starting samples.
     simulate_merge : bool
@@ -605,11 +636,16 @@ def benign_benchmark(
     else:
         os.environ.pop("SIMULATE_MERGES", None)
 
+    run_project = gitea_project or unique_gitea_project_name(
+        "benign", agent or "default", cwe or "all"
+    )
+
     solver_impl = (
         benign_reviewer_solver(
             model=model,
             reset=reset,
             gitea_port=gitea_port,
+            gitea_project=run_project,
             pause_after_reset=pause_after_reset,
             version=version,
             tool_mode=tool_mode,
@@ -622,6 +658,7 @@ def benign_benchmark(
             model=model,
             reset=reset,
             gitea_port=gitea_port,
+            gitea_project=run_project,
             timeout=CLI_TIMEOUT,
             version=version,
             image=BENIGN_IMAGE_TEMPLATE.format(version=version),
