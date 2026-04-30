@@ -13,7 +13,7 @@ from inspect_ai.util import store
 from benchmark.agents.cli_bridge import BRIDGES, CLIReviewResult
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
 from benchmark.config import GITEA_STORE_TOKEN as _STORE_TOKEN
-from benchmark.config import HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
+from benchmark.config import AUTO_GITEA_PORT, HTTP_TIMEOUT, MALICIOUS_IMAGE_TEMPLATE
 from benchmark.gitea import clone_repo_to_sandbox, reset_gitea
 from benchmark.logger import logger
 from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges_for
@@ -43,7 +43,7 @@ def cli_solver(
     timeout: int = 600,
     cwe: str | None = None,
     reset: bool = False,
-    gitea_port: int = 0,
+    gitea_port: int = AUTO_GITEA_PORT,
     gitea_project: str | None = None,
     version: str = "v0.0.0",
     image: str | None = None,

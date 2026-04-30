@@ -8,6 +8,9 @@ from pathlib import Path
 HTTP_TIMEOUT = 60
 CLI_TIMEOUT = 600
 
+# Sentinel value telling reset_gitea() to allocate an available host port.
+AUTO_GITEA_PORT = 0
+
 # Default dataset to use for evaluation.
 HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
 

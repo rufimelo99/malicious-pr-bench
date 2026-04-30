@@ -33,9 +33,9 @@ class TestFreePort:
 
 class TestGiteaReset:
     def test_unique_project_name_is_compose_safe(self):
-        from benchmark.gitea import unique_gitea_project_name
+        from benchmark.docker_cleanup import unique_docker_project_name
 
-        name = unique_gitea_project_name("Reviewer", "codex", "CWE-79")
+        name = unique_docker_project_name("Reviewer", "codex", "CWE-79")
         assert name.startswith("mprb-reviewer-codex-cwe-79-")
         assert len(name) <= 63
         assert all(c.islower() or c.isdigit() or c in "-_" for c in name)

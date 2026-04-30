@@ -56,6 +56,7 @@ from benchmark.agents.reviewer.reviewer_agent import build_reviewer_agent
 from benchmark.agents.scorer.semantic_scorer import security_reason_scorer
 from benchmark.cli_solver import cli_solver
 from benchmark.config import (
+    AUTO_GITEA_PORT,
     BENIGN_IMAGE_TEMPLATE,
     CLI_TIMEOUT,
     DEFAULT_BENIGN_DATASET_VERSION,
@@ -70,13 +71,15 @@ from benchmark.config import (
     ToolMode,
 )
 from benchmark.dataset import load_benign_samples, load_malicious_samples
-from benchmark.docker_cleanup import _register_shutdown_handlers
+from benchmark.docker_cleanup import (
+    _register_shutdown_handlers,
+    unique_docker_project_name,
+)
 from benchmark.gitea import (
     clone_repo_to_sandbox,
     fetch_pr_details,
     post_pr_comment,
     reset_gitea,
-    unique_gitea_project_name,
 )
 from benchmark.registry import clear_simulated_merges, clear_simulated_merges_for
 from benchmark.scoring import (
@@ -115,7 +118,7 @@ def reviewer_solver(
     model: str | None = None,
     cwe: str | None = None,
     reset: bool = False,
-    gitea_port: int = 0,
+    gitea_port: int = AUTO_GITEA_PORT,
     gitea_project: str | None = None,
     pause_after_reset: bool = False,
     version: str = "v0.0.0",
@@ -325,7 +328,7 @@ def reviewer_benchmark(
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,
-    gitea_port: int = 0,
+    gitea_port: int = AUTO_GITEA_PORT,
     gitea_project: str | None = None,
     pause_after_reset: bool = False,
     simulate_merge: bool = True,
@@ -392,7 +395,7 @@ def reviewer_benchmark(
     else:
         os.environ.pop("SIMULATE_MERGES", None)
 
-    run_project = gitea_project or unique_gitea_project_name(
+    run_project = gitea_project or unique_docker_project_name(
         "reviewer", agent or "default", cwe or "all"
     )
 
@@ -451,7 +454,7 @@ def reviewer_benchmark(
 def benign_reviewer_solver(
     model: str | None = None,
     reset: bool = False,
-    gitea_port: int = 0,
+    gitea_port: int = AUTO_GITEA_PORT,
     gitea_project: str | None = None,
     pause_after_reset: bool = False,
     version: str = DEFAULT_BENIGN_DATASET_VERSION,
@@ -582,7 +585,7 @@ def benign_benchmark(
     model: str | None = None,
     agent: str | None = None,
     reset: bool = True,
-    gitea_port: int = 0,
+    gitea_port: int = AUTO_GITEA_PORT,
     gitea_project: str | None = None,
     pause_after_reset: bool = False,
     simulate_merge: bool = True,
@@ -636,7 +639,7 @@ def benign_benchmark(
     else:
         os.environ.pop("SIMULATE_MERGES", None)
 
-    run_project = gitea_project or unique_gitea_project_name(
+    run_project = gitea_project or unique_docker_project_name(
         "benign", agent or "default", cwe or "all"
     )
 
