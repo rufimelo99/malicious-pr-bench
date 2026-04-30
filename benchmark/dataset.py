@@ -116,9 +116,8 @@ def load_malicious_samples(
 
     records = [r for r in records if r.get("axis1")]
 
-    # TODO(Rui): This is being temporarily disabled.
-    # if skip_undefined:
-    #     records = _filter_undefined_axes(records)
+    if skip_undefined:
+        records = _filter_undefined_axes(records)
 
     # Pre-compute group membership
     group_prs: dict[str, list[tuple[int, int]]] = {}
@@ -140,9 +139,53 @@ def load_malicious_samples(
         if gid in complete_groups
     }
 
-    if review_mode in ("sequence", "independent"):
+    if review_mode == "sequence":
         return _load_sequence_samples(records, repo, complete_groups)
+    if review_mode == "independent":
+        return _load_independent_samples(records, repo, complete_groups)
     return _load_individual_samples(records, repo, group_prs_sorted, complete_groups)
+
+
+def _load_independent_samples(
+    records: list[dict], repo: str, complete_groups: set[str] | None = None
+) -> list[Sample]:
+    """One sample per PR, including every PR in complete multi-PR groups."""
+    samples: list[Sample] = []
+    for record in records:
+        group_id = record.get("group_id")
+        if group_id and complete_groups is not None and group_id not in complete_groups:
+            continue
+        sample_repo = record.get("repo") or repo
+        pr_number = record["pr_number"]
+        category = record.get("category", "unknown")
+        axis1 = record.get("axis1", "monolithic")
+        axis2 = record.get("axis2", "unknown")
+        axis3 = record.get("axis3", "unknown")
+        pr_title = record.get("pr_title", "")
+        pr_body = record.get("pr_body", "")
+
+        samples.append(
+            Sample(
+                input=_build_pr_input(pr_number, sample_repo, pr_title, pr_body),
+                id=f"{sample_repo.replace('/', '_')}-pr{pr_number}-{axis1}-{axis2}-{axis3}",
+                metadata=MaliciousSampleMetadata(
+                    repo=sample_repo,
+                    pr_number=pr_number,
+                    category=category,
+                    axis1=axis1,
+                    axis2=axis2,
+                    axis3=axis3,
+                    branch=record.get("branch", ""),
+                    files_changed=record.get("files_changed", []),
+                    group_id=group_id,
+                    sequence_index=record.get("sequence_index"),
+                    sequence_total=record.get("sequence_total"),
+                    group_pr_numbers=None,
+                    pr_details={pr_number: PRDetails(title=pr_title, body=pr_body)},
+                ).to_dict(),
+            )
+        )
+    return samples
 
 
 def _load_individual_samples(

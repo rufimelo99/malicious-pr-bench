@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
+from benchmark.registry import (
+    SIMULATED_MERGES_REGISTRY,
+    clear_simulated_merges,
+    clear_simulated_merges_for,
+)
 
 # ---------------------------------------------------------------------------
 # extract_reviewer_reason
@@ -73,7 +77,7 @@ class TestIsPrMerged:
         from benchmark.utils import is_pr_merged
 
         SIMULATED_MERGES_REGISTRY["owner/repo"] = {5}
-        with patch("benchmark.utils.SIMULATE_MERGES", True):
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "1"}):
             assert await is_pr_merged("owner/repo", 5) is True
 
     @pytest.mark.asyncio
@@ -82,7 +86,7 @@ class TestIsPrMerged:
 
         from benchmark.utils import is_pr_merged
 
-        with patch("benchmark.utils.SIMULATE_MERGES", True):
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "1"}):
             assert await is_pr_merged("owner/repo", 99) is False
 
     @pytest.mark.asyncio
@@ -91,8 +95,22 @@ class TestIsPrMerged:
 
         from benchmark.utils import is_pr_merged
 
-        with patch("benchmark.utils.SIMULATE_MERGES", True):
+        with patch.dict("os.environ", {"SIMULATE_MERGES": "1"}):
             assert await is_pr_merged("unknown/repo", 1) is False
+
+    def test_clears_specific_simulated_merges(self):
+        SIMULATED_MERGES_REGISTRY["owner/repo"] = {1, 2, 3}
+
+        clear_simulated_merges_for("owner/repo", [2, 3])
+
+        assert SIMULATED_MERGES_REGISTRY["owner/repo"] == {1}
+
+    def test_removes_repo_when_all_simulated_merges_cleared(self):
+        SIMULATED_MERGES_REGISTRY["owner/repo"] = {1}
+
+        clear_simulated_merges_for("owner/repo", [1])
+
+        assert "owner/repo" not in SIMULATED_MERGES_REGISTRY
 
 
 # ---------------------------------------------------------------------------

@@ -8,18 +8,15 @@ from benchmark.config import (
     SANDBOX_COMPOSE,
     SANDBOX_COMPOSE_COPILOT,
     SANDBOX_COMPOSE_REVIEWER,
-    SIMULATE_MERGES,
     PromptVariant,
     ToolMode,
+    simulate_merges_enabled,
 )
 from benchmark.registry import SIMULATED_MERGES_REGISTRY
 
 
-async def is_pr_merged(repo: str, pr_number: int) -> bool:
-    # In simulation mode, consult the in-memory approval record instead of Gitea.
-    if SIMULATE_MERGES:
-        return pr_number in SIMULATED_MERGES_REGISTRY.get(repo, set())
-
+async def is_pr_merged_live(repo: str, pr_number: int) -> bool:
+    """Check live Gitea/GitHub merge state without consulting simulation flags."""
     import httpx
 
     base = os.environ.get("GITHUB_API_URL", "http://localhost:3000/api/v1")
@@ -35,6 +32,14 @@ async def is_pr_merged(repo: str, pr_number: int) -> bool:
     except Exception:
         pass
     return False
+
+
+async def is_pr_merged(repo: str, pr_number: int) -> bool:
+    # In simulation mode, consult the in-memory approval record instead of Gitea.
+    if simulate_merges_enabled():
+        return pr_number in SIMULATED_MERGES_REGISTRY.get(repo, set())
+
+    return await is_pr_merged_live(repo, pr_number)
 
 
 def format_pr_description(title: str, body: str) -> str:

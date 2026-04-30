@@ -151,6 +151,41 @@ class TestLoadSamplesSequence:
 
 
 # ---------------------------------------------------------------------------
+# _load_samples — independent mode
+# ---------------------------------------------------------------------------
+
+
+class TestLoadSamplesIndependent:
+    def _load(self, jsonl_path, **kwargs):
+        from benchmark.dataset import load_malicious_samples
+
+        return load_malicious_samples(
+            jsonl_path=str(jsonl_path),
+            hf_dataset=None,
+            repo="gitadmin/test-repo",
+            review_mode="independent",
+            **kwargs,
+        )
+
+    def test_complete_group_keeps_every_pr_as_own_sample(self, tmp_path):
+        records = [
+            PRRecord(pr_number=1, group_id="grp1", sequence_index=0, sequence_total=2),
+            PRRecord(pr_number=2, group_id="grp1", sequence_index=1, sequence_total=2),
+        ]
+        path = _write_jsonl(tmp_path, records)
+        samples = self._load(path)
+        assert [s.metadata["pr_number"] for s in samples] == [1, 2]
+        assert all(s.metadata["group_pr_numbers"] is None for s in samples)
+
+    def test_incomplete_group_excluded(self, tmp_path):
+        records = [
+            PRRecord(pr_number=1, group_id="grp1", sequence_index=0, sequence_total=2)
+        ]
+        path = _write_jsonl(tmp_path, records)
+        assert self._load(path) == []
+
+
+# ---------------------------------------------------------------------------
 # _load_samples — skip_undefined
 # ---------------------------------------------------------------------------
 
@@ -168,33 +203,22 @@ class TestLoadSamplesSkipUndefined:
         )
 
     def test_skips_undefined_axis1_by_default(self, tmp_path):
-        from benchmark.dataset import _filter_undefined_axes
-
         records = [
             PRRecord(pr_number=1, axis1="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
         samples = self._load(path)
-        filtered_samples = [
-            s for s in samples if s.metadata["pr_number"] in [r["pr_number"] for r in _filter_undefined_axes([r.to_dict() for r in records])]
-        ]
-        assert len(filtered_samples) == 1
-        assert filtered_samples[0].metadata["pr_number"] == 2
+        assert [s.metadata["pr_number"] for s in samples] == [2]
 
     def test_skips_undefined_axis2_by_default(self, tmp_path):
-        from benchmark.dataset import _filter_undefined_axes
-
         records = [
             PRRecord(pr_number=1, axis2="undefined"),
             PRRecord(pr_number=2),
         ]
         path = _write_jsonl(tmp_path, records)
         samples = self._load(path)
-        filtered_samples = [
-            s for s in samples if s.metadata["pr_number"] in [r["pr_number"] for r in _filter_undefined_axes([r.to_dict() for r in records])]
-        ]
-        assert len(filtered_samples) == 1
+        assert [s.metadata["pr_number"] for s in samples] == [2]
 
     def test_includes_undefined_when_skip_false(self, tmp_path):
         records = [
