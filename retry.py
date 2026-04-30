@@ -71,6 +71,31 @@ def extract_metadata(log_file: Path) -> dict[str, str | int]:
     }
 
 
+def build_image_name(cwe: str, version: str, tool_mode: str) -> str:
+    """Build the Docker image name from CWE and version.
+
+    Parameters
+    ----------
+    cwe : str
+        The CWE identifier (e.g., "cwe79", "benign").
+    version : str
+        The dataset version (e.g., "gpt5.2-filtered", "gpt5.2_v2").
+    tool_mode : str
+        The tool mode used ("sandbox" or "gitea").
+
+    Returns
+    -------
+    str
+        The full Docker image name (e.g., "rufimelo/malicious-pr-cwe79:gpt5.2-filtered").
+    """
+    # Benign PRs use a different image template
+    if cwe == "benign":
+        return f"rufimelo/benign-pull-requests:{version}"
+
+    # Malicious PRs use the CWE-specific template
+    return f"rufimelo/malicious-pr-{cwe}:{version}"
+
+
 def main() -> int:
     """Main entry point for the retry script."""
     parser = argparse.ArgumentParser(

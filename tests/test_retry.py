@@ -78,3 +78,19 @@ def test_extract_metadata_invalid_json():
             extract_metadata(eval_file)
     finally:
         eval_file.unlink()
+
+
+def test_build_image_name_malicious():
+    """Test building Docker image name for malicious PRs."""
+    from retry import build_image_name
+
+    image = build_image_name(cwe="cwe79", version="gpt5.2-filtered", tool_mode="sandbox")
+    assert image == "rufimelo/malicious-pr-cwe79:gpt5.2-filtered"
+
+
+def test_build_image_name_benign():
+    """Test building Docker image name for benign PRs."""
+    from retry import build_image_name
+
+    image = build_image_name(cwe="benign", version="gpt5.2_v2", tool_mode="sandbox")
+    assert image == "rufimelo/benign-pull-requests:gpt5.2_v2"
