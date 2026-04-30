@@ -6,6 +6,7 @@ import os
 from typing import TYPE_CHECKING
 
 from benchmark.agents.cli_bridge.base import CLIAgentBridge
+from benchmark.config import FORWARDED_ENV_VARS
 
 if TYPE_CHECKING:
     from inspect_ai.util._sandbox.environment import SandboxEnvironment
@@ -24,6 +25,7 @@ class CodexBridge(CLIAgentBridge):
         self, prompt: str, workdir: str, output_file: str, sb: "SandboxEnvironment"
     ) -> tuple[int, str]:
         _ensure_azure_env()
+        env = {k: v for k in FORWARDED_ENV_VARS if (v := os.environ.get(k))}
         args = [
             "codex",
             "exec",
@@ -41,7 +43,7 @@ class CodexBridge(CLIAgentBridge):
         args.append(prompt)
 
         try:
-            res = await sb.exec(cmd=args, cwd=workdir, timeout=self.timeout)
+            res = await sb.exec(cmd=args, cwd=workdir, timeout=self.timeout, env=env)
             raw = "\n".join(p for p in (res.stdout, res.stderr) if p).strip()
             return res.returncode, raw
         except TimeoutError:
