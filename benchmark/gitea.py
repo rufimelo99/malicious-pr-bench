@@ -12,8 +12,8 @@ import urllib.request
 from pathlib import Path
 
 from benchmark.config import GITEA_STORE_API_URL as _STORE_API_URL
-from benchmark.config import HTTP_TIMEOUT, SANDBOX_REPO_PATH
-from benchmark.docker_cleanup import track_project
+from benchmark.config import AUTO_GITEA_PORT, HTTP_TIMEOUT, SANDBOX_REPO_PATH
+from benchmark.docker_cleanup import normalize_compose_project_name, track_project
 from benchmark.logger import logger
 
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
@@ -30,7 +30,7 @@ def _free_port() -> int:
 
 def reset_gitea(
     image: str,
-    port: int = 3001,
+    port: int = AUTO_GITEA_PORT,
     project_name: str | None = None,
 ) -> tuple[str, str]:
     """Tear down and restart a Gitea container, return (api_url, token).
@@ -40,18 +40,32 @@ def reset_gitea(
     image:
         Full Docker image name, e.g. ``rufimelo/malicious-pr-cwe79:gpt5.2-filtered``.
     port:
-        Host port Gitea will listen on.
+        Host port Gitea will listen on. Pass ``0`` to allocate a free port.
     project_name:
         Optional compose project name; use a unique value per sample to allow
         parallel containers without collisions.
     """
-    logger.info("Resetting Gitea container", image=image, port=port)
-    env = {**os.environ, "DOCKER_IMAGE": image, "GITEA_PORT": str(port)}
-    compose = ["docker", "compose", "-f", str(_COMPOSE_FILE)]
-    if project_name:
-        compose += ["--project-name", project_name]
-    else:
+    if port <= 0:
+        port = _free_port()
+    if project_name is None:
         project_name = "benchmark"
+    project_name = normalize_compose_project_name(project_name)
+
+    logger.info("Resetting Gitea container", image=image, port=port)
+    env = {
+        **os.environ,
+        "DOCKER_IMAGE": image,
+        "GITEA_PORT": str(port),
+        "GITEA_ROOT_URL": f"http://localhost:{port}/",
+    }
+    compose = [
+        "docker",
+        "compose",
+        "-f",
+        str(_COMPOSE_FILE),
+        "--project-name",
+        project_name,
+    ]
 
     track_project(project_name, _COMPOSE_FILE)
 

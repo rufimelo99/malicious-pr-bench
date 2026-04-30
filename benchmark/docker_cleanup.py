@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import atexit
+import os
+import re
 import signal
 import subprocess
+import time
+import uuid
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
@@ -14,6 +18,23 @@ from benchmark.logger import logger
 _COMPOSE_FILE = Path(__file__).parent.parent / "scripts" / "docker-compose.yml"
 _active_projects: set[tuple[str, str]] = set()
 _shutdown_registered = False
+
+
+def normalize_compose_project_name(raw_project_name: str) -> str:
+    """Return a Docker Compose-safe project name."""
+    project_name = re.sub(
+        r"[^a-z0-9_-]+", "-", raw_project_name.lower()
+    ).strip("-_")
+    if not project_name or not re.match(r"^[a-z0-9]", project_name):
+        project_name = f"benchmark-{project_name}"
+    return project_name[:63].rstrip("-_")
+
+
+def unique_docker_project_name(*parts: object) -> str:
+    """Build a unique Docker Compose project name for one benchmark run."""
+    labels = [str(part) for part in parts if part not in (None, "")]
+    suffix = f"{os.getpid()}-{int(time.time() * 1000)}-{uuid.uuid4().hex[:8]}"
+    return normalize_compose_project_name("-".join(["mprb", *labels, suffix]))
 
 
 def _cleanup_project(project_name: str, compose_file: str | Path) -> None:
@@ -96,14 +117,12 @@ def _cleanup_orphaned_containers() -> None:
 
 
 def _cleanup_all() -> None:
-    """Clean up all tracked docker-compose projects and orphaned containers."""
+    """Clean up only the Docker Compose projects tracked by this process."""
     if _active_projects:
         logger.info(f"Shutting down {len(_active_projects)} Docker containers...")
         for project_name, compose_file in list(_active_projects):
             _cleanup_project(project_name, compose_file)
             _active_projects.discard((project_name, compose_file))
-
-    _cleanup_orphaned_containers()
 
 
 def _register_shutdown_handlers() -> None:
