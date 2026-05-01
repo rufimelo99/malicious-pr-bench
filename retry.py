@@ -2,9 +2,11 @@
 """Helper script to retry failed evaluation tasks.
 
 This script takes an .eval log file from a failed `inspect eval` run and:
-1. Extracts metadata (port, CWE, version, project name)
-2. Starts a Gitea Docker container with those parameters
-3. Runs `inspect eval-retry` to restart failed tasks
+1. Extracts metadata from the log file to validate it
+2. Runs `inspect eval-retry` to restart failed tasks
+
+The Docker container and Gitea server are managed by `inspect eval-retry`, so this
+script only validates the eval file and delegates to the inspection framework.
 
 Usage
 -----
@@ -18,14 +20,13 @@ Example
 Requirements
 ------------
 - The .eval file must be from a `malicious_pr_bench` benchmark run
-- Docker and docker-compose must be installed and running
-- The script uses the existing benchmark/gitea.py and benchmark/docker_cleanup.py utilities
+- The `inspect` command and `uv` must be installed
+- Docker and docker-compose must be installed and running (managed by inspect eval-retry)
 
 Notes
 -----
-- The Gitea container will be started on the same port as the original run
-- The container will be cleaned up on script exit via signal handlers
-- For debugging, use `docker ps` to see running containers
+- Gitea container startup is handled by inspect eval-retry internally
+- For debugging, use `docker ps` to see running containers managed by inspect
 """
 
 from __future__ import annotations
@@ -100,75 +101,6 @@ def extract_metadata(log_file: Path) -> dict[str, str | int]:
         "project_name": project_name,
         "tool_mode": params.get("tool_mode", "sandbox"),
     }
-
-
-def build_image_name(cwe: str, version: str, tool_mode: str) -> str:
-    """Build the Docker image name from CWE and version.
-
-    Parameters
-    ----------
-    cwe : str
-        The CWE identifier (e.g., "cwe79", "benign").
-    version : str
-        The dataset version (e.g., "gpt5.2-filtered", "gpt5.2_v2").
-    tool_mode : str
-        The tool mode used ("sandbox" or "gitea").
-
-    Returns
-    -------
-    str
-        The full Docker image name (e.g., "rufimelo/malicious-pr-cwe79:gpt5.2-filtered").
-    """
-    # Benign PRs use a different image template
-    if cwe == "benign":
-        return f"rufimelo/benign-pull-requests:{version}"
-
-    # Malicious PRs use the CWE-specific template
-    return f"rufimelo/malicious-pr-{cwe}:{version}"
-
-
-def start_gitea(image: str, port: int, project_name: str) -> tuple[str, str]:
-    """Start a Gitea container using the existing reset_gitea function.
-
-    Parameters
-    ----------
-    image : str
-        Full Docker image name (e.g., "rufimelo/malicious-pr-cwe79:gpt5.2-filtered").
-    port : int
-        Host port for Gitea to listen on.
-    project_name : str
-        Docker Compose project name for this container.
-
-    Returns
-    -------
-    tuple[str, str]
-        (api_url, token) for accessing the Gitea API.
-
-    Raises
-    ------
-    RuntimeError
-        If Docker container fails to start or Gitea is not healthy.
-    """
-    # Import here to avoid adding benchmark dependency at module level
-    from benchmark.gitea import reset_gitea
-
-    print(f"\n{'='*60}")
-    print(f"Starting Gitea container for retry")
-    print(f"  Image: {image}")
-    print(f"  Port: {port}")
-    print(f"  Project: {project_name}")
-    print(f"{'='*60}\n")
-
-    try:
-        api_url, token = reset_gitea(image=image, port=port, project_name=project_name)
-        print(f"\n{'='*60}")
-        print(f"Gitea started successfully")
-        print(f"  API URL: {api_url}")
-        print(f"{'='*60}\n")
-        return api_url, token
-    except RuntimeError as e:
-        print(f"\nError starting Gitea: {e}", file=sys.stderr)
-        raise
 
 
 def validate_metadata(metadata: dict[str, str | int]) -> None:
@@ -256,7 +188,7 @@ def main() -> int:
 
     print(f"Processing eval log: {args.log_file}")
 
-    # Step 1: Extract metadata from the log file
+    # Step 1: Extract metadata from the log file to validate it
     try:
         metadata = extract_metadata(args.log_file)
         validate_metadata(metadata)
@@ -270,25 +202,7 @@ def main() -> int:
         print(f"Error extracting metadata: {e}", file=sys.stderr)
         return 1
 
-    # Step 2: Build the Docker image name
-    image = build_image_name(
-        cwe=metadata["cwe"],
-        version=metadata["version"],
-        tool_mode=metadata["tool_mode"]
-    )
-
-    # Step 3: Start Gitea
-    try:
-        api_url, token = start_gitea(
-            image=image,
-            port=metadata["port"],
-            project_name=metadata["project_name"]
-        )
-    except RuntimeError as e:
-        print(f"Failed to start Gitea: {e}", file=sys.stderr)
-        return 1
-
-    # Step 4: Run inspect eval-retry
+    # Step 2: Run inspect eval-retry (which manages Gitea internally)
     exit_code = run_retry(args.log_file)
 
     if exit_code == 0:
