@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 
 # Timeout (seconds) for all outbound HTTP requests to GitHub / Gitea APIs.
-HTTP_TIMEOUT = 60
+HTTP_TIMEOUT = 120
 CLI_TIMEOUT = 600
 
 # Sentinel value telling reset_gitea() to allocate an available host port.
