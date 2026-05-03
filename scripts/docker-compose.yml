@@ -18,14 +18,9 @@ services:
       - GITEA__repository__DEFAULT_PUSH_CREATE_PRIVATE=false
     ports:
       - "${GITEA_PORT:-3001}:3001"
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 4G
-        reservations:
-          cpus: '1'
-          memory: 2G
+    mem_limit: 12g
+    memswap_limit: 12g
+    cpus: 6
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/api/healthz"]
       interval: 5s

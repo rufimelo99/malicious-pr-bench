@@ -69,6 +69,7 @@ from benchmark.config import (
     MALICIOUS_IMAGE_TEMPLATE,
     PromptVariant,
     ToolMode,
+    WEAKER_MODELS,
 )
 from benchmark.dataset import load_benign_samples, load_malicious_samples
 from benchmark.docker_cleanup import (
@@ -335,6 +336,7 @@ def reviewer_benchmark(
     skip_undefined: bool = True,
     tool_mode: ToolMode | str = ToolMode.SANDBOX,
     prompt_variant: PromptVariant | str = PromptVariant.SECURITY,
+    failed_by: str | list[str] | None = WEAKER_MODELS,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -382,6 +384,10 @@ def reviewer_benchmark(
         Record approvals in memory without actually merging PRs on Gitea. Default: True.
     skip_undefined : bool
         Exclude records where any axis field has the value ``undefined``. Default: True.
+    failed_by : str | list[str] | None
+        Only include samples where at least one model in this list was fooled.
+        Defaults to ``WEAKER_MODELS`` — the known baseline models. Pass ``None``
+        to run on the full dataset.
     """
     _register_shutdown_handlers()
 
@@ -438,6 +444,7 @@ def reviewer_benchmark(
             axis3=axis3,
             review_mode=review_mode,
             skip_undefined=skip_undefined,
+            failed_by=failed_by,
         ),
         solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],

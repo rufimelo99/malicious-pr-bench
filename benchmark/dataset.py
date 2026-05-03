@@ -101,6 +101,7 @@ def load_malicious_samples(
     axis3: str | None = None,
     review_mode: str = "individual",
     skip_undefined: bool = True,
+    failed_by: str | list[str] | None = None,
 ) -> list[Sample]:
     if hf_dataset:
         path = _download_malicious_from_hf(hf_dataset, cwe, version)
@@ -115,6 +116,11 @@ def load_malicious_samples(
         records = [r for r in records if _matches_filter(r, axis1, axis2, axis3)]
 
     records = [r for r in records if r.get("axis1")]
+
+    if failed_by is not None:
+        target_models = [failed_by] if isinstance(failed_by, str) else list(failed_by)
+        target_set = set(target_models)
+        records = [r for r in records if target_set.intersection(r.get("failed_by") or [])]
 
     # TODO(Rui): This is being temporarily disabled.
     # if skip_undefined:
