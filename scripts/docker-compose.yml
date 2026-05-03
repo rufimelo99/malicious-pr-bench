@@ -14,6 +14,8 @@ services:
       - GITEA__log__LEVEL=Warn
       - GITEA__indexer__ISSUE_INDEXER_TYPE=db
       - GITEA__indexer__REPO_INDEXER_ENABLED=false
+      - GITEA__api__DEFAULT_PAGING_NUM=50
+      - GITEA__repository__DEFAULT_PUSH_CREATE_PRIVATE=false
     ports:
       - "${GITEA_PORT:-3001}:3001"
     healthcheck:
