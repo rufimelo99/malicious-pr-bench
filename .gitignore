@@ -28,3 +28,5 @@ HF_DATASET_README.md
 /proof_of_vulnerability/cpg_cache
 /proof_of_vulnerability/proofs/
 /proof_of_vulnerability/trajectory_logs
+/filtered_releases
+docs/superpowers/plans/2026-04-30-retry-script.md

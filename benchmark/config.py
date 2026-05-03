@@ -5,7 +5,7 @@ from enum import Enum
 from pathlib import Path
 
 # Timeout (seconds) for all outbound HTTP requests to GitHub / Gitea APIs.
-HTTP_TIMEOUT = 60
+HTTP_TIMEOUT = 120
 CLI_TIMEOUT = 600
 
 # Sentinel value telling reset_gitea() to allocate an available host port.
@@ -13,6 +13,15 @@ AUTO_GITEA_PORT = 0
 
 # Default dataset to use for evaluation.
 HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
+
+# Models considered "weaker" baselines. When running a new model with the
+# default filter, only samples fooled by at least one of these are included —
+# skipping the easy ones every model gets right.
+WEAKER_MODELS: list[str] = [
+    "bedrock/us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    "openai/azure/gpt-5.4-nano",
+    "openai/azure/grok-code-fast-1",
+]
 
 # All CWE subsets available in the HF dataset.
 SUPPORTED_CWES: frozenset[str] = frozenset(
