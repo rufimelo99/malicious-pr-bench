@@ -337,6 +337,7 @@ def reviewer_benchmark(
     tool_mode: ToolMode | str = ToolMode.SANDBOX,
     prompt_variant: PromptVariant | str = PromptVariant.SECURITY,
     failed_by: str | list[str] | None = WEAKER_MODELS,
+    temperature: float | None = None,
 ) -> Task:
     """Benchmark a model's ability to detect malicious pull requests.
 
@@ -449,7 +450,7 @@ def reviewer_benchmark(
         solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=get_sandbox_spec(agent, tool_mode),
-        config=GenerateConfig(temperature=0),
+        config=GenerateConfig(temperature=temperature) if temperature is not None else None,
     )
 
 
@@ -683,5 +684,4 @@ def benign_benchmark(
         solver=solver_impl,
         scorer=false_positive_scorer(),
         sandbox=get_sandbox_spec(agent, tool_mode),
-        config=GenerateConfig(temperature=0),
     )
