@@ -450,7 +450,7 @@ def reviewer_benchmark(
         solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=get_sandbox_spec(agent, tool_mode),
-        config=GenerateConfig(temperature=temperature) if temperature is not None else None,
+        config=GenerateConfig(temperature=temperature),
     )
 
 
