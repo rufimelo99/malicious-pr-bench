@@ -10,7 +10,7 @@ The benchmark combines adversarial attack evaluation with utility measurement: a
 
 ## Dataset
 
-**Available on Hugging Face**: [`SocialAITBD/malicious-pull-requests`](https://huggingface.co/datasets/SocialAITBD/malicious-pull-requests)
+**Available on Hugging Face**: [`RedAI4Code/SEVRA`](https://huggingface.co/datasets/RedAI4Code/SEVRA)
 
 The current supported releases are:
 
@@ -338,7 +338,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 |-----------|---------|-------------|
 | `cwe` | — | **Required.** CWE class to evaluate: `cwe79`, `cwe89`, `cwe352`, `cwe862`, `cwe787`, `cwe22`, `cwe416`, `cwe125`, `cwe78`, `cwe94` |
 | `version` | `gpt5.2-filtered` | Dataset version for malicious PRs |
-| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from. Set to `""` to use local file instead |
+| `hf_dataset` | `RedAI4Code/SEVRA` | Hugging Face dataset to load from. Set to `""` to use local file instead |
 | `jsonl_path` | — | Path to local `generated_prs.jsonl` file (used when `hf_dataset=""`) |
 | `axis1` | — | **Optional.** Filter by distribution strategy (e.g., `single_pr_introduction`, `precondition_staging`) |
 | `axis2` | — | **Optional.** Filter by code concealment: `tiny_change`, `buried_in_complexity`, or `semantic_equivalent` |
@@ -410,7 +410,7 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 |-----------|---------|-------------|
 | `cwe` | — | **Required.** CWE class to evaluate (same as malicious) |
 | `version` | `gpt5.2_v2` | Dataset version for benign PRs |
-| `hf_dataset` | `SocialAITBD/malicious-pull-requests` | Hugging Face dataset to load from |
+| `hf_dataset` | `RedAI4Code/SEVRA` | Hugging Face dataset to load from |
 | `agent` | `default` | Agent type: `default` (LLM-based), `claude-code` (Claude Code CLI), or `copilot-cli` (GitHub Copilot CLI) |
 | `tool_mode` | `sandbox` | Execution mode: `sandbox` (Gitea tools plus sandbox bash) or `gitea` (Gitea tools only) |
 | `reset` | `true` | Reset Gitea container before run |

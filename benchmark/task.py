@@ -343,7 +343,7 @@ def reviewer_benchmark(
     Parameters
     ----------
     hf_dataset : str | None
-        HF Hub dataset ID (default: ``SocialAITBD/malicious-pull-requests``).
+        HF Hub dataset ID (default: ``RedAI4Code/SEVRA``).
         Set to empty string to use ``jsonl_path`` instead.
     jsonl_path : str | None
         Path to a local ``generated_prs.jsonl``.
