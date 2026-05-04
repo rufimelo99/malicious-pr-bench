@@ -47,7 +47,7 @@ import os
 
 from inspect_ai import Task, task
 from inspect_ai.agent import AgentState
-from inspect_ai.model import ChatMessageUser
+from inspect_ai.model import ChatMessageUser, GenerateConfig
 from inspect_ai.scorer import Score, Scorer, Target, scorer
 from inspect_ai.solver import Solver, TaskState, solver
 from inspect_ai.util import store
@@ -449,6 +449,7 @@ def reviewer_benchmark(
         solver=solver_impl,
         scorer=[detection_scorer(), security_reason_scorer()],
         sandbox=get_sandbox_spec(agent, tool_mode),
+        config=GenerateConfig(temperature=0),
     )
 
 
@@ -682,4 +683,5 @@ def benign_benchmark(
         solver=solver_impl,
         scorer=false_positive_scorer(),
         sandbox=get_sandbox_spec(agent, tool_mode),
+        config=GenerateConfig(temperature=0),
     )
