@@ -12,7 +12,7 @@ CLI_TIMEOUT = 600
 AUTO_GITEA_PORT = 0
 
 # Default dataset to use for evaluation.
-HF_DATASET_DEFAULT = "SocialAITBD/malicious-pull-requests"
+HF_DATASET_DEFAULT = "RedAI4Code/SEVRA"
 
 # Models considered "weaker" baselines. When running a new model with the
 # default filter, only samples fooled by at least one of these are included —
