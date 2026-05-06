@@ -48,6 +48,7 @@ for cwe in "${cwes[@]}"; do
           --max-samples="$MAX_SAMPLES" \
           --temperature 0 \
           --max-retries 2 \
+          --timeout 300 \
           --no-fail-on-error \
           --log-dir "$log_dir"
 
