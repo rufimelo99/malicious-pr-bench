@@ -195,16 +195,20 @@ The code change in each malicious PR is identical (deterministic patch reversal)
 
 ## Filtering Methodology
 
-The malicious PR dataset was filtered using two baseline models to create a challenging evaluation subset of 1,062 samples. The filtering retained only samples that **neither baseline model could detect**, ensuring the remaining benchmark is sufficiently difficult.
+The malicious PR dataset was filtered using two baseline models to create a challenging evaluation subset of 1,062 samples. The filtering retained only samples that **at least one baseline model failed to detect**, ensuring the remaining benchmark challenges strong reviewers.
 
-### Baseline Model Accuracy (on full dataset)
+### Baseline Model Accuracy
 
-| Model | Overall Accuracy | Per-CWE Breakdown |
-|-------|------------------|---|
-| **GPT-5.4-nano** | **69.0%** (1,656/2,400) | CWE-125: 68.1% • CWE-22: 65.6% • CWE-352: 69.2% • CWE-416: 68.0% • CWE-78: 69.1% • CWE-787: 74.6% • CWE-79: 65.9% • CWE-862: 68.8% • CWE-89: 66.7% • CWE-94: 73.3% |
-| **Grok-code-fast-1** | **48.4%** (1,123/2,322) | CWE-125: 42.8% • CWE-22: 42.4% • CWE-352: 53.8% • CWE-416: 37.9% • CWE-78: 50.0% • CWE-787: 47.1% • CWE-79: 46.2% • CWE-862: 56.2% • CWE-89: 54.2% • CWE-94: 57.5% |
+| Model | Full Dataset (2,400) | Filtered Subset* (1,062) |
+|-------|---|---|
+| **GPT-5.4-nano** | **69.0%** (1,656/2,400) | **36.2%** (291/804)** |
+| **Grok-code-fast-1** | **48.4%** (1,123/2,322) | **39.7%** (311/783)** |
 
-The filtering eliminated samples detected by both models, producing a focused evaluation set where each challenge sample eluded at least one baseline reviewer.
+**Per-CWE breakdown (filtered subset):**
+- GPT-5.4-nano: CWE-125: 31.5% • CWE-22: 11.8% • CWE-352: 42.0% • CWE-416: 48.4% • CWE-78: 27.3% • CWE-787: 54.1% • CWE-79: 43.9% • CWE-862: 26.9% • CWE-89: 16.9% • CWE-94: 40.5%
+- Grok-code-fast-1: CWE-125: 33.9% • CWE-22: 39.2% • CWE-352: 52.0% • CWE-416: 33.1% • CWE-78: 31.3% • CWE-787: 32.4% • CWE-79: 38.8% • CWE-862: 51.9% • CWE-89: 47.5% • CWE-94: 52.4%
+
+\** Filtered subset (1,062 samples) contains only samples that at least one baseline model missed. Performance drops significantly on filtered samples, indicating they represent a genuinely challenging evaluation set.
 
 ## Generation Pipeline
 
@@ -261,10 +265,10 @@ uv run inspect eval benchmark/task.py@reviewer_benchmark \
 
 | Version | Type | Samples | Description |
 |---------|------|---------|-------------|
-| `deterministic` | Malicious | 2,250 (1,062 filtered*) | **Current release.** Deterministic patch reversal, 15 framing strategies. Full dataset of 2,250 samples; challenging evaluation subset of 1,062 samples remaining after filtering via GPT-5.4-nano (69%) and Grok-code-fast-1 (48%), retaining only samples both models missed. |
+| `deterministic` | Malicious | 2,250 (1,062 filtered*) | **Current release.** Deterministic patch reversal, 15 framing strategies. Full dataset of 2,250 samples; challenging evaluation subset of 1,062 samples (47%) containing only PRs that at least one baseline model failed to detect. |
 | `benign` | Benign | 347 | **Current release.** Ground-truth security fixes for FDR measurement |
 
-\* **Filtered subset**: Contains 1,062 malicious PRs (47% of original 2,250) selected such that both baseline models failed to detect them. This subset challenges stronger reviewers by eliminating "easy" samples. For robustness evaluation, use the full 2,250-sample dataset; for focused benchmarking against strong baselines, use the 1,062-sample filtered subset.
+\* **Filtered subset**: Contains 1,062 malicious PRs selected such that at least one baseline model failed to detect them. This subset eliminates "easy" samples and provides a focused evaluation set. Baseline model accuracy on filtered samples: GPT-5.4-nano 36.2%, Grok-code-fast-1 39.7%. For robustness evaluation of new reviewers, use the full 2,250-sample dataset; for competitive benchmarking against strong baselines, use the 1,062-sample filtered subset.
 
 ## License
 

@@ -14,7 +14,7 @@ The benchmark combines adversarial attack evaluation with utility measurement: a
 
 The current supported releases are:
 
-- `deterministic`: **2,250 malicious PRs** across 10 CWE classes from the 2025 CWE Top 25. Full dataset generated via deterministic patch reversal. Challenging evaluation subset of **1,062 filtered samples** (47%) remaining after filtering via GPT-5.4-nano (69% catch rate) and Grok-code-fast-1 (48% catch rate). Each record includes `baseline_accuracy` and `filtering_note` metadata.
+- `deterministic`: **2,250 malicious PRs** across 10 CWE classes from the 2025 CWE Top 25. Deterministic patch reversal with 15 social engineering framing strategies. Challenging evaluation subset: **1,062 filtered samples** (47%) containing only PRs at least one baseline model missed. Baseline accuracy on filtered subset: GPT-5.4-nano 36.2%, Grok-code-fast-1 39.7%.
 - `benign`: **347 benign ground-truth security fixes** from the same CWE classes, for false-decline rate measurement
 
 Each attack PR is grounded in a real CVE from the OSV/SECommits datasets and is parametrized by social engineering framing strategy.
