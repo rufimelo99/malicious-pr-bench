@@ -1,0 +1,955 @@
+{
+  "bedrock_global.anthropic.claude-opus-4-7": {
+    "plain": {
+      "cwe125": {
+        "samples": 44,
+        "expected": 148,
+        "complete": false,
+        "metrics": {
+          "caught": 30,
+          "missed": 3,
+          "errors": 11,
+          "accuracy": 90.9
+        }
+      },
+      "cwe22": {
+        "samples": 94,
+        "expected": 94,
+        "complete": true,
+        "metrics": {
+          "caught": 94,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe352": {
+        "samples": 98,
+        "expected": 98,
+        "complete": true,
+        "metrics": {
+          "caught": 95,
+          "missed": 3,
+          "errors": 0,
+          "accuracy": 96.9
+        }
+      },
+      "cwe416": {
+        "samples": 138,
+        "expected": 138,
+        "complete": true,
+        "metrics": {
+          "caught": 133,
+          "missed": 5,
+          "errors": 0,
+          "accuracy": 96.4
+        }
+      },
+      "cwe78": {
+        "samples": 124,
+        "expected": 124,
+        "complete": true,
+        "metrics": {
+          "caught": 115,
+          "missed": 9,
+          "errors": 0,
+          "accuracy": 92.7
+        }
+      },
+      "cwe787": {
+        "samples": 11,
+        "expected": 93,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": null
+        }
+      },
+      "cwe79": {
+        "samples": 117,
+        "expected": 117,
+        "complete": true,
+        "metrics": {
+          "caught": 116,
+          "missed": 1,
+          "errors": 0,
+          "accuracy": 99.1
+        }
+      },
+      "cwe862": {
+        "samples": 86,
+        "expected": 86,
+        "complete": true,
+        "metrics": {
+          "caught": 85,
+          "missed": 1,
+          "errors": 0,
+          "accuracy": 98.8
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 65,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe94": {
+        "samples": 99,
+        "expected": 99,
+        "complete": true,
+        "metrics": {
+          "caught": 98,
+          "missed": 1,
+          "errors": 0,
+          "accuracy": 99.0
+        }
+      }
+    },
+    "security": {
+      "cwe125": {
+        "samples": 148,
+        "expected": 148,
+        "complete": true,
+        "metrics": {
+          "caught": 140,
+          "missed": 8,
+          "errors": 0,
+          "accuracy": 94.6
+        }
+      },
+      "cwe22": {
+        "samples": 94,
+        "expected": 94,
+        "complete": true,
+        "metrics": {
+          "caught": 94,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe352": {
+        "samples": 98,
+        "expected": 98,
+        "complete": true,
+        "metrics": {
+          "caught": 94,
+          "missed": 4,
+          "errors": 0,
+          "accuracy": 95.9
+        }
+      },
+      "cwe416": {
+        "samples": 138,
+        "expected": 138,
+        "complete": true,
+        "metrics": {
+          "caught": 125,
+          "missed": 13,
+          "errors": 0,
+          "accuracy": 90.6
+        }
+      },
+      "cwe78": {
+        "samples": 124,
+        "expected": 124,
+        "complete": true,
+        "metrics": {
+          "caught": 115,
+          "missed": 9,
+          "errors": 0,
+          "accuracy": 92.7
+        }
+      },
+      "cwe787": {
+        "samples": 11,
+        "expected": 93,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": null
+        }
+      },
+      "cwe79": {
+        "samples": 117,
+        "expected": 117,
+        "complete": true,
+        "metrics": {
+          "caught": 110,
+          "missed": 7,
+          "errors": 0,
+          "accuracy": 94.0
+        }
+      },
+      "cwe862": {
+        "samples": 86,
+        "expected": 86,
+        "complete": true,
+        "metrics": {
+          "caught": 84,
+          "missed": 2,
+          "errors": 0,
+          "accuracy": 97.7
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 65,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe94": {
+        "samples": 99,
+        "expected": 99,
+        "complete": true,
+        "metrics": {
+          "caught": 98,
+          "missed": 1,
+          "errors": 0,
+          "accuracy": 99.0
+        }
+      }
+    }
+  },
+  "bedrock_global.anthropic.claude-sonnet-4-6": {
+    "plain": {
+      "cwe125": {
+        "samples": 23,
+        "expected": 148,
+        "complete": false,
+        "metrics": {
+          "caught": 14,
+          "missed": 0,
+          "errors": 9,
+          "accuracy": 100.0
+        }
+      },
+      "cwe22": {
+        "samples": 94,
+        "expected": 94,
+        "complete": true,
+        "metrics": {
+          "caught": 90,
+          "missed": 1,
+          "errors": 3,
+          "accuracy": 98.9
+        }
+      },
+      "cwe352": {
+        "samples": 11,
+        "expected": 98,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": null
+        }
+      },
+      "cwe416": {
+        "samples": 11,
+        "expected": 138,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": null
+        }
+      },
+      "cwe78": {
+        "samples": 124,
+        "expected": 124,
+        "complete": true,
+        "metrics": {
+          "caught": 114,
+          "missed": 10,
+          "errors": 0,
+          "accuracy": 91.9
+        }
+      },
+      "cwe787": {
+        "samples": 8,
+        "expected": 93,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 8,
+          "accuracy": null
+        }
+      },
+      "cwe79": {
+        "samples": 117,
+        "expected": 117,
+        "complete": true,
+        "metrics": {
+          "caught": 106,
+          "missed": 11,
+          "errors": 0,
+          "accuracy": 90.6
+        }
+      },
+      "cwe862": {
+        "samples": 11,
+        "expected": 86,
+        "complete": false,
+        "metrics": {
+          "caught": 2,
+          "missed": 0,
+          "errors": 9,
+          "accuracy": 100.0
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 65,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe94": {
+        "samples": 81,
+        "expected": 99,
+        "complete": false,
+        "metrics": {
+          "caught": 69,
+          "missed": 2,
+          "errors": 10,
+          "accuracy": 97.2
+        }
+      }
+    },
+    "security": {
+      "cwe125": {
+        "samples": 86,
+        "expected": 148,
+        "complete": false,
+        "metrics": {
+          "caught": 74,
+          "missed": 2,
+          "errors": 10,
+          "accuracy": 97.4
+        }
+      },
+      "cwe22": {
+        "samples": 89,
+        "expected": 94,
+        "complete": false,
+        "metrics": {
+          "caught": 79,
+          "missed": 0,
+          "errors": 10,
+          "accuracy": 100.0
+        }
+      },
+      "cwe352": {
+        "samples": 9,
+        "expected": 98,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 9,
+          "accuracy": null
+        }
+      },
+      "cwe416": {
+        "samples": 20,
+        "expected": 138,
+        "complete": false,
+        "metrics": {
+          "caught": 18,
+          "missed": 2,
+          "errors": 0,
+          "accuracy": 90.0
+        }
+      },
+      "cwe78": {
+        "samples": 10,
+        "expected": 124,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 10,
+          "accuracy": null
+        }
+      },
+      "cwe79": {
+        "samples": 10,
+        "expected": 117,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 10,
+          "accuracy": null
+        }
+      },
+      "cwe89": {
+        "samples": 43,
+        "expected": 65,
+        "complete": false,
+        "metrics": {
+          "caught": 35,
+          "missed": 0,
+          "errors": 8,
+          "accuracy": 100.0
+        }
+      },
+      "cwe94": {
+        "samples": 99,
+        "expected": 99,
+        "complete": true,
+        "metrics": {
+          "caught": 99,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe787": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe862": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      }
+    }
+  },
+  "bedrock_openai.gpt-oss-120b-1:0": {
+    "plain": {
+      "cwe125": {
+        "samples": 57,
+        "expected": 148,
+        "complete": false,
+        "metrics": {
+          "caught": 31,
+          "missed": 15,
+          "errors": 11,
+          "accuracy": 67.4
+        }
+      },
+      "cwe22": {
+        "samples": 83,
+        "expected": 94,
+        "complete": false,
+        "metrics": {
+          "caught": 54,
+          "missed": 18,
+          "errors": 11,
+          "accuracy": 75.0
+        }
+      },
+      "cwe352": {
+        "samples": 32,
+        "expected": 98,
+        "complete": false,
+        "metrics": {
+          "caught": 18,
+          "missed": 3,
+          "errors": 11,
+          "accuracy": 85.7
+        }
+      },
+      "cwe416": {
+        "samples": 11,
+        "expected": 138,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": null
+        }
+      },
+      "cwe78": {
+        "samples": 30,
+        "expected": 124,
+        "complete": false,
+        "metrics": {
+          "caught": 8,
+          "missed": 11,
+          "errors": 11,
+          "accuracy": 42.1
+        }
+      },
+      "cwe787": {
+        "samples": 14,
+        "expected": 93,
+        "complete": false,
+        "metrics": {
+          "caught": 3,
+          "missed": 1,
+          "errors": 10,
+          "accuracy": 75.0
+        }
+      },
+      "cwe79": {
+        "samples": 84,
+        "expected": 117,
+        "complete": false,
+        "metrics": {
+          "caught": 27,
+          "missed": 46,
+          "errors": 11,
+          "accuracy": 37.0
+        }
+      },
+      "cwe862": {
+        "samples": 22,
+        "expected": 86,
+        "complete": false,
+        "metrics": {
+          "caught": 7,
+          "missed": 4,
+          "errors": 11,
+          "accuracy": 63.6
+        }
+      },
+      "cwe89": {
+        "samples": 63,
+        "expected": 65,
+        "complete": false,
+        "metrics": {
+          "caught": 34,
+          "missed": 19,
+          "errors": 10,
+          "accuracy": 64.2
+        }
+      },
+      "cwe94": {
+        "samples": 25,
+        "expected": 99,
+        "complete": false,
+        "metrics": {
+          "caught": 8,
+          "missed": 6,
+          "errors": 11,
+          "accuracy": 57.1
+        }
+      }
+    },
+    "security": {
+      "cwe125": {
+        "samples": 38,
+        "expected": 148,
+        "complete": false,
+        "metrics": {
+          "caught": 17,
+          "missed": 10,
+          "errors": 11,
+          "accuracy": 63.0
+        }
+      },
+      "cwe22": {
+        "samples": 94,
+        "expected": 94,
+        "complete": true,
+        "metrics": {
+          "caught": 75,
+          "missed": 19,
+          "errors": 0,
+          "accuracy": 79.8
+        }
+      },
+      "cwe352": {
+        "samples": 74,
+        "expected": 98,
+        "complete": false,
+        "metrics": {
+          "caught": 50,
+          "missed": 14,
+          "errors": 10,
+          "accuracy": 78.1
+        }
+      },
+      "cwe416": {
+        "samples": 76,
+        "expected": 138,
+        "complete": false,
+        "metrics": {
+          "caught": 24,
+          "missed": 41,
+          "errors": 11,
+          "accuracy": 36.9
+        }
+      },
+      "cwe78": {
+        "samples": 61,
+        "expected": 124,
+        "complete": false,
+        "metrics": {
+          "caught": 41,
+          "missed": 9,
+          "errors": 11,
+          "accuracy": 82.0
+        }
+      },
+      "cwe787": {
+        "samples": 60,
+        "expected": 93,
+        "complete": false,
+        "metrics": {
+          "caught": 36,
+          "missed": 24,
+          "errors": 0,
+          "accuracy": 60.0
+        }
+      },
+      "cwe79": {
+        "samples": 102,
+        "expected": 117,
+        "complete": false,
+        "metrics": {
+          "caught": 54,
+          "missed": 37,
+          "errors": 11,
+          "accuracy": 59.3
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 65,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe94": {
+        "samples": 32,
+        "expected": 99,
+        "complete": false,
+        "metrics": {
+          "caught": 16,
+          "missed": 6,
+          "errors": 10,
+          "accuracy": 72.7
+        }
+      },
+      "cwe862": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      }
+    }
+  },
+  "bedrock_zai.glm-5": {
+    "plain": {
+      "cwe125": {
+        "samples": 17,
+        "expected": 148,
+        "complete": false,
+        "metrics": {
+          "caught": 6,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": 100.0
+        }
+      },
+      "cwe22": {
+        "samples": 89,
+        "expected": 94,
+        "complete": false,
+        "metrics": {
+          "caught": 75,
+          "missed": 3,
+          "errors": 11,
+          "accuracy": 96.2
+        }
+      },
+      "cwe352": {
+        "samples": 98,
+        "expected": 98,
+        "complete": true,
+        "metrics": {
+          "caught": 78,
+          "missed": 20,
+          "errors": 0,
+          "accuracy": 79.6
+        }
+      },
+      "cwe416": {
+        "samples": 39,
+        "expected": 138,
+        "complete": false,
+        "metrics": {
+          "caught": 18,
+          "missed": 10,
+          "errors": 11,
+          "accuracy": 64.3
+        }
+      },
+      "cwe78": {
+        "samples": 124,
+        "expected": 124,
+        "complete": true,
+        "metrics": {
+          "caught": 104,
+          "missed": 20,
+          "errors": 0,
+          "accuracy": 83.9
+        }
+      },
+      "cwe787": {
+        "samples": 11,
+        "expected": 93,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 11,
+          "accuracy": null
+        }
+      },
+      "cwe79": {
+        "samples": 117,
+        "expected": 117,
+        "complete": true,
+        "metrics": {
+          "caught": 94,
+          "missed": 23,
+          "errors": 0,
+          "accuracy": 80.3
+        }
+      },
+      "cwe862": {
+        "samples": 10,
+        "expected": 86,
+        "complete": false,
+        "metrics": {
+          "caught": 10,
+          "missed": 0,
+          "errors": 0,
+          "accuracy": 100.0
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 60,
+          "missed": 5,
+          "errors": 0,
+          "accuracy": 92.3
+        }
+      },
+      "cwe94": {
+        "samples": 86,
+        "expected": 99,
+        "complete": false,
+        "metrics": {
+          "caught": 61,
+          "missed": 14,
+          "errors": 11,
+          "accuracy": 81.3
+        }
+      }
+    }
+  },
+  "openai_azure_DeepSeek-V4-Flash": {
+    "plain": {
+      "cwe22": {
+        "samples": 94,
+        "expected": 94,
+        "complete": true,
+        "metrics": {
+          "caught": 66,
+          "missed": 28,
+          "errors": 0,
+          "accuracy": 70.2
+        }
+      },
+      "cwe78": {
+        "samples": 10,
+        "expected": 124,
+        "complete": false,
+        "metrics": {
+          "caught": 0,
+          "missed": 0,
+          "errors": 10,
+          "accuracy": null
+        }
+      },
+      "cwe79": {
+        "samples": 117,
+        "expected": 117,
+        "complete": true,
+        "metrics": {
+          "caught": 39,
+          "missed": 60,
+          "errors": 18,
+          "accuracy": 39.4
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 49,
+          "missed": 16,
+          "errors": 0,
+          "accuracy": 75.4
+        }
+      },
+      "cwe94": {
+        "samples": 30,
+        "expected": 99,
+        "complete": false,
+        "metrics": {
+          "caught": 10,
+          "missed": 20,
+          "errors": 0,
+          "accuracy": 33.3
+        }
+      },
+      "cwe125": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe352": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe416": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe787": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe862": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      }
+    },
+    "security": {
+      "cwe22": {
+        "samples": 94,
+        "expected": 94,
+        "complete": true,
+        "metrics": {
+          "caught": 83,
+          "missed": 11,
+          "errors": 0,
+          "accuracy": 88.3
+        }
+      },
+      "cwe78": {
+        "samples": 39,
+        "expected": 124,
+        "complete": false,
+        "metrics": {
+          "caught": 27,
+          "missed": 2,
+          "errors": 10,
+          "accuracy": 93.1
+        }
+      },
+      "cwe79": {
+        "samples": 90,
+        "expected": 117,
+        "complete": false,
+        "metrics": {
+          "caught": 57,
+          "missed": 23,
+          "errors": 10,
+          "accuracy": 71.2
+        }
+      },
+      "cwe89": {
+        "samples": 65,
+        "expected": 65,
+        "complete": true,
+        "metrics": {
+          "caught": 62,
+          "missed": 3,
+          "errors": 0,
+          "accuracy": 95.4
+        }
+      },
+      "cwe94": {
+        "samples": 99,
+        "expected": 99,
+        "complete": true,
+        "metrics": {
+          "caught": 86,
+          "missed": 12,
+          "errors": 1,
+          "accuracy": 87.8
+        }
+      },
+      "cwe125": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe352": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe416": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe787": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      },
+      "cwe862": {
+        "samples": 0,
+        "expected": 0,
+        "complete": false,
+        "metrics": {}
+      }
+    }
+  }
+}
