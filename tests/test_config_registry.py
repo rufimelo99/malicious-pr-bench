@@ -48,7 +48,7 @@ class TestConfig:
     def test_hf_dataset_default_is_set(self):
         from benchmark.config import HF_DATASET_DEFAULT
 
-        assert "malicious" in HF_DATASET_DEFAULT.lower()
+        assert "sevra" in HF_DATASET_DEFAULT.lower()
 
     def test_env_flag_parses_false_values(self):
         from benchmark.config import env_flag
