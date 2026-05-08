@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import json
 import os
@@ -9,6 +10,7 @@ import shlex
 import time
 from urllib.parse import quote
 
+import httpx
 import requests
 from inspect_ai.tool import Tool, tool
 from inspect_ai.util import sandbox, store
@@ -102,6 +104,27 @@ def _read_file_content(
     return base64.b64decode(data["content"]).decode("utf-8")
 
 
+async def _fetch_raw_async(
+    client: httpx.AsyncClient,
+    api_url: str,
+    repo: str,
+    path: str,
+    encoded_branch: str,
+) -> tuple[str, str]:
+    """Fetch a file's raw text content. Returns (path, content) or (path, "") on error."""
+    encoded_path = "/".join(quote(part, safe="") for part in path.split("/"))
+    try:
+        r = await client.get(
+            f"{api_url}/repos/{repo}/raw/{encoded_path}?ref={encoded_branch}",
+            timeout=10.0,
+        )
+        if r.status_code == 200:
+            return path, r.text
+    except Exception:
+        pass
+    return path, ""
+
+
 def _review_approve_event() -> str:
     return "APPROVED" if "github.com" not in _api_url() else "APPROVE"
 
@@ -141,8 +164,16 @@ def github_read_file() -> Tool:
             path: File path inside the repository.
             branch: Branch to read from.
         """
+        encoded_branch = quote(branch, safe="")
+        async with httpx.AsyncClient(headers=_headers()) as client:
+            _, content = await _fetch_raw_async(
+                client, _api_url(), repo, path, encoded_branch
+            )
+        if content:
+            return content
+        # Fall back to contents API (handles directories and gives better errors)
         try:
-            return _read_file_content(repo, path, branch)
+            return await asyncio.to_thread(_read_file_content, repo, path, branch)
         except requests.HTTPError as e:
             return f"Error reading '{path}' (HTTP {e.response.status_code if e.response else '?'})"
 
@@ -324,24 +355,33 @@ def github_search_code() -> Tool:
     ) -> str:
         """Grep for query across a bounded page of text files in the repository tree.
 
+        Files in each page are fetched in parallel, so max_files can be larger
+        without a proportional time cost.
+
         Args:
             repo: Repository in owner/name format (e.g. 'gitadmin/my-repo').
             query: String or pattern to search for (case-insensitive substring).
             branch: Branch to search on (default: main).
             offset: Candidate file offset to start scanning from.
-            max_files: Maximum number of candidate files to scan in this call, capped at 50.
+            max_files: Maximum number of candidate files to scan in this call, capped at 100.
             limit: Maximum number of matching lines to return.
-            max_seconds: Maximum wall-clock seconds to spend scanning files (capped at 30).
+            max_seconds: Maximum wall-clock seconds for the parallel fetch (capped at 60).
         """
         offset = max(offset, 0)
         limit = max(1, min(limit, 100))
-        max_seconds = max(1, min(max_seconds, 30))
+        max_files = max(1, min(max_files if max_files and max_files > 0 else 100, 100))
+        max_seconds = max(5, min(max_seconds, 60))
+
+        encoded_branch = quote(branch, safe="")
+        api_url = _api_url()
 
         try:
-            encoded_branch = quote(branch, safe="")
-            tree = _get(f"/repos/{repo}/git/trees/{encoded_branch}?recursive=1")
+            tree = await asyncio.to_thread(
+                _get, f"/repos/{repo}/git/trees/{encoded_branch}?recursive=1"
+            )
         except requests.HTTPError as e:
             return f"Error fetching repo tree: {e}"
+
         files = [
             item["path"]
             for item in (tree.get("tree") or [])
@@ -351,10 +391,6 @@ def github_search_code() -> Tool:
             )
         ]
         total_files = len(files)
-        if max_files is None or max_files <= 0:
-            max_files = 50
-        else:
-            max_files = max(1, min(max_files, 50))
         files_page = files[offset : offset + max_files]
         if not files_page:
             return (
@@ -362,37 +398,42 @@ def github_search_code() -> Tool:
                 f"Total candidate files: {total_files}."
             )
 
-        matches = []
-        query_lower = query.lower()
-        scanned = 0
         started = time.monotonic()
-        for path in files_page:
-            if time.monotonic() - started >= max_seconds:
-                break
-            scanned += 1
+        async with httpx.AsyncClient(headers=_headers()) as client:
             try:
-                content = _read_file_content(repo, path, branch, timeout=5)
-                for i, line in enumerate(content.splitlines(), 1):
-                    if query_lower in line.lower():
-                        matches.append(f"{path}:{i}: {line.strip()}")
-                        if len(matches) >= limit:
-                            break
-            except Exception:
+                raw_results: list[tuple[str, str]] = await asyncio.wait_for(
+                    asyncio.gather(
+                        *[
+                            _fetch_raw_async(client, api_url, repo, path, encoded_branch)
+                            for path in files_page
+                        ]
+                    ),
+                    timeout=max_seconds,
+                )
+            except asyncio.TimeoutError:
+                raw_results = []
+        elapsed = time.monotonic() - started
+
+        matches: list[str] = []
+        query_lower = query.lower()
+        for path, content in raw_results:
+            if not content:
                 continue
+            for i, line in enumerate(content.splitlines(), 1):
+                if query_lower in line.lower():
+                    matches.append(f"{path}:{i}: {line.strip()}")
+                    if len(matches) >= limit:
+                        break
             if len(matches) >= limit:
                 break
 
-        next_offset = offset + scanned
-        hit_time_limit = time.monotonic() - started >= max_seconds
-        search_complete = (
-            next_offset >= total_files or len(matches) >= limit
-        ) and not hit_time_limit
+        next_offset = offset + len(files_page)
+        search_complete = next_offset >= total_files or len(matches) >= limit
         status = (
-            f"Search for '{query}' scanned files {offset}-{offset + scanned - 1} "
-            f"of {total_files} candidate files."
+            f"Search for '{query}' scanned {len(files_page)} files "
+            f"({offset}–{offset + len(files_page) - 1} of {total_files} total) "
+            f"in {elapsed:.1f}s."
         )
-        if hit_time_limit:
-            status += f" Stopped after {max_seconds}s."
         if not search_complete:
             status += (
                 f" Search incomplete; call github_search_code with "
