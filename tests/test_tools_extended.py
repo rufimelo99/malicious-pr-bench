@@ -10,7 +10,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from benchmark.registry import SIMULATED_MERGES_REGISTRY, clear_simulated_merges
+from benchmark.registry import (SIMULATED_MERGES_REGISTRY,
+                                clear_simulated_merges)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -504,17 +505,16 @@ class TestGithubSearchCode:
     def test_search_offset_can_scan_files_beyond_first_page(self):
         execute = self._make_execute()
         tree = {
-            "tree": [
-                {"type": "blob", "path": f"src/file_{i}.py"} for i in range(85)
-            ]
+            "tree": [{"type": "blob", "path": f"src/file_{i}.py"} for i in range(85)]
         }
 
-        def _read(_repo, path, _branch, timeout=60):
-            return "needle\n" if path == "src/file_84.py" else "haystack\n"
+        async def _fetch(client, api_url, repo, path, branch):
+            content = "needle\n" if path == "src/file_84.py" else "haystack\n"
+            return path, content
 
         with (
             patch("benchmark.tools._get", return_value=tree),
-            patch("benchmark.tools._read_file_content", side_effect=_read),
+            patch("benchmark.tools._fetch_raw_async", side_effect=_fetch),
         ):
             result = asyncio.run(execute("owner/repo", "needle", offset=80))
 
@@ -523,37 +523,37 @@ class TestGithubSearchCode:
     def test_search_reports_next_offset_when_page_incomplete(self):
         execute = self._make_execute()
         tree = {
-            "tree": [
-                {"type": "blob", "path": f"src/file_{i}.py"} for i in range(150)
-            ]
+            "tree": [{"type": "blob", "path": f"src/file_{i}.py"} for i in range(150)]
         }
+
+        async def _fetch(client, api_url, repo, path, branch):
+            return path, "haystack\n"
 
         with (
             patch("benchmark.tools._get", return_value=tree),
-            patch("benchmark.tools._read_file_content", return_value="haystack\n"),
+            patch("benchmark.tools._fetch_raw_async", side_effect=_fetch),
         ):
             result = asyncio.run(execute("owner/repo", "needle", max_files=100))
 
-        assert "scanned files 0-49 of 150" in result
+        assert "scanned 100 files" in result
         assert "Search incomplete" in result
-        assert "offset=50" in result
+        assert "offset=100" in result
 
     def test_search_offset_scans_next_file_page(self):
         execute = self._make_execute()
         tree = {
-            "tree": [
-                {"type": "blob", "path": f"src/file_{i}.py"} for i in range(150)
-            ]
+            "tree": [{"type": "blob", "path": f"src/file_{i}.py"} for i in range(150)]
         }
         read_paths = []
 
-        def _read(_repo, path, _branch, timeout=60):
+        async def _fetch(client, api_url, repo, path, branch):
             read_paths.append(path)
-            return "needle\n" if path == "src/file_120.py" else "haystack\n"
+            content = "needle\n" if path == "src/file_120.py" else "haystack\n"
+            return path, content
 
         with (
             patch("benchmark.tools._get", return_value=tree),
-            patch("benchmark.tools._read_file_content", side_effect=_read),
+            patch("benchmark.tools._fetch_raw_async", side_effect=_fetch),
         ):
             result = asyncio.run(execute("owner/repo", "needle", offset=100))
 
