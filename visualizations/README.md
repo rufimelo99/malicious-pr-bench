@@ -77,6 +77,27 @@ Scripts read from parent directory:
 - `logs/results_nips/` — Frontier model evaluation logs
 - `logs/filtering_releases/` — Baseline model evaluation logs
 
+## Data Generation Pipeline
+
+The notebook reads from `nips_results_with_srr_retained_split.json`, which is generated as follows:
+
+```bash
+# Step 1: Generate aggregated results from evaluation logs
+cd visualizations/scripts/
+python3 extract_nips_results_with_srr.py --retained
+
+# This creates: nips_results_with_srr_retained_split.json
+# (saved to parent directory: ../nips_results_with_srr_retained_split.json)
+```
+
+**What the script does:**
+1. Scans `logs/results_nips/` (frontier models) and `logs/filtering_releases/` (baseline models)
+2. Extracts detection accuracy and security reasoning rates from evaluation logs
+3. Aggregates results per-CWE and per-framing
+4. Filters to retained challenge split (1,062 curated samples where weak baselines failed)
+5. Computes standard errors for all metrics
+6. Outputs structured JSON with per_cwe and per_framing sections
+
 ## Running the Notebook
 
 **Option 1: Interactive mode**
