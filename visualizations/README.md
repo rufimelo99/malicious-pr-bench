@@ -6,15 +6,14 @@ Complete visualization and analysis pipeline for the malicious PR benchmark pape
 
 ```
 visualizations/
-├── README.md                    (This file - overview)
-├── generate_nips_plots.ipynb    (Main visualization notebook)
-├── generate_message_count_plots.py  (Message count visualizations)
-├── [PNG outputs]               (Generated scatter plots)
+├── README.md                           (This file - overview)
+├── generate_nips_plots.ipynb           (Main NIPS visualization notebook)
+├── generate_message_count_plots.ipynb  (Message count visualization notebook)
+├── [PNG outputs]                       (Generated scatter plots)
 └── scripts/
-    ├── README.md               (Scripts documentation)
+    ├── README.md                       (Scripts documentation)
     ├── extract_nips_results_with_srr.py     (Data extraction)
-    ├── extract_message_counts.py            (Message count extraction)
-    └── analyze_retained_split_clustering.py (Clustering analysis)
+    └── extract_message_counts.py            (Message count extraction)
 ```
 
 ## Notebook
@@ -148,12 +147,26 @@ python3 extract_message_counts.py --retained
 
 ### Message Count Visualizations
 
-Generate publication-quality visualizations:
+**`generate_message_count_plots.ipynb`** — Interactive Jupyter notebook for message count analysis
+- Generates all three reasoning depth visualizations
+- Analyzes how many back-and-forth messages each model needed to detect malicious PRs
+- Compares frontier vs baseline model efficiency
+- Can be run cell-by-cell or all at once
+- Outputs PNG files at 300 DPI
 
+**To run:**
 ```bash
-cd visualizations/
-python3 generate_message_count_plots.py
+jupyter notebook visualizations/generate_message_count_plots.ipynb
 ```
+
+Then execute the cells in order:
+1. Setup and Configuration
+2. Load Data
+3. Configure Model Naming and Categories
+4. Plot 1: Message Count vs Detection Accuracy
+5. Plot 2: Message Count Distribution by CWE
+6. Plot 3: Message Count Distribution Comparison (Frontier vs Baseline)
+7. Summary Statistics
 
 **Outputs:**
 - `6_message_count_accuracy.png` — Message Count vs Detection Accuracy (scatter plot showing efficiency)
