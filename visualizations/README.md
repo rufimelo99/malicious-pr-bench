@@ -7,11 +7,13 @@ Complete visualization and analysis pipeline for the malicious PR benchmark pape
 ```
 visualizations/
 ├── README.md                    (This file - overview)
-├── generate_nips_plots.py      (Main visualization script)
+├── generate_nips_plots.ipynb    (Main visualization notebook)
+├── generate_message_count_plots.py  (Message count visualizations)
 ├── [PNG outputs]               (Generated scatter plots)
 └── scripts/
     ├── README.md               (Scripts documentation)
     ├── extract_nips_results_with_srr.py     (Data extraction)
+    ├── extract_message_counts.py            (Message count extraction)
     └── analyze_retained_split_clustering.py (Clustering analysis)
 ```
 
@@ -123,8 +125,50 @@ All plots are saved to the visualizations directory at 300 DPI.
 - **Models**: 7 models (Frontier: Opus 4.7, GPT-5.5, GLM-5; Baseline: GPT-5.4-nano, DeepSeek, Kimi, Grok)
 - **CWEs**: All 10 CWEs represented
 
+## Message Count Analysis
+
+**Purpose**: Measure reasoning depth—how many back-and-forth messages each model needed to reach a decision.
+
+### Data Generation
+
+Generate message count data from evaluation logs:
+
+```bash
+cd visualizations/scripts/
+python3 extract_message_counts.py --retained
+# Output: ../../message_counts_retained_split.json
+```
+
+**What the script does:**
+1. Scans evaluation logs in `logs/results_nips/` and `logs/filtering_releases/`
+2. Extracts `message_count` field from each sample's JSON summary
+3. Aggregates per-model and per-CWE statistics
+4. Filters to retained challenge split (1,062 curated samples)
+5. Outputs JSON with per-model and per-CWE reasoning depth metrics
+
+### Message Count Visualizations
+
+Generate publication-quality visualizations:
+
+```bash
+cd visualizations/
+python3 generate_message_count_plots.py
+```
+
+**Outputs:**
+- `6_message_count_accuracy.png` — Message Count vs Detection Accuracy (scatter plot showing efficiency)
+- `7_message_count_by_cwe.png` — Message Count Distribution by Vulnerability Class (box plot)
+- `8_message_count_distribution.png` — Frontier vs Baseline Reasoning Depth (comparative distribution)
+
+**Key Insights:**
+- Frontier models average ~23 messages with 96% accuracy
+- Baseline models average ~18 messages but only 53% accuracy
+- Some baseline models (DeepSeek) use 34+ messages but still fail to detect vulnerabilities
+- **Inference**: Frontier models achieve better accuracy with comparable or slightly higher reasoning effort, suggesting more efficient decision-making, not just more effort
+
 ## Key Findings
 
 1. **Vulnerability difficulty varies**: Some CWEs (SQL injection) are easy to detect; others (Use-After-Free) are fundamentally harder
 2. **Frontier models fundamentally different**: Clear stratification shows frontier models achieve high accuracy consistently
 3. **Attacks compound on hard targets**: Social engineering is much more effective against difficult-to-detect vulnerabilities
+4. **Reasoning efficiency matters**: Frontier models reach accurate conclusions with efficient reasoning, while baseline models use comparable effort but reach poor conclusions
