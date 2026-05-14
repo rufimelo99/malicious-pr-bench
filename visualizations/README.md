@@ -169,15 +169,35 @@ Then execute the cells in order:
 7. Summary Statistics
 
 **Outputs:**
+
+*Scatter & Box Plots:*
 - `6_message_count_accuracy.png` — Message Count vs Detection Accuracy (scatter plot showing efficiency)
 - `7_message_count_by_cwe.png` — Message Count Distribution by Vulnerability Class (box plot)
 - `8_message_count_distribution.png` — Frontier vs Baseline Reasoning Depth (comparative distribution)
 
+*Line Plots (Trends & Decay):*
+- `9_message_count_by_framing.png` — Message count and accuracy by framing strategy (dual-axis line plot)
+  - Shows how different social engineering framings affect reasoning complexity
+  - Some framings fool models quickly (5 messages), others require deep reasoning (25+ messages)
+  
+- `10_difficulty_vs_message_count.png` — Vulnerability difficulty vs reasoning depth (line plot)
+  - **Key finding**: No linear relationship between difficulty and message count
+  - CWE-79 (XSS): Very hard (41% rejection), only 16 messages
+  - CWE-416 (Use-After-Free): Hard (40% rejection), 27 messages
+  - Suggests different vulnerabilities engage different reasoning patterns
+  
+- `11_message_count_trends_by_model.png` — Message count trends per model across CWEs (multi-line plot)
+  - Frontier models (solid lines) show smooth, consistent reasoning patterns
+  - Baseline models (dashed lines) show erratic spikes at CWE-22 and CWE-416
+  - Demonstrates capability-dependent consistency in reasoning depth
+
 **Key Insights:**
-- Frontier models average ~23 messages with 96% accuracy
-- Baseline models average ~18 messages but only 53% accuracy
-- Some baseline models (DeepSeek) use 34+ messages but still fail to detect vulnerabilities
-- **Inference**: Frontier models achieve better accuracy with comparable or slightly higher reasoning effort, suggesting more efficient decision-making, not just more effort
+- Frontier models average ~23 messages with 96% accuracy (efficient decision-making)
+- Baseline models average ~18 messages but only 53% accuracy (effort ≠ accuracy)
+- Some baseline models (DeepSeek) use 34+ messages but still fail
+- Reasoning efficiency matters more than reasoning depth
+- Different vulnerabilities and framings engage different reasoning patterns
+- **Inference**: Model capability, not effort, determines detection performance
 
 ## Key Findings
 
