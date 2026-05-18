@@ -1,0 +1,164 @@
+{
+  "cwe_metrics": {
+    "cwe125": {
+      "detection_accuracy": 72.60871121718378,
+      "rejection_rate": 27.39128878281622,
+      "security_reason_rate": 36.969138755980865,
+      "n_samples": 1676
+    },
+    "cwe22": {
+      "detection_accuracy": 76.84610038610039,
+      "rejection_rate": 23.15389961389961,
+      "security_reason_rate": 58.76108108108108,
+      "n_samples": 1295
+    },
+    "cwe352": {
+      "detection_accuracy": 67.50456204379563,
+      "rejection_rate": 32.49543795620437,
+      "security_reason_rate": 49.6848401826484,
+      "n_samples": 1096
+    },
+    "cwe416": {
+      "detection_accuracy": 60.145034642032336,
+      "rejection_rate": 39.854965357967664,
+      "security_reason_rate": 19.971219135802468,
+      "n_samples": 1299
+    },
+    "cwe78": {
+      "detection_accuracy": 69.15520628683693,
+      "rejection_rate": 30.84479371316307,
+      "security_reason_rate": 57.367845448592,
+      "n_samples": 1527
+    },
+    "cwe787": {
+      "detection_accuracy": 66.85190839694657,
+      "rejection_rate": 33.14809160305343,
+      "security_reason_rate": 42.742311886586705,
+      "n_samples": 917
+    },
+    "cwe79": {
+      "detection_accuracy": 64.04815088757397,
+      "rejection_rate": 35.95184911242603,
+      "security_reason_rate": 47.69525925925926,
+      "n_samples": 1352
+    },
+    "cwe862": {
+      "detection_accuracy": 75.56497297297298,
+      "rejection_rate": 24.43502702702702,
+      "security_reason_rate": 52.54551351351352,
+      "n_samples": 925
+    },
+    "cwe89": {
+      "detection_accuracy": 80.53221153846154,
+      "rejection_rate": 19.46778846153846,
+      "security_reason_rate": 68.23959085439229,
+      "n_samples": 832
+    },
+    "cwe94": {
+      "detection_accuracy": 74.46720067453624,
+      "rejection_rate": 25.532799325463756,
+      "security_reason_rate": 59.82945147679324,
+      "n_samples": 1186
+    }
+  },
+  "framing_metrics": {
+    "unsafe_optimization": {
+      "detection_accuracy": 71.37781690140845,
+      "rejection_rate": 28.62218309859155,
+      "n_samples": 852
+    },
+    "refactoring": {
+      "detection_accuracy": 78.26968973747019,
+      "rejection_rate": 21.730310262529812,
+      "n_samples": 419
+    },
+    "misleading_pass": {
+      "detection_accuracy": 68.83838526912182,
+      "rejection_rate": 31.161614730878185,
+      "n_samples": 706
+    },
+    "review_bias": {
+      "detection_accuracy": 74.06171171171174,
+      "rejection_rate": 25.938288288288263,
+      "n_samples": 1110
+    },
+    "emotional_appeal": {
+      "detection_accuracy": 74.6329706202394,
+      "rejection_rate": 25.367029379760595,
+      "n_samples": 919
+    },
+    "ai_agent_authored": {
+      "detection_accuracy": 74.96433566433565,
+      "rejection_rate": 25.03566433566435,
+      "n_samples": 715
+    },
+    "build_system_laundering": {
+      "detection_accuracy": 68.39548387096774,
+      "rejection_rate": 31.604516129032262,
+      "n_samples": 930
+    },
+    "prior_approval_signal": {
+      "detection_accuracy": 60.80643879173291,
+      "rejection_rate": 39.19356120826709,
+      "n_samples": 1258
+    },
+    "misleading_hardening": {
+      "detection_accuracy": 81.11007874015748,
+      "rejection_rate": 18.889921259842524,
+      "n_samples": 635
+    },
+    "evidence_dilution": {
+      "detection_accuracy": 74.47858769931663,
+      "rejection_rate": 25.521412300683366,
+      "n_samples": 439
+    },
+    "dependency_compat_claim": {
+      "detection_accuracy": 64.65312169312169,
+      "rejection_rate": 35.34687830687831,
+      "n_samples": 945
+    },
+    "fake_bug_fix": {
+      "detection_accuracy": 64.64728752260397,
+      "rejection_rate": 35.352712477396025,
+      "n_samples": 1106
+    },
+    "appeal_to_authority": {
+      "detection_accuracy": 73.48640939597315,
+      "rejection_rate": 26.513590604026845,
+      "n_samples": 596
+    },
+    "out_of_distribution": {
+      "detection_accuracy": 67.04066937119676,
+      "rejection_rate": 32.959330628803244,
+      "n_samples": 986
+    },
+    "false_coverage": {
+      "detection_accuracy": 78.95460122699387,
+      "rejection_rate": 21.045398773006127,
+      "n_samples": 489
+    }
+  },
+  "cwe_clustering": {
+    "method": "Ward hierarchical clustering",
+    "features": [
+      "Rejection Rate",
+      "Security Reason Rate",
+      "Difficulty"
+    ],
+    "pca_variance_explained": [
+      0.9037179030556423,
+      0.09628209694435777
+    ]
+  },
+  "framing_clustering": {
+    "method": "Ward hierarchical clustering",
+    "features": [
+      "Rejection Rate",
+      "Sample Count (scaled)"
+    ],
+    "pca_variance_explained": [
+      0.8780595636602966,
+      0.12194043633970351
+    ]
+  }
+}

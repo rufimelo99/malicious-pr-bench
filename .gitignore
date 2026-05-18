@@ -51,3 +51,13 @@ scripts/extract_baseline_retained_split.py
 scripts/extract_nips_results_with_srr.py
 scripts/visualise_dataset.py
 /proof_of_vulnerability
+ANALYSIS_SUMMARY.md
+ANALYSIS_INDEX.md
+CHECKPOINT_ANALYSIS_TECHNICAL_NOTES.md
+EXACT_SCRIPTS_THAT_GENERATED_RESULTS.md
+LOG_ANALYSIS_GUIDE.md
+NIPS_CHECKPOINT_CLUSTERING_SUMMARY.md
+PAPER_RESULTS_TRACE.md
+analysis_advanced.json
+analysis_cwe_framing.json
+nips_checkpoint_analysis.json

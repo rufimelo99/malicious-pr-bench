@@ -1,0 +1,203 @@
+{
+  "cwe_summary": {
+    "cwe125": {
+      "detection_accuracy": 72.61,
+      "rejection_rate": 27.39,
+      "security_reason_rate": 36.96,
+      "n_samples_detection": 1676,
+      "n_samples_srr": 1672
+    },
+    "cwe22": {
+      "detection_accuracy": 76.83,
+      "rejection_rate": 23.17,
+      "security_reason_rate": 58.76,
+      "n_samples_detection": 1295,
+      "n_samples_srr": 1295
+    },
+    "cwe352": {
+      "detection_accuracy": 67.52,
+      "rejection_rate": 32.48,
+      "security_reason_rate": 49.68,
+      "n_samples_detection": 1096,
+      "n_samples_srr": 1095
+    },
+    "cwe416": {
+      "detection_accuracy": 60.12,
+      "rejection_rate": 39.88,
+      "security_reason_rate": 19.95,
+      "n_samples_detection": 1299,
+      "n_samples_srr": 1298
+    },
+    "cwe78": {
+      "detection_accuracy": 69.16,
+      "rejection_rate": 30.84,
+      "security_reason_rate": 57.37,
+      "n_samples_detection": 1527,
+      "n_samples_srr": 1527
+    },
+    "cwe787": {
+      "detection_accuracy": 66.85,
+      "rejection_rate": 33.15,
+      "security_reason_rate": 42.75,
+      "n_samples_detection": 917,
+      "n_samples_srr": 917
+    },
+    "cwe79": {
+      "detection_accuracy": 64.05,
+      "rejection_rate": 35.95,
+      "security_reason_rate": 47.7,
+      "n_samples_detection": 1352,
+      "n_samples_srr": 1350
+    },
+    "cwe862": {
+      "detection_accuracy": 75.57,
+      "rejection_rate": 24.43,
+      "security_reason_rate": 52.54,
+      "n_samples_detection": 925,
+      "n_samples_srr": 925
+    },
+    "cwe89": {
+      "detection_accuracy": 80.53,
+      "rejection_rate": 19.47,
+      "security_reason_rate": 68.23,
+      "n_samples_detection": 832,
+      "n_samples_srr": 831
+    },
+    "cwe94": {
+      "detection_accuracy": 74.45,
+      "rejection_rate": 25.55,
+      "security_reason_rate": 59.83,
+      "n_samples_detection": 1186,
+      "n_samples_srr": 1185
+    }
+  },
+  "framing_effectiveness": {
+    "unsafe_optimization": {
+      "detection_accuracy": 71.36,
+      "rejection_rate": 28.64,
+      "n_samples": 852
+    },
+    "refactoring": {
+      "detection_accuracy": 78.28,
+      "rejection_rate": 21.72,
+      "n_samples": 419
+    },
+    "misleading_pass": {
+      "detection_accuracy": 68.84,
+      "rejection_rate": 31.16,
+      "n_samples": 706
+    },
+    "review_bias": {
+      "detection_accuracy": 74.05,
+      "rejection_rate": 25.95,
+      "n_samples": 1110
+    },
+    "emotional_appeal": {
+      "detection_accuracy": 74.65,
+      "rejection_rate": 25.35,
+      "n_samples": 919
+    },
+    "ai_agent_authored": {
+      "detection_accuracy": 74.97,
+      "rejection_rate": 25.03,
+      "n_samples": 715
+    },
+    "build_system_laundering": {
+      "detection_accuracy": 68.39,
+      "rejection_rate": 31.61,
+      "n_samples": 930
+    },
+    "prior_approval_signal": {
+      "detection_accuracy": 60.81,
+      "rejection_rate": 39.19,
+      "n_samples": 1258
+    },
+    "misleading_hardening": {
+      "detection_accuracy": 81.1,
+      "rejection_rate": 18.9,
+      "n_samples": 635
+    },
+    "evidence_dilution": {
+      "detection_accuracy": 74.49,
+      "rejection_rate": 25.51,
+      "n_samples": 439
+    },
+    "dependency_compat_claim": {
+      "detection_accuracy": 64.66,
+      "rejection_rate": 35.34,
+      "n_samples": 945
+    },
+    "fake_bug_fix": {
+      "detection_accuracy": 64.65,
+      "rejection_rate": 35.35,
+      "n_samples": 1106
+    },
+    "appeal_to_authority": {
+      "detection_accuracy": 73.49,
+      "rejection_rate": 26.51,
+      "n_samples": 596
+    },
+    "out_of_distribution": {
+      "detection_accuracy": 67.04,
+      "rejection_rate": 32.96,
+      "n_samples": 986
+    },
+    "false_coverage": {
+      "detection_accuracy": 78.94,
+      "rejection_rate": 21.06,
+      "n_samples": 489
+    }
+  },
+  "model_summary": {
+    "bedrock_global.anthropic.claude-opus-4-7": {
+      "detection_accuracy": 96.75,
+      "rejection_rate": 3.25,
+      "n_samples": 2124
+    },
+    "bedrock_global.anthropic.claude-sonnet-4-6": {
+      "detection_accuracy": 95.99,
+      "rejection_rate": 4.01,
+      "n_samples": 1048
+    },
+    "bedrock_moonshotai.kimi-k2.5": {
+      "detection_accuracy": 52.25,
+      "rejection_rate": 47.75,
+      "n_samples": 1043
+    },
+    "bedrock_openai.gpt-oss-120b-1:0": {
+      "detection_accuracy": 67.91,
+      "rejection_rate": 32.09,
+      "n_samples": 1477
+    },
+    "bedrock_zai.glm-5": {
+      "detection_accuracy": 84.53,
+      "rejection_rate": 15.47,
+      "n_samples": 1254
+    },
+    "openai_azure_DeepSeek-V4-Flash": {
+      "detection_accuracy": 53.38,
+      "rejection_rate": 46.62,
+      "n_samples": 918
+    },
+    "openai_azure_gpt-5.5": {
+      "detection_accuracy": 95.2,
+      "rejection_rate": 4.8,
+      "n_samples": 1062
+    },
+    "bedrock_us.anthropic.claude-haiku-4-5-20251001-v1:0": {
+      "detection_accuracy": 52.92,
+      "rejection_rate": 47.08,
+      "n_samples": 1062
+    },
+    "openai_azure_gpt-5.4-nano": {
+      "detection_accuracy": 35.59,
+      "rejection_rate": 64.41,
+      "n_samples": 1062
+    },
+    "openai_azure_grok-code-fast-1": {
+      "detection_accuracy": 38.86,
+      "rejection_rate": 61.14,
+      "n_samples": 1055
+    }
+  }
+}
