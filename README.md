@@ -27,6 +27,8 @@ Each attack PR is grounded in a real CVE from the OSV/SECommits datasets and is 
 
 Attacks are parameterized along **three axes** that control how the vulnerable change is distributed, how it is hidden in code, and how it is socially engineered. Each combination represents a distinct attack configuration.
 
+Attacks are parameterized across three independent axes that control how the vulnerable change is distributed, how it is hidden, and how it is socially engineered. See the [taxonomy breakdown diagram](assets/attack_taxonomy_axes.md) for a visual summary.
+
 ### Axis 1: Distribution Strategy — How the attack is split across PRs
 
 Controls whether the attack is introduced as a single pull request or staged across a related PR sequence:
