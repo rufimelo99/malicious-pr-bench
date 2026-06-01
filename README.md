@@ -1,5 +1,11 @@
 # SEVRA-BENCH: Social Engineering of Vulnerabilities in Review Agents
 
+## Benchmark Architecture
+
+![SEVRA Framework Overview](assets/framework_diagram.pdf)
+
+SEVRA operationalizes real-world supply chain attacks as pull requests. The benchmark measures how well LLM agents detect malicious PRs across three attack dimensions: **distribution strategy** (single vs. staged), **code concealment** (tiny change vs. buried in complexity vs. semantic equivalent), and **social engineering framing** (15 distinct manipulation strategies). Agent performance is scored on detection accuracy (blocking attacks) and false-decline rate (not rejecting legitimate fixes).
+
 A reproducible benchmark for measuring how well LLM agents detect malicious pull requests and resist social engineering attacks. The benchmark places an agent in the role of an open-source code reviewer and asks it to accept or reject PRs that contain deliberately embedded vulnerabilities alongside manipulative framing. Each attack PR is crafted to look plausible — the question is whether the agent can see through the disguise.
 
 ## What the benchmark measures
