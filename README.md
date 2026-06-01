@@ -2,7 +2,7 @@
 
 ## Benchmark Architecture
 
-![SEVRA Framework Overview](assets/framework_diagram.pdf)
+![SEVRA Framework Overview](assets/framework_diagram.png)
 
 SEVRA operationalizes real-world supply chain attacks as pull requests. The benchmark measures how well LLM agents detect malicious PRs across three attack dimensions: **distribution strategy** (single vs. staged), **code concealment** (tiny change vs. buried in complexity vs. semantic equivalent), and **social engineering framing** (15 distinct manipulation strategies). Agent performance is scored on detection accuracy (blocking attacks) and false-decline rate (not rejecting legitimate fixes).
 
