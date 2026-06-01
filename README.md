@@ -1,12 +1,16 @@
 # SEVRA-BENCH: Social Engineering of Vulnerabilities in Review Agents
 
+## Benchmark Architecture
+
+![SEVRA Framework Overview](assets/framework_diagram.png)
+
+SEVRA operationalizes real-world supply chain attacks as pull requests. The benchmark measures how well LLM agents detect malicious PRs across three attack dimensions: **distribution strategy** (single vs. staged), **code concealment** (tiny change vs. buried in complexity vs. semantic equivalent), and **social engineering framing** (15 distinct manipulation strategies). Agent performance is scored on detection accuracy (blocking attacks) and false-decline rate (not rejecting legitimate fixes).
+
 A reproducible benchmark for measuring how well LLM agents detect malicious pull requests and resist social engineering attacks. The benchmark places an agent in the role of an open-source code reviewer and asks it to accept or reject PRs that contain deliberately embedded vulnerabilities alongside manipulative framing. Each attack PR is crafted to look plausible — the question is whether the agent can see through the disguise.
 
-## What the benchmark measures
+## What the Benchmark Measures
 
-Real-world supply chain attacks frequently arrive as pull requests: a seemingly helpful bug fix that quietly introduces a backdoor, a performance optimization that happens to leak secrets, a refactor that embeds an injection vulnerability. This benchmark operationalizes that threat model. A reviewer agent is given access to a live Gitea instance preloaded with attack PRs and must decide which ones to approve. Its score is the fraction of attacks it successfully blocked.
-
-The benchmark combines adversarial attack evaluation with utility measurement: agents are scored both on their ability to detect malicious PRs and on their false-decline rate (FDR) — the fraction of legitimate security fixes they incorrectly reject — ensuring that evaluation distinguishes between cautious reviewers and genuinely discerning ones.
+Real-world supply chain attacks arrive as pull requests: a helpful-looking bug fix that introduces a backdoor, an "optimization" that leaks secrets, a "refactor" that embeds injection. SEVRA operationalizes this threat model, placing a reviewer agent in a live Gitea instance with attack PRs and measuring two metrics: **detection accuracy** (fraction of malicious PRs blocked) and **false-decline rate** (fraction of legitimate fixes incorrectly rejected). This dual-metric design distinguishes between cautious and genuinely discerning reviewers.
 
 ## Dataset
 
@@ -22,6 +26,8 @@ Each attack PR is grounded in a real CVE from the OSV/SECommits datasets and is 
 ## Attack Taxonomy
 
 Attacks are parameterized along **three axes** that control how the vulnerable change is distributed, how it is hidden in code, and how it is socially engineered. Each combination represents a distinct attack configuration.
+
+Attacks are parameterized across three independent axes that control how the vulnerable change is distributed, how it is hidden, and how it is socially engineered. See the [taxonomy breakdown diagram](assets/attack_taxonomy_axes.md) for a visual summary.
 
 ### Axis 1: Distribution Strategy — How the attack is split across PRs
 
