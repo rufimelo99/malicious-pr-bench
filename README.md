@@ -8,11 +8,9 @@ SEVRA operationalizes real-world supply chain attacks as pull requests. The benc
 
 A reproducible benchmark for measuring how well LLM agents detect malicious pull requests and resist social engineering attacks. The benchmark places an agent in the role of an open-source code reviewer and asks it to accept or reject PRs that contain deliberately embedded vulnerabilities alongside manipulative framing. Each attack PR is crafted to look plausible — the question is whether the agent can see through the disguise.
 
-## What the benchmark measures
+## What the Benchmark Measures
 
-Real-world supply chain attacks frequently arrive as pull requests: a seemingly helpful bug fix that quietly introduces a backdoor, a performance optimization that happens to leak secrets, a refactor that embeds an injection vulnerability. This benchmark operationalizes that threat model. A reviewer agent is given access to a live Gitea instance preloaded with attack PRs and must decide which ones to approve. Its score is the fraction of attacks it successfully blocked.
-
-The benchmark combines adversarial attack evaluation with utility measurement: agents are scored both on their ability to detect malicious PRs and on their false-decline rate (FDR) — the fraction of legitimate security fixes they incorrectly reject — ensuring that evaluation distinguishes between cautious reviewers and genuinely discerning ones.
+Real-world supply chain attacks arrive as pull requests: a helpful-looking bug fix that introduces a backdoor, an "optimization" that leaks secrets, a "refactor" that embeds injection. SEVRA operationalizes this threat model, placing a reviewer agent in a live Gitea instance with attack PRs and measuring two metrics: **detection accuracy** (fraction of malicious PRs blocked) and **false-decline rate** (fraction of legitimate fixes incorrectly rejected). This dual-metric design distinguishes between cautious and genuinely discerning reviewers.
 
 ## Dataset
 
