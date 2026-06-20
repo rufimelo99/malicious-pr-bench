@@ -283,6 +283,51 @@
     </div>
   </section>
 
+  <!-- SRR results -->
+  <section class="section" id="srr">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Results: Security Reason Rate by CWE</h2>
+      <p class="content">
+        Security Reason Rate (%) on the retained challenge split &mdash; of the malicious PRs a reviewer
+        <em>blocked</em>, the fraction where its stated rationale actually cited a security concern (rather
+        than declining for unrelated reasons). Higher is better. Columns match the order above.
+        <span class="tag rr-hi">&ge;80</span>
+        <span class="tag rr-mid">50&ndash;79</span>
+        <span class="tag rr-lo">&lt;50</span>
+      </p>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth results-table">
+          <thead>
+            <tr>
+              <th>CWE</th>
+              <th>Opus&nbsp;4.7</th>
+              <th>GPT-5.5</th>
+              <th>GLM</th>
+              <th>Haiku-4.5</th>
+              <th>DeepSeek&nbsp;V4-Flash</th>
+              <th>Kimi</th>
+              <th>Grok&nbsp;Code&nbsp;Fast</th>
+              <th>GPT-5.4-nano</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>CWE-79 &mdash; Cross-Site Scripting (XSS)</td><td class="rr-mid">79</td><td class="rr-mid">74</td><td class="rr-mid">63</td><td class="rr-lo">34</td><td class="rr-lo">26</td><td class="rr-lo">31</td><td class="rr-lo">13</td><td class="rr-lo">30</td></tr>
+            <tr><td>CWE-89 &mdash; SQL Injection</td><td class="rr-hi">94</td><td class="rr-hi">92</td><td class="rr-hi">88</td><td class="rr-mid">74</td><td class="rr-mid">52</td><td class="rr-mid">55</td><td class="rr-lo">21</td><td class="rr-lo">48</td></tr>
+            <tr><td>CWE-352 &mdash; Cross-Site Request Forgery</td><td class="rr-mid">74</td><td class="rr-mid">76</td><td class="rr-mid">60</td><td class="rr-lo">44</td><td class="rr-lo">27</td><td class="rr-lo">41</td><td class="rr-lo">16</td><td class="rr-lo">43</td></tr>
+            <tr><td>CWE-862 &mdash; Missing Authorization</td><td class="rr-mid">77</td><td class="rr-hi">85</td><td class="rr-mid">64</td><td class="rr-lo">41</td><td class="rr-lo">30</td><td class="rr-lo">31</td><td class="rr-lo">12</td><td class="rr-lo">38</td></tr>
+            <tr><td>CWE-787 &mdash; Out-of-bounds Write</td><td class="rr-mid">59</td><td class="rr-mid">72</td><td class="rr-mid">54</td><td class="rr-lo">43</td><td class="rr-lo">23</td><td class="rr-lo">22</td><td class="rr-lo">15</td><td class="rr-lo">43</td></tr>
+            <tr><td>CWE-22 &mdash; Path Traversal</td><td class="rr-mid">72</td><td class="rr-mid">71</td><td class="rr-mid">67</td><td class="rr-mid">58</td><td class="rr-lo">48</td><td class="rr-lo">38</td><td class="rr-lo">34</td><td class="rr-lo">38</td></tr>
+            <tr><td>CWE-416 &mdash; Use After Free</td><td class="rr-lo">30</td><td class="rr-lo">20</td><td class="rr-lo">18</td><td class="rr-lo">12</td><td class="rr-lo">16</td><td class="rr-lo">7</td><td class="rr-lo">5</td><td class="rr-lo">13</td></tr>
+            <tr><td>CWE-125 &mdash; Out-of-bounds Read</td><td class="rr-lo">45</td><td class="rr-mid">57</td><td class="rr-lo">45</td><td class="rr-lo">30</td><td class="rr-lo">31</td><td class="rr-lo">26</td><td class="rr-lo">17</td><td class="rr-lo">29</td></tr>
+            <tr><td>CWE-78 &mdash; OS Command Injection</td><td class="rr-hi">81</td><td class="rr-mid">72</td><td class="rr-mid">75</td><td class="rr-lo">44</td><td class="rr-lo">36</td><td class="rr-lo">37</td><td class="rr-lo">28</td><td class="rr-lo">39</td></tr>
+            <tr><td>CWE-94 &mdash; Code Injection</td><td class="rr-hi">85</td><td class="rr-mid">79</td><td class="rr-mid">69</td><td class="rr-mid">61</td><td class="rr-lo">38</td><td class="rr-lo">42</td><td class="rr-lo">22</td><td class="rr-lo">49</td></tr>
+            <tr class="overall-row"><td><strong>Overall Average</strong></td><td class="rr-mid"><strong>70</strong></td><td class="rr-mid"><strong>70</strong></td><td class="rr-mid"><strong>60</strong></td><td class="rr-lo"><strong>44</strong></td><td class="rr-lo"><strong>33</strong></td><td class="rr-lo"><strong>33</strong></td><td class="rr-lo"><strong>18</strong></td><td class="rr-lo"><strong>37</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <!-- Framing analysis -->
   <section class="section hero is-light">
     <div class="container is-max-desktop">
@@ -356,8 +401,12 @@
                         padding:1.25rem 1.5rem; display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap; }
     .headline-num { font-size:2rem; font-weight:800; color:#2563eb; white-space:nowrap; }
     .headline-callout p { margin:0; flex:1 1 320px; }
-    .results-table td, .results-table th { text-align:center; vertical-align:middle; }
-    .results-table td:first-child, .results-table th:first-child { text-align:left; }
+    .results-table { table-layout:fixed; width:100%; }
+    .results-table th, .results-table td { text-align:center; vertical-align:middle; width:9%;
+                                            padding-left:4px; padding-right:4px; overflow-wrap:anywhere; }
+    .results-table th { vertical-align:bottom; font-size:0.82rem; line-height:1.15; }
+    .results-table th:first-child, .results-table td:first-child { text-align:left; width:28%;
+                                                                   overflow-wrap:normal; }
     .results-table .overall-row td { border-top:2px solid #b5b5b5; }
     .rr-hi  { background:#e8f6ec !important; color:#1f7a3d; font-weight:600; }
     .rr-mid { background:#fdf6e3 !important; color:#9a6b00; font-weight:600; }
