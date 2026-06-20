@@ -65,7 +65,7 @@
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- JS (static page only needs fontawesome + copy button; no jQuery/Adobe/chart.js) -->
+  <!-- JS: icons + copy/scroll handlers only; the page is fully static. -->
   <script defer src="static/js/fontawesome.all.min.js"></script>
   <script defer src="static/js/index.js"></script>
 
@@ -286,7 +286,71 @@
 
 
 
-<!--BibTex citation -->
+  <!-- Results -->
+  <section class="section" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Results: Refusal Rate by CWE</h2>
+      <p class="content">
+        Refusal Rate (%) on the retained challenge split &mdash; the fraction of malicious PRs each reviewer
+        correctly blocked. Higher is better. Models are ordered by overall refusal rate.
+        <span class="tag rr-hi">&ge;80</span>
+        <span class="tag rr-mid">50&ndash;79</span>
+        <span class="tag rr-lo">&lt;50</span>
+      </p>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth results-table">
+          <thead>
+            <tr>
+              <th>CWE</th>
+              <th>Opus&nbsp;4.7</th>
+              <th>GPT-5.5</th>
+              <th>GLM</th>
+              <th>Haiku-4.5</th>
+              <th>DeepSeek&nbsp;V4-Flash</th>
+              <th>Kimi</th>
+              <th>Grok&nbsp;Code&nbsp;Fast</th>
+              <th>GPT-5.4-nano</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>CWE-79 &mdash; Cross-Site Scripting (XSS)</td><td class="rr-hi">99</td><td class="rr-hi">89</td><td class="rr-hi">80</td><td class="rr-lo">37</td><td class="rr-lo">39</td><td class="rr-lo">47</td><td class="rr-lo">39</td><td class="rr-lo">42</td></tr>
+            <tr><td>CWE-89 &mdash; SQL Injection</td><td class="rr-hi">100</td><td class="rr-hi">100</td><td class="rr-hi">92</td><td class="rr-hi">85</td><td class="rr-mid">75</td><td class="rr-mid">68</td><td class="rr-lo">45</td><td class="rr-lo">15</td></tr>
+            <tr><td>CWE-352 &mdash; Cross-Site Request Forgery</td><td class="rr-hi">97</td><td class="rr-hi">89</td><td class="rr-hi">80</td><td class="rr-lo">46</td><td class="rr-lo">45</td><td class="rr-mid">53</td><td class="rr-lo">47</td><td class="rr-lo">36</td></tr>
+            <tr><td>CWE-862 &mdash; Missing Authorization</td><td class="rr-hi">99</td><td class="rr-hi">98</td><td class="rr-hi">89</td><td class="rr-mid">71</td><td class="rr-mid">62</td><td class="rr-mid">56</td><td class="rr-mid">54</td><td class="rr-lo">28</td></tr>
+            <tr><td>CWE-787 &mdash; Out-of-bounds Write</td><td class="rr-hi">100</td><td class="rr-hi">100</td><td class="rr-mid">79</td><td class="rr-lo">41</td><td class="rr-lo">49</td><td class="rr-lo">44</td><td class="rr-lo">37</td><td class="rr-mid">51</td></tr>
+            <tr><td>CWE-22 &mdash; Path Traversal</td><td class="rr-hi">100</td><td class="rr-hi">100</td><td class="rr-hi">92</td><td class="rr-mid">67</td><td class="rr-mid">70</td><td class="rr-mid">63</td><td class="rr-lo">37</td><td class="rr-lo">18</td></tr>
+            <tr><td>CWE-416 &mdash; Use After Free</td><td class="rr-hi">96</td><td class="rr-hi">93</td><td class="rr-mid">72</td><td class="rr-lo">30</td><td class="rr-lo">37</td><td class="rr-lo">34</td><td class="rr-lo">34</td><td class="rr-lo">49</td></tr>
+            <tr><td>CWE-125 &mdash; Out-of-bounds Read</td><td class="rr-hi">97</td><td class="rr-hi">99</td><td class="rr-hi">84</td><td class="rr-mid">68</td><td class="rr-mid">62</td><td class="rr-mid">64</td><td class="rr-lo">31</td><td class="rr-lo">33</td></tr>
+            <tr><td>CWE-78 &mdash; OS Command Injection</td><td class="rr-hi">93</td><td class="rr-hi">92</td><td class="rr-hi">84</td><td class="rr-lo">48</td><td class="rr-mid">50</td><td class="rr-lo">47</td><td class="rr-lo">14</td><td class="rr-lo">28</td></tr>
+            <tr><td>CWE-94 &mdash; Code Injection</td><td class="rr-hi">99</td><td class="rr-hi">97</td><td class="rr-hi">81</td><td class="rr-mid">57</td><td class="rr-mid">50</td><td class="rr-mid">59</td><td class="rr-mid">51</td><td class="rr-lo">46</td></tr>
+            <tr class="overall-row"><td><strong>Overall Average</strong></td><td class="rr-hi"><strong>98</strong></td><td class="rr-hi"><strong>95</strong></td><td class="rr-hi"><strong>83</strong></td><td class="rr-mid"><strong>53</strong></td><td class="rr-mid"><strong>53</strong></td><td class="rr-mid"><strong>52</strong></td><td class="rr-lo"><strong>39</strong></td><td class="rr-lo"><strong>36</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Framing analysis -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">It's Not Just the Code &mdash; It's the Story</h2>
+      <div class="content">
+        <p>
+          Sevra-Bench holds the vulnerable diff fixed and varies only the PR narrative across 15
+          social-engineering framings. Frontier reviewers stay robust regardless of the story:
+          <strong>Claude Opus 4.7 blocks 84&ndash;100%</strong> and <strong>GPT-5.5 75&ndash;100%</strong> across every framing.
+          Open-weight reviewers are far more susceptible &mdash; DeepSeek V4-Flash blocks 100% of PRs that appeal to
+          authority but only 18% of PRs claiming prior approval, an 82-point swing driven purely by how the
+          same change is described.
+        </p>
+      </div>
+      <figure class="image has-text-centered">
+        <img src="static/images/framing_effectiveness.png" alt="Effect of framing strategy on refusal rate by model" loading="lazy" style="max-width:100%;height:auto;">
+      </figure>
+    </div>
+  </section>
+
+  <!-- BibTeX citation -->
   <section class="section" id="BibTeX">
     <div class="container is-max-desktop content">
       <div class="bibtex-header">
@@ -296,255 +360,22 @@
           <span class="copy-text">Copy</span>
         </button>
       </div>
-      <pre id="bibtex-code"><code>@article{YourPaperKey2024,
-  title={Your Paper Title Here},
-  author={First Author and Second Author and Third Author},
-  journal={Conference/Journal Name},
-  year={2024},
-  url={https://your-domain.com/your-project-page}
+      <pre id="bibtex-code"><code>@article{melo2026sevra,
+  title   = {Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents},
+  author  = {Melo, Rui and Fogliato, Riccardo and Zhou, Sean and Thaker, Pratiksha and Wu, Zhiwei Steven},
+  journal = {arXiv preprint arXiv:2606.13757},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2606.13757}
 }</code></pre>
     </div>
-</section>
-<!--End BibTex citation -->
-
-
-  <footer class="footer">
-  <div class="container">
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-
-          <p>
-            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
-            You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<!-- Statcounter tracking code -->
-  
-<!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
-
-    <!-- End of Statcounter Code -->
-
-  
-  <section class="section">
-    <div class="container is-max-desktop has-text-centered has-text-grey-light">
-      <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-04-19 20:38:49 UTC
-      </p>
-    </div>
   </section>
 
-
-  <!-- Filters Section -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <h2 class="title is-4">Filters</h2>
-      <div class="columns">
-        <div class="column">
-          <div class="field">
-            <label class="label">Model</label>
-            <div class="control">
-              <div class="select">
-                <select id="model-filter"></select>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="field">
-            <label class="label">Harness</label>
-            <div class="control">
-              <div class="select">
-                <select id="harness-filter"></select>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="field">
-            <label class="label">CWE Type</label>
-            <div class="control">
-              <div class="select">
-                <select id="cwe-filter"></select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Charts Section -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <div class="tabs">
-        <ul>
-          <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
-          <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
-          <li><a onclick="switchChart('axes')">📋 Axis Breakdown</a></li>
-        </ul>
-      </div>
-
-      <div id="timeSeriesContainer" class="chart-container">
-        <h2 class="title is-4">Score Over Time</h2>
-        <canvas id="timeSeriesChart"></canvas>
-      </div>
-
-      <div id="barContainer" class="chart-container" style="display:none;">
-        <h2 class="title is-4">Model Comparison</h2>
-        <canvas id="barChart"></canvas>
-      </div>
-
-      <div id="axisTableContainer" class="chart-container" style="display:none; margin-top: 4rem;">
-        <h2 class="title is-4">Model Performance by Axis</h2>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    function switchChart(chartType) {
-      const containers = {
-        'timeSeries': 'timeSeriesContainer',
-        'bar': 'barContainer',
-        'axes': 'axisTableContainer'
-      };
-
-      // Hide all containers
-      Object.values(containers).forEach(id => {
-        document.getElementById(id).style.display = 'none';
-      });
-
-      // Show selected container
-      document.getElementById(containers[chartType]).style.display = 'block';
-
-      // Update tab styling
-      document.querySelectorAll('.tabs li').forEach(li => li.classList.remove('is-active'));
-      event.target.closest('li').classList.add('is-active');
-    }
-  </script>
-
-  <style>
-    .tabs a { cursor: pointer; }
-    .chart-container { position: relative; height: 400px; margin-bottom: 8rem; }
-    #radarChart { max-width: 500px; margin: 0 auto; }
-    #axisTableContainer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e5e5; }
-  </style>
-
-  <!-- 🔍 Malicious PR Detection Section -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3">🔍 Malicious PR Detection</h2>
-
-      <div class="table-container">
-        <table class="table is-striped is-hoverable is-fullwidth">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>Harness</th>
-              <th>CWE Type</th>
-              <th>Date</th>
-              <th>Samples</th>
-              <th>Accuracy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe125</code></td>
-              <td>2026-04-18</td>
-              <td>395</td>
-              <td class="has-text-warning"><strong>77.5%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe22</code></td>
-              <td>2026-04-18</td>
-              <td>349</td>
-              <td class="has-text-warning"><strong>74.5%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe352</code></td>
-              <td>2026-04-18</td>
-              <td>452</td>
-              <td class="has-text-success"><strong>82.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe416</code></td>
-              <td>2026-04-18</td>
-              <td>109</td>
-              <td class="has-text-warning"><strong>74.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe78</code></td>
-              <td>2026-04-18</td>
-              <td>43</td>
-              <td class="has-text-success"><strong>93.0%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe787</code></td>
-              <td>2026-04-18</td>
-              <td>269</td>
-              <td class="has-text-success"><strong>89.6%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe79</code></td>
-              <td>2026-04-18</td>
-              <td>382</td>
-              <td class="has-text-success"><strong>80.4%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe862</code></td>
-              <td>2026-04-18</td>
-              <td>364</td>
-              <td class="has-text-success"><strong>84.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe89</code></td>
-              <td>2026-04-18</td>
-              <td>219</td>
-              <td class="has-text-success"><strong>91.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe94</code></td>
-              <td>2026-04-18</td>
-              <td>86</td>
-              <td class="has-text-success"><strong>84.9%</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+  </main>
 
   <section class="section">
     <div class="container is-max-desktop has-text-centered has-text-grey-light">
-      <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-05-07 18:30:29 UTC
+      <p style="font-size: 0.9rem; margin-top: 1rem;">
+        Last updated: 2026-06-20
       </p>
     </div>
   </section>
@@ -561,9 +392,5 @@
       </div>
     </div>
   </footer>
-
-  <!-- Chart.js and leaderboard scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="leaderboard.js"></script>
 </body>
   </html>
