@@ -3,178 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+
   <!-- Primary Meta Tags -->
-  <!-- TODO: Replace with your paper title and author names -->
-  <meta name="title" content="Malicious PR Benchmark Leaderboard - SocialAITBD">
-  <!-- TODO: Write a compelling 150-160 character description of your research -->
-  <meta name="description" content="Model evaluation on security review and malicious PR detection capabilities">
-  <!-- TODO: Add 5-10 relevant keywords for your research area -->
-  <meta name="keywords" content="KEYWORD1, KEYWORD2, KEYWORD3, machine learning, computer vision, AI">
-  <!-- TODO: List all authors -->
-  <meta name="author" content="FIRST_AUTHOR_NAME, SECOND_AUTHOR_NAME">
+  <meta name="title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta name="description" content="Sevra-Bench benchmarks whether LLM code-review agents reject malicious pull requests when the attacker controls both the diff and the narrative. Reveals a 45-point gap between frontier and open-weight reviewers.">
+  <meta name="keywords" content="LLM code review, AI security, malicious pull requests, social engineering, CVE, CWE, software supply chain, AI safety, agent evaluation, benchmark">
+  <meta name="author" content="Rui Melo, Riccardo Fogliato, Sean Zhou, Pratiksha Thaker, Zhiwei Steven Wu">
   <meta name="robots" content="index, follow">
   <meta name="language" content="English">
-  
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">
-  <!-- TODO: Replace with your institution or lab name -->
-  <meta property="og:site_name" content="SocialAITBD">
-  <!-- TODO: Same as paper title above -->
-  <meta property="og:title" content="Malicious PR Benchmark Leaderboard">
-  <!-- TODO: Same as description above -->
-  <meta property="og:description" content="Model evaluation on security review and malicious PR detection capabilities">
-  <!-- TODO: Replace with your actual website URL -->
-  <meta property="og:url" content="https://github.com/SocialAITBD/malicious-pr-bench">
-  <!-- TODO: Create a 1200x630px preview image and update path -->
-  <meta property="og:image" content="https://github.com/static/images/social_preview.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Malicious PR Benchmark Leaderboard - Research Preview">
-  <meta property="article:published_time" content="2024-01-01T00:00:00.000Z">
-  <meta property="article:author" content="FIRST_AUTHOR_NAME">
-  <meta property="article:section" content="Research">
-  <meta property="article:tag" content="KEYWORD1">
-  <meta property="article:tag" content="KEYWORD2">
+  <meta property="og:site_name" content="Sevra-Bench">
+  <meta property="og:title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta property="og:description" content="Can an automated reviewer reject a malicious PR when the attacker controls both the code diff and the narrative? A benchmark of 8 LLM reviewers across 10 CWEs and 15 social-engineering framings.">
+  <meta property="og:url" content="https://github.com/rufimelo99/malicious-pr-bench">
+  <meta property="og:image" content="static/images/framework_short.png">
+  <meta property="og:image:alt" content="Sevra-Bench framework overview">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <!-- TODO: Replace with your lab/institution Twitter handle -->
-  <meta name="twitter:site" content="@YOUR_TWITTER_HANDLE">
-  <!-- TODO: Replace with first author's Twitter handle -->
-  <meta name="twitter:creator" content="@AUTHOR_TWITTER_HANDLE">
-  <!-- TODO: Same as paper title above -->
-  <meta name="twitter:title" content="Malicious PR Benchmark Leaderboard">
-  <!-- TODO: Same as description above -->
-  <meta name="twitter:description" content="Model evaluation on security review and malicious PR detection capabilities">
-  <!-- TODO: Same as social preview image above -->
-  <meta name="twitter:image" content="https://github.com/static/images/social_preview.png">
-  <meta name="twitter:image:alt" content="Malicious PR Benchmark Leaderboard - Research Preview">
+  <meta name="twitter:title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta name="twitter:description" content="A benchmark measuring how often LLM code-review agents approve adversarial pull requests. Frontier vs. open-weight reviewers differ by ~45 points.">
+  <meta name="twitter:image" content="static/images/framework_short.png">
 
   <!-- Academic/Research Specific -->
-  <meta name="citation_title" content="Malicious PR Benchmark Leaderboard">
-  <meta name="citation_author" content="FIRST_AUTHOR_LAST, FIRST_AUTHOR_FIRST">
-  <meta name="citation_author" content="SECOND_AUTHOR_LAST, SECOND_AUTHOR_FIRST">
-  <meta name="citation_publication_date" content="2024">
-  <meta name="citation_conference_title" content="CONFERENCE_NAME">
-  <meta name="citation_pdf_url" content="https://github.com/static/pdfs/paper.pdf">
-  
+  <meta name="citation_title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta name="citation_author" content="Melo, Rui">
+  <meta name="citation_author" content="Fogliato, Riccardo">
+  <meta name="citation_author" content="Zhou, Sean">
+  <meta name="citation_author" content="Thaker, Pratiksha">
+  <meta name="citation_author" content="Wu, Zhiwei Steven">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2606.13757">
+  <meta name="citation_arxiv_id" content="2606.13757">
+
   <!-- Additional SEO -->
   <meta name="theme-color" content="#2563eb">
-  <meta name="msapplication-TileColor" content="#2563eb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  
+
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://ajax.googleapis.com">
-  <link rel="preconnect" href="https://documentcloud.adobe.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
+  <title>Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents</title>
 
-  <!-- TODO: Replace with your paper title and authors -->
-  <title>Malicious PR Benchmark Leaderboard - SocialAITBD | Academic Research</title>
-  
-  <!-- Favicon and App Icons -->
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="static/images/sevra_favicon.png">
   <link rel="apple-touch-icon" href="static/images/sevra_favicon.png">
-  
-  <!-- Critical CSS - Load synchronously -->
+
+  <!-- CSS -->
   <link rel="stylesheet" href="static/css/bulma.min.css">
   <link rel="stylesheet" href="static/css/index.css">
-  
-  <!-- Non-critical CSS - Load asynchronously -->
-  <link rel="preload" href="static/css/bulma-carousel.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preload" href="static/css/bulma-slider.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="static/css/fontawesome.all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  
-  <!-- Fallback for browsers that don't support preload -->
   <noscript>
-    <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
-    <link rel="stylesheet" href="static/css/bulma-slider.min.css">
     <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   </noscript>
-  
-  <!-- Fonts - Optimized loading -->
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Defer non-critical JavaScript -->
-  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+
+  <!-- JS (static page only needs fontawesome + copy button; no jQuery/Adobe/chart.js) -->
   <script defer src="static/js/fontawesome.all.min.js"></script>
-  <script defer src="static/js/bulma-carousel.min.js"></script>
-  <script defer src="static/js/bulma-slider.min.js"></script>
   <script defer src="static/js/index.js"></script>
-  
-  <!-- Structured Data for Academic Papers -->
+
+  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "ScholarlyArticle",
-    "headline": "Malicious PR Benchmark Leaderboard",
-    "description": "Model evaluation on security review and malicious PR detection capabilities",
+    "headline": "Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents",
+    "description": "A benchmark measuring how often LLM code-review agents approve adversarial pull requests in which the attacker controls both the code diff and the PR narrative.",
     "author": [
-      {
-        "@type": "Person",
-        "name": "FIRST_AUTHOR_NAME",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "INSTITUTION_NAME"
-        }
-      },
-      {
-        "@type": "Person",
-        "name": "SECOND_AUTHOR_NAME",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "INSTITUTION_NAME"
-        }
-      }
+      { "@type": "Person", "name": "Rui Melo", "affiliation": { "@type": "Organization", "name": "Carnegie Mellon University" } },
+      { "@type": "Person", "name": "Riccardo Fogliato", "affiliation": { "@type": "Organization", "name": "Microsoft Core AI" } },
+      { "@type": "Person", "name": "Sean Zhou", "affiliation": { "@type": "Organization", "name": "Amazon" } },
+      { "@type": "Person", "name": "Pratiksha Thaker", "affiliation": { "@type": "Organization", "name": "Databricks" } },
+      { "@type": "Person", "name": "Zhiwei Steven Wu", "affiliation": { "@type": "Organization", "name": "Carnegie Mellon University" } }
     ],
-    "datePublished": "2024-01-01",
-    "publisher": {
-      "@type": "Organization",
-      "name": "CONFERENCE_OR_JOURNAL_NAME"
-    },
-    "url": "https://github.com/SocialAITBD/malicious-pr-bench",
-    "image": "https://github.com/static/images/social_preview.png",
-    "keywords": ["KEYWORD1", "KEYWORD2", "KEYWORD3", "machine learning", "computer vision"],
-    "abstract": "FULL_ABSTRACT_TEXT_HERE",
-    "citation": "BIBTEX_CITATION_HERE",
+    "datePublished": "2026",
+    "url": "https://arxiv.org/abs/2606.13757",
+    "image": "static/images/framework_short.png",
+    "keywords": ["LLM code review", "AI security", "malicious pull requests", "social engineering", "CVE", "CWE", "software supply chain"],
     "isAccessibleForFree": true,
-    "license": "https://creativecommons.org/licenses/by/4.0/",
-    "mainEntity": {
-      "@type": "WebPage",
-      "@id": "https://github.com/SocialAITBD/malicious-pr-bench"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "RESEARCH_AREA_1"
-      },
-      {
-        "@type": "Thing", 
-        "name": "RESEARCH_AREA_2"
-      }
-    ]
-  }
-  </script>
-  
-  <!-- Website/Organization Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "SocialAITBD",
-    "url": "https://YOUR_INSTITUTION_WEBSITE.com",
-    "logo": "https://github.com/static/images/favicon.ico",
-    "sameAs": [
-      "https://twitter.com/YOUR_TWITTER_HANDLE",
-      "https://github.com/YOUR_GITHUB_USERNAME"
-    ]
+    "license": "https://creativecommons.org/licenses/by/4.0/"
   }
   </script>
 </head>
