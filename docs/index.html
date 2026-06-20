@@ -3,178 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+
   <!-- Primary Meta Tags -->
-  <!-- TODO: Replace with your paper title and author names -->
-  <meta name="title" content="Malicious PR Benchmark Leaderboard - SocialAITBD">
-  <!-- TODO: Write a compelling 150-160 character description of your research -->
-  <meta name="description" content="Model evaluation on security review and malicious PR detection capabilities">
-  <!-- TODO: Add 5-10 relevant keywords for your research area -->
-  <meta name="keywords" content="KEYWORD1, KEYWORD2, KEYWORD3, machine learning, computer vision, AI">
-  <!-- TODO: List all authors -->
-  <meta name="author" content="FIRST_AUTHOR_NAME, SECOND_AUTHOR_NAME">
+  <meta name="title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta name="description" content="Sevra-Bench benchmarks whether LLM code-review agents reject malicious pull requests when the attacker controls both the diff and the narrative. Reveals a 45-point gap between frontier and open-weight reviewers.">
+  <meta name="keywords" content="LLM code review, AI security, malicious pull requests, social engineering, CVE, CWE, software supply chain, AI safety, agent evaluation, benchmark">
+  <meta name="author" content="Rui Melo, Riccardo Fogliato, Sean Zhou, Pratiksha Thaker, Zhiwei Steven Wu">
   <meta name="robots" content="index, follow">
   <meta name="language" content="English">
-  
+
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article">
-  <!-- TODO: Replace with your institution or lab name -->
-  <meta property="og:site_name" content="SocialAITBD">
-  <!-- TODO: Same as paper title above -->
-  <meta property="og:title" content="Malicious PR Benchmark Leaderboard">
-  <!-- TODO: Same as description above -->
-  <meta property="og:description" content="Model evaluation on security review and malicious PR detection capabilities">
-  <!-- TODO: Replace with your actual website URL -->
-  <meta property="og:url" content="https://github.com/SocialAITBD/malicious-pr-bench">
-  <!-- TODO: Create a 1200x630px preview image and update path -->
-  <meta property="og:image" content="https://github.com/static/images/social_preview.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Malicious PR Benchmark Leaderboard - Research Preview">
-  <meta property="article:published_time" content="2024-01-01T00:00:00.000Z">
-  <meta property="article:author" content="FIRST_AUTHOR_NAME">
-  <meta property="article:section" content="Research">
-  <meta property="article:tag" content="KEYWORD1">
-  <meta property="article:tag" content="KEYWORD2">
+  <meta property="og:site_name" content="Sevra-Bench">
+  <meta property="og:title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta property="og:description" content="Can an automated reviewer reject a malicious PR when the attacker controls both the code diff and the narrative? A benchmark of 8 LLM reviewers across 10 CWEs and 15 social-engineering framings.">
+  <meta property="og:url" content="https://github.com/rufimelo99/malicious-pr-bench">
+  <meta property="og:image" content="static/images/framework_short.png">
+  <meta property="og:image:alt" content="Sevra-Bench framework overview">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <!-- TODO: Replace with your lab/institution Twitter handle -->
-  <meta name="twitter:site" content="@YOUR_TWITTER_HANDLE">
-  <!-- TODO: Replace with first author's Twitter handle -->
-  <meta name="twitter:creator" content="@AUTHOR_TWITTER_HANDLE">
-  <!-- TODO: Same as paper title above -->
-  <meta name="twitter:title" content="Malicious PR Benchmark Leaderboard">
-  <!-- TODO: Same as description above -->
-  <meta name="twitter:description" content="Model evaluation on security review and malicious PR detection capabilities">
-  <!-- TODO: Same as social preview image above -->
-  <meta name="twitter:image" content="https://github.com/static/images/social_preview.png">
-  <meta name="twitter:image:alt" content="Malicious PR Benchmark Leaderboard - Research Preview">
+  <meta name="twitter:title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta name="twitter:description" content="A benchmark measuring how often LLM code-review agents approve adversarial pull requests. Frontier vs. open-weight reviewers differ by ~45 points.">
+  <meta name="twitter:image" content="static/images/framework_short.png">
 
   <!-- Academic/Research Specific -->
-  <meta name="citation_title" content="Malicious PR Benchmark Leaderboard">
-  <meta name="citation_author" content="FIRST_AUTHOR_LAST, FIRST_AUTHOR_FIRST">
-  <meta name="citation_author" content="SECOND_AUTHOR_LAST, SECOND_AUTHOR_FIRST">
-  <meta name="citation_publication_date" content="2024">
-  <meta name="citation_conference_title" content="CONFERENCE_NAME">
-  <meta name="citation_pdf_url" content="https://github.com/static/pdfs/paper.pdf">
-  
+  <meta name="citation_title" content="Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents">
+  <meta name="citation_author" content="Melo, Rui">
+  <meta name="citation_author" content="Fogliato, Riccardo">
+  <meta name="citation_author" content="Zhou, Sean">
+  <meta name="citation_author" content="Thaker, Pratiksha">
+  <meta name="citation_author" content="Wu, Zhiwei Steven">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2606.13757">
+  <meta name="citation_arxiv_id" content="2606.13757">
+
   <!-- Additional SEO -->
   <meta name="theme-color" content="#2563eb">
-  <meta name="msapplication-TileColor" content="#2563eb">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  
+
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://ajax.googleapis.com">
-  <link rel="preconnect" href="https://documentcloud.adobe.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
 
+  <title>Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents</title>
 
-  <!-- TODO: Replace with your paper title and authors -->
-  <title>Malicious PR Benchmark Leaderboard - SocialAITBD | Academic Research</title>
-  
-  <!-- Favicon and App Icons -->
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="static/images/sevra_favicon.png">
   <link rel="apple-touch-icon" href="static/images/sevra_favicon.png">
-  
-  <!-- Critical CSS - Load synchronously -->
+
+  <!-- CSS -->
   <link rel="stylesheet" href="static/css/bulma.min.css">
   <link rel="stylesheet" href="static/css/index.css">
-  
-  <!-- Non-critical CSS - Load asynchronously -->
-  <link rel="preload" href="static/css/bulma-carousel.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preload" href="static/css/bulma-slider.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="static/css/fontawesome.all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  
-  <!-- Fallback for browsers that don't support preload -->
   <noscript>
-    <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
-    <link rel="stylesheet" href="static/css/bulma-slider.min.css">
     <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   </noscript>
-  
-  <!-- Fonts - Optimized loading -->
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Defer non-critical JavaScript -->
-  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+
+  <!-- JS: icons + copy/scroll handlers only; the page is fully static. -->
   <script defer src="static/js/fontawesome.all.min.js"></script>
-  <script defer src="static/js/bulma-carousel.min.js"></script>
-  <script defer src="static/js/bulma-slider.min.js"></script>
   <script defer src="static/js/index.js"></script>
-  
-  <!-- Structured Data for Academic Papers -->
+
+  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "ScholarlyArticle",
-    "headline": "Malicious PR Benchmark Leaderboard",
-    "description": "Model evaluation on security review and malicious PR detection capabilities",
+    "headline": "Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents",
+    "description": "A benchmark measuring how often LLM code-review agents approve adversarial pull requests in which the attacker controls both the code diff and the PR narrative.",
     "author": [
-      {
-        "@type": "Person",
-        "name": "FIRST_AUTHOR_NAME",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "INSTITUTION_NAME"
-        }
-      },
-      {
-        "@type": "Person",
-        "name": "SECOND_AUTHOR_NAME",
-        "affiliation": {
-          "@type": "Organization",
-          "name": "INSTITUTION_NAME"
-        }
-      }
+      { "@type": "Person", "name": "Rui Melo", "affiliation": { "@type": "Organization", "name": "Carnegie Mellon University" } },
+      { "@type": "Person", "name": "Riccardo Fogliato", "affiliation": { "@type": "Organization", "name": "Microsoft Core AI" } },
+      { "@type": "Person", "name": "Sean Zhou", "affiliation": { "@type": "Organization", "name": "Amazon" } },
+      { "@type": "Person", "name": "Pratiksha Thaker", "affiliation": { "@type": "Organization", "name": "Databricks" } },
+      { "@type": "Person", "name": "Zhiwei Steven Wu", "affiliation": { "@type": "Organization", "name": "Carnegie Mellon University" } }
     ],
-    "datePublished": "2024-01-01",
-    "publisher": {
-      "@type": "Organization",
-      "name": "CONFERENCE_OR_JOURNAL_NAME"
-    },
-    "url": "https://github.com/SocialAITBD/malicious-pr-bench",
-    "image": "https://github.com/static/images/social_preview.png",
-    "keywords": ["KEYWORD1", "KEYWORD2", "KEYWORD3", "machine learning", "computer vision"],
-    "abstract": "FULL_ABSTRACT_TEXT_HERE",
-    "citation": "BIBTEX_CITATION_HERE",
+    "datePublished": "2026",
+    "url": "https://arxiv.org/abs/2606.13757",
+    "image": "static/images/framework_short.png",
+    "keywords": ["LLM code review", "AI security", "malicious pull requests", "social engineering", "CVE", "CWE", "software supply chain"],
     "isAccessibleForFree": true,
-    "license": "https://creativecommons.org/licenses/by/4.0/",
-    "mainEntity": {
-      "@type": "WebPage",
-      "@id": "https://github.com/SocialAITBD/malicious-pr-bench"
-    },
-    "about": [
-      {
-        "@type": "Thing",
-        "name": "RESEARCH_AREA_1"
-      },
-      {
-        "@type": "Thing", 
-        "name": "RESEARCH_AREA_2"
-      }
-    ]
-  }
-  </script>
-  
-  <!-- Website/Organization Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "SocialAITBD",
-    "url": "https://YOUR_INSTITUTION_WEBSITE.com",
-    "logo": "https://github.com/static/images/favicon.ico",
-    "sameAs": [
-      "https://twitter.com/YOUR_TWITTER_HANDLE",
-      "https://github.com/YOUR_GITHUB_USERNAME"
-    ]
+    "license": "https://creativecommons.org/licenses/by/4.0/"
   }
   </script>
 </head>
@@ -186,53 +100,6 @@
     <i class="fas fa-chevron-up"></i>
   </button>
 
-  <!-- More Works Dropdown -->
-  <!-- <div class="more-works-container">
-    <button class="more-works-btn" onclick="toggleMoreWorks()" title="View More Works from Our Lab">
-      <i class="fas fa-flask"></i>
-      More Works
-      <i class="fas fa-chevron-down dropdown-arrow"></i>
-    </button>
-    <div class="more-works-dropdown" id="moreWorksDropdown">
-      <div class="dropdown-header">
-        <h4>More Works from Our Lab</h4>
-        <button class="close-btn" onclick="toggleMoreWorks()">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="works-list"> -->
-        <!-- TODO: Replace with your lab's related works -->
-        <!-- <a href="https://arxiv.org/abs/PAPER_ID_1" class="work-item" target="_blank">
-          <div class="work-info"> -->
-            <!-- TODO: Replace with actual paper title -->
-            <!-- <h5>Paper Title 1</h5> -->
-            <!-- TODO: Replace with brief description -->
-            <!-- <p>Brief description of the work and its main contribution.</p> -->
-            <!-- TODO: Replace with venue and year -->
-            <!-- <span class="work-venue">Conference/Journal 2024</span>
-          </div>
-          <i class="fas fa-external-link-alt"></i>
-        </a> -->
-        <!-- TODO: Add more related works or remove extra items -->
-        <!-- <a href="https://arxiv.org/abs/PAPER_ID_2" class="work-item" target="_blank">
-          <div class="work-info">
-            <h5>Paper Title 2</h5>
-            <p>Brief description of the work and its main contribution.</p>
-            <span class="work-venue">Conference/Journal 2023</span>
-          </div>
-          <i class="fas fa-external-link-alt"></i>
-        </a>
-        <a href="https://arxiv.org/abs/PAPER_ID_3" class="work-item" target="_blank">
-          <div class="work-info">
-            <h5>Paper Title 3</h5>
-            <p>Brief description of the work and its main contribution.</p>
-            <span class="work-venue">Conference/Journal 2023</span>
-          </div>
-          <i class="fas fa-external-link-alt"></i>
-        </a>
-      </div>
-    </div>
-  </div> -->
 
   <main id="main-content">
   <section class="hero">
@@ -240,237 +107,248 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <!-- TODO: Replace with your paper title -->
-            <h1 class="title is-1 publication-title">Academic Project Page</h1>
+            <h1 class="title is-1 publication-title">Sevra-Bench</h1>
+            <h2 class="subtitle is-4" style="margin-top:-0.5rem;">Social Engineering of Vulnerabilities in Review Agents</h2>
+            <p class="is-size-5" style="max-width:760px;margin:0.75rem auto 1.5rem;color:#4a4a4a;">
+              Can an automated code reviewer reject a malicious pull request when the attacker
+              controls both the code diff <em>and</em> the PR narrative?
+            </p>
+
             <div class="is-size-5 publication-authors">
-              <!-- TODO: Replace with your paper authors and their personal links -->
-              <span class="author-block">
-                <a href="FIRST AUTHOR PERSONAL LINK" target="_blank">First Author</a><sup>*</sup>,</span>
-                <span class="author-block">
-                  <a href="SECOND AUTHOR PERSONAL LINK" target="_blank">Second Author</a><sup>*</sup>,</span>
-                  <span class="author-block">
-                    <a href="THIRD AUTHOR PERSONAL LINK" target="_blank">Third Author</a>
-                  </span>
-                  </div>
+              <span class="author-block"><a href="mailto:rmelo@cs.cmu.edu">Rui Melo</a><sup>1</sup>,</span>
+              <span class="author-block">Riccardo Fogliato<sup>2</sup>,</span>
+              <span class="author-block">Sean Zhou<sup>3</sup>,</span>
+              <span class="author-block">Pratiksha Thaker<sup>4</sup>,</span>
+              <span class="author-block">Zhiwei Steven Wu<sup>1</sup></span>
+            </div>
+            <div class="is-size-6 publication-authors" style="margin-top:0.5rem;">
+              <span class="author-block"><sup>1</sup>Carnegie Mellon University</span>&nbsp;&nbsp;
+              <span class="author-block"><sup>2</sup>Microsoft Core AI</span>&nbsp;&nbsp;
+              <span class="author-block"><sup>3</sup>Amazon</span>&nbsp;&nbsp;
+              <span class="author-block"><sup>4</sup>Databricks</span>
+              <br><small>Correspondence: <a href="mailto:rmelo@cs.cmu.edu">rmelo@cs.cmu.edu</a></small>
+            </div>
 
-                  <div class="is-size-5 publication-authors">
-                    <!-- TODO: Replace with your institution and conference/journal info -->
-                    <span class="author-block">Institution Name<br>Conference name and year</span>
-                    <!-- TODO: Remove this line if no equal contribution -->
-                    <span class="eql-cntrb"><small><br><sup>*</sup>Indicates Equal Contribution</small></span>
-                  </div>
-
-                  <div class="column has-text-centered">
-                    <div class="publication-links">
-                         <!-- TODO: Update with your arXiv paper ID -->
-                      <span class="link-block">
-                        <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
-                        class="external-link button is-normal is-rounded is-dark">
-                        <span class="icon">
-                          <i class="fas fa-file-pdf"></i>
-                        </span>
-                        <span>Paper</span>
-                      </a>
-                    </span>
-
-                    <!-- TODO: Add your supplementary material PDF or remove this section -->
-                    <span class="link-block">
-                      <a href="static/pdfs/supplementary_material.pdf" target="_blank"
-                      class="external-link button is-normal is-rounded is-dark">
-                      <span class="icon">
-                        <i class="fas fa-file-pdf"></i>
-                      </span>
-                      <span>Supplementary</span>
-                    </a>
-                  </span>
-
-                  <!-- TODO: Replace with your GitHub repository URL -->
-                  <span class="link-block">
-                    <a href="https://github.com/YOUR REPO HERE" target="_blank"
-                    class="external-link button is-normal is-rounded is-dark">
-                    <span class="icon">
-                      <i class="fab fa-github"></i>
-                    </span>
-                    <span>Code</span>
+            <div class="column has-text-centered" style="margin-top:1.25rem;">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2606.13757" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span>
                   </a>
                 </span>
-
-                <!-- TODO: Update with your arXiv paper ID -->
                 <span class="link-block">
-                  <a href="https://arxiv.org/abs/<ARXIV PAPER ID>" target="_blank"
-                  class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                    <i class="ai ai-arxiv"></i>
-                  </span>
-                  <span>arXiv</span>
-                </a>
-              </span>
+                  <a href="https://github.com/rufimelo99/malicious-pr-bench" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://huggingface.co/datasets/RedAI4Code/SEVRA" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">🤗</span><span>Dataset</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2606.13757" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv</span>
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-
-<!-- Teaser video-->
-<!-- <section class="hero teaser"> -->
-  <!-- <div class="container is-max-desktop"> -->
-    <!-- <div class="hero-body"> -->
-      <!-- TODO: Replace with your teaser video -->
-      <!-- <video poster="" id="tree" autoplay controls muted loop height="100%" preload="metadata"> -->
-        <!-- TODO: Add your video file path here -->
-        <!-- <source src="static/videos/banner_video.mp4" type="video/mp4"> -->
-      <!-- </video> -->
-      <!-- TODO: Replace with your video description -->
-      <!-- <h2 class="subtitle has-text-centered">
-        Aliquam vitae elit ullamcorper tellus egestas pellentesque. Ut lacus tellus, maximus vel lectus at, placerat pretium mi. Maecenas dignissim tincidunt vestibulum. Sed consequat hendrerit nisl ut maximus. 
-      </h2>
-    </div>
-  </div>
-</section> -->
-<!-- End teaser video -->
-
-<!-- Paper abstract -->
-<!-- <section class="section hero is-light">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3">Abstract</h2>
-        <div class="content has-text-justified"> -->
-          <!-- TODO: Replace with your paper abstract -->
-          <!-- <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ullamcorper tellus sed ante aliquam tempus. Etiam porttitor urna feugiat nibh elementum, et tempor dolor mattis. Donec accumsan enim augue, a vulputate nisi sodales sit amet. Proin bibendum ex eget mauris cursus euismod nec et nibh. Maecenas ac gravida ante, nec cursus dui. Vivamus purus nibh, placerat ac purus eget, sagittis vestibulum metus. Sed vestibulum bibendum lectus gravida commodo. Pellentesque auctor leo vitae sagittis suscipit.
-          </p>
-        </div>
+  <!-- Key stats -->
+  <section class="section" style="padding-top:1rem;">
+    <div class="container is-max-desktop">
+      <div class="stat-band">
+        <div class="stat-card"><div class="stat-num">2,250</div><div class="stat-label">Malicious PRs</div></div>
+        <div class="stat-card"><div class="stat-num">1,062</div><div class="stat-label">Challenge split</div></div>
+        <div class="stat-card"><div class="stat-num">347</div><div class="stat-label">Benign fixes</div></div>
+        <div class="stat-card"><div class="stat-num">15</div><div class="stat-label">Framings</div></div>
+        <div class="stat-card"><div class="stat-num">10</div><div class="stat-label">CWEs (Top 25)</div></div>
+        <div class="stat-card"><div class="stat-num">8</div><div class="stat-label">Models</div></div>
       </div>
     </div>
-  </div>
-</section> -->
-<!-- End paper abstract -->
+  </section>
 
-
-<!-- Image carousel -->
-<!-- <section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item"> -->
-        <!-- TODO: Replace with your research result images -->
-        <!-- <img src="static/images/carousel1.jpg" alt="First research result visualization" loading="lazy"/> -->
-        <!-- TODO: Replace with description of this result -->
-        <!-- <h2 class="subtitle has-text-centered">
-          First image description.
-        </h2>
-      </div>
-      <div class="item"> -->
-        <!-- Your image here -->
-        <!-- <img src="static/images/carousel2.jpg" alt="Second research result visualization" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          Second image description.
-        </h2>
-      </div>
-      <div class="item"> -->
-        <!-- Your image here -->
-        <!-- <img src="static/images/carousel3.jpg" alt="Third research result visualization" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-         Third image description.
-       </h2>
-     </div>
-     <div class="item"> -->
-      <!-- Your image here -->
-      <!-- <img src="static/images/carousel4.jpg" alt="Fourth research result visualization" loading="lazy"/>
-      <h2 class="subtitle has-text-centered">
-        Fourth image description.
-      </h2>
-    </div>
-  </div>
-</div>
-</div>
-</section> -->
-<!-- End image carousel -->
-
-
-
-
-<!-- Youtube video -->
-<!-- <section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container"> -->
-      <!-- Paper video. -->
-      <!-- <h2 class="title is-3">Video Presentation</h2>
+  <!-- Abstract -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
       <div class="columns is-centered has-text-centered">
         <div class="column is-four-fifths">
-          
-          <div class="publication-video"> -->
-            <!-- TODO: Replace with your YouTube video ID -->
-            <!-- <iframe src="https://www.youtube.com/embed/JkaxUblCGz0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Large language model (LLM) reviewers are increasingly used in pull-request (PR) workflows,
+              where their approvals help decide which code is merged into a repository. This raises a
+              question that benchmarks for static vulnerability detection or code generation do not address:
+              can an automated reviewer reject a malicious contribution when the attacker controls both the
+              code change and the accompanying PR text? We introduce <strong>Sevra-Bench</strong>
+              (Social Engineering of Vulnerabilities in Review Agents), a benchmark that measures how often an
+              automated reviewer approves such adversarial pull requests. Each malicious PR is built from a
+              real project commit that previously fixed a vulnerability listed in the CVE database. We
+              automatically invert that fix to restore the original vulnerable code and submit it as a pull
+              request wrapped in one of 15 social-engineering framings, which vary the claims made, the
+              supporting evidence, the urgency conveyed, signals of prior approval, and appeals to authority.
+              Sevra-Bench contains 1,062 malicious PRs drawn from CVE-linked fixes across the top 10 entries
+              of the 2025 CWE Top 25. In a realistic setting, we evaluate 8 current LLMs as code-review agents
+              on PRs that introduce vulnerabilities previously reported in public disclosures. Our results
+              reveal a sharp gap in security capabilities between closed- and open-source models. We hope
+              Sevra-Bench will serve as a valuable resource for advancing open-source models and narrowing
+              this gap.
+            </p>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section> -->
-<!-- End youtube video -->
+  </section>
 
 
-<!-- Video carousel -->
-<!-- <section class="hero is-small">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Another Carousel</h2>
-      <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-video1"> -->
-          <!-- TODO: Add poster image for better preview -->
-          <!-- <video poster="" id="video1" controls muted loop height="100%" preload="metadata"> -->
-            <!-- Your video file here -->
-            <!-- <source src="static/videos/carousel1.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-video2"> -->
-          <!-- TODO: Add poster image for better preview -->
-          <!-- <video poster="" id="video2" controls muted loop height="100%" preload="metadata"> -->
-            <!-- Your video file here -->
-            <!-- <source src="static/videos/carousel2.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-video3"> -->
-          <!-- TODO: Add poster image for better preview -->
-          <!-- <video poster="" id="video3" controls muted loop height="100%" preload="metadata"> -->
-            <!-- Your video file here -->
-            <!-- <source src="static/videos/carousel3.mp4" type="video/mp4">
-          </video>
-        </div>
-      </div>
+  <!-- Framework overview -->
+  <section class="section">
+    <div class="container is-max-desktop has-text-centered">
+      <h2 class="title is-3">How Sevra-Bench Works</h2>
+      <figure class="image">
+        <img src="static/images/framework_short.png" alt="Sevra-Bench framework overview" loading="lazy" style="max-width:100%;height:auto;">
+      </figure>
+      <p class="is-size-6 has-text-grey" style="margin-top:0.75rem;max-width:820px;margin-left:auto;margin-right:auto;">
+        Each malicious episode reverses a project commit that fixed a CVE-linked vulnerability, then
+        presents the resulting pull request under one of 15 social-engineering framings. The reviewer
+        agent evaluates the live PR in an isolated Gitea repository through tool calls, and decides
+        whether to approve or decline.
+      </p>
     </div>
-  </div>
-</section> -->
-<!-- End video carousel -->
+  </section>
 
-
-
-
-
-
-<!-- Paper poster -->
-<section class="hero is-small is-light">
-  <div class="hero-body">
-    <div class="container">
-      <h2 class="title">Poster</h2>
-
-      <!-- TODO: Replace with your poster PDF -->
-      <iframe  src="static/pdfs/sample.pdf" width="100%" height="550">
-          </iframe>
-        
+  <!-- Headline result -->
+  <section class="section" style="padding-top:0;">
+    <div class="container is-max-desktop">
+      <div class="headline-callout">
+        <div class="headline-num">~45 points</div>
+        <p>
+          The gap in detection ability between frontier and open-weight reviewers is not marginal.
+          <strong>Claude Opus 4.7 blocks ~98%</strong> of adversarial PRs on the challenge split, while the
+          weakest evaluated reviewer manages only <strong>~36%</strong> — a ~45-percentage-point gulf, with
+          open-weight models swinging dramatically depending on how the PR is framed.
+        </p>
       </div>
     </div>
   </section>
-<!--End paper poster -->
 
 
 
-<!--BibTex citation -->
+  <!-- Results -->
+  <section class="section" id="results">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Results: Refusal Rate by CWE</h2>
+      <p class="content">
+        Refusal Rate (%) on the retained challenge split &mdash; the fraction of malicious PRs each reviewer
+        correctly blocked. Higher is better. Models are ordered by overall refusal rate.
+        <span class="tag rr-hi">&ge;80</span>
+        <span class="tag rr-mid">50&ndash;79</span>
+        <span class="tag rr-lo">&lt;50</span>
+      </p>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth results-table">
+          <thead>
+            <tr>
+              <th>CWE</th>
+              <th>Opus&nbsp;4.7</th>
+              <th>GPT-5.5</th>
+              <th>GLM</th>
+              <th>Haiku-4.5</th>
+              <th>DeepSeek&nbsp;V4-Flash</th>
+              <th>Kimi</th>
+              <th>Grok&nbsp;Code&nbsp;Fast</th>
+              <th>GPT-5.4-nano</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>CWE-79 &mdash; Cross-Site Scripting (XSS)</td><td class="rr-hi">99</td><td class="rr-hi">89</td><td class="rr-hi">80</td><td class="rr-lo">37</td><td class="rr-lo">39</td><td class="rr-lo">47</td><td class="rr-lo">39</td><td class="rr-lo">42</td></tr>
+            <tr><td>CWE-89 &mdash; SQL Injection</td><td class="rr-hi">100</td><td class="rr-hi">100</td><td class="rr-hi">92</td><td class="rr-hi">85</td><td class="rr-mid">75</td><td class="rr-mid">68</td><td class="rr-lo">45</td><td class="rr-lo">15</td></tr>
+            <tr><td>CWE-352 &mdash; Cross-Site Request Forgery</td><td class="rr-hi">97</td><td class="rr-hi">89</td><td class="rr-hi">80</td><td class="rr-lo">46</td><td class="rr-lo">45</td><td class="rr-mid">53</td><td class="rr-lo">47</td><td class="rr-lo">36</td></tr>
+            <tr><td>CWE-862 &mdash; Missing Authorization</td><td class="rr-hi">99</td><td class="rr-hi">98</td><td class="rr-hi">89</td><td class="rr-mid">71</td><td class="rr-mid">62</td><td class="rr-mid">56</td><td class="rr-mid">54</td><td class="rr-lo">28</td></tr>
+            <tr><td>CWE-787 &mdash; Out-of-bounds Write</td><td class="rr-hi">100</td><td class="rr-hi">100</td><td class="rr-mid">79</td><td class="rr-lo">41</td><td class="rr-lo">49</td><td class="rr-lo">44</td><td class="rr-lo">37</td><td class="rr-mid">51</td></tr>
+            <tr><td>CWE-22 &mdash; Path Traversal</td><td class="rr-hi">100</td><td class="rr-hi">100</td><td class="rr-hi">92</td><td class="rr-mid">67</td><td class="rr-mid">70</td><td class="rr-mid">63</td><td class="rr-lo">37</td><td class="rr-lo">18</td></tr>
+            <tr><td>CWE-416 &mdash; Use After Free</td><td class="rr-hi">96</td><td class="rr-hi">93</td><td class="rr-mid">72</td><td class="rr-lo">30</td><td class="rr-lo">37</td><td class="rr-lo">34</td><td class="rr-lo">34</td><td class="rr-lo">49</td></tr>
+            <tr><td>CWE-125 &mdash; Out-of-bounds Read</td><td class="rr-hi">97</td><td class="rr-hi">99</td><td class="rr-hi">84</td><td class="rr-mid">68</td><td class="rr-mid">62</td><td class="rr-mid">64</td><td class="rr-lo">31</td><td class="rr-lo">33</td></tr>
+            <tr><td>CWE-78 &mdash; OS Command Injection</td><td class="rr-hi">93</td><td class="rr-hi">92</td><td class="rr-hi">84</td><td class="rr-lo">48</td><td class="rr-mid">50</td><td class="rr-lo">47</td><td class="rr-lo">14</td><td class="rr-lo">28</td></tr>
+            <tr><td>CWE-94 &mdash; Code Injection</td><td class="rr-hi">99</td><td class="rr-hi">97</td><td class="rr-hi">81</td><td class="rr-mid">57</td><td class="rr-mid">50</td><td class="rr-mid">59</td><td class="rr-mid">51</td><td class="rr-lo">46</td></tr>
+            <tr class="overall-row"><td><strong>Overall Average</strong></td><td class="rr-hi"><strong>98</strong></td><td class="rr-hi"><strong>95</strong></td><td class="rr-hi"><strong>83</strong></td><td class="rr-mid"><strong>53</strong></td><td class="rr-mid"><strong>53</strong></td><td class="rr-mid"><strong>52</strong></td><td class="rr-lo"><strong>39</strong></td><td class="rr-lo"><strong>36</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SRR results -->
+  <section class="section" id="srr">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Results: Security Reason Rate by CWE</h2>
+      <p class="content">
+        Security Reason Rate (%) on the retained challenge split &mdash; of the malicious PRs a reviewer
+        <em>blocked</em>, the fraction where its stated rationale actually cited a security concern (rather
+        than declining for unrelated reasons). Higher is better. Columns match the order above.
+        <span class="tag rr-hi">&ge;80</span>
+        <span class="tag rr-mid">50&ndash;79</span>
+        <span class="tag rr-lo">&lt;50</span>
+      </p>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth results-table">
+          <thead>
+            <tr>
+              <th>CWE</th>
+              <th>Opus&nbsp;4.7</th>
+              <th>GPT-5.5</th>
+              <th>GLM</th>
+              <th>Haiku-4.5</th>
+              <th>DeepSeek&nbsp;V4-Flash</th>
+              <th>Kimi</th>
+              <th>Grok&nbsp;Code&nbsp;Fast</th>
+              <th>GPT-5.4-nano</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>CWE-79 &mdash; Cross-Site Scripting (XSS)</td><td class="rr-mid">79</td><td class="rr-mid">74</td><td class="rr-mid">63</td><td class="rr-lo">34</td><td class="rr-lo">26</td><td class="rr-lo">31</td><td class="rr-lo">13</td><td class="rr-lo">30</td></tr>
+            <tr><td>CWE-89 &mdash; SQL Injection</td><td class="rr-hi">94</td><td class="rr-hi">92</td><td class="rr-hi">88</td><td class="rr-mid">74</td><td class="rr-mid">52</td><td class="rr-mid">55</td><td class="rr-lo">21</td><td class="rr-lo">48</td></tr>
+            <tr><td>CWE-352 &mdash; Cross-Site Request Forgery</td><td class="rr-mid">74</td><td class="rr-mid">76</td><td class="rr-mid">60</td><td class="rr-lo">44</td><td class="rr-lo">27</td><td class="rr-lo">41</td><td class="rr-lo">16</td><td class="rr-lo">43</td></tr>
+            <tr><td>CWE-862 &mdash; Missing Authorization</td><td class="rr-mid">77</td><td class="rr-hi">85</td><td class="rr-mid">64</td><td class="rr-lo">41</td><td class="rr-lo">30</td><td class="rr-lo">31</td><td class="rr-lo">12</td><td class="rr-lo">38</td></tr>
+            <tr><td>CWE-787 &mdash; Out-of-bounds Write</td><td class="rr-mid">59</td><td class="rr-mid">72</td><td class="rr-mid">54</td><td class="rr-lo">43</td><td class="rr-lo">23</td><td class="rr-lo">22</td><td class="rr-lo">15</td><td class="rr-lo">43</td></tr>
+            <tr><td>CWE-22 &mdash; Path Traversal</td><td class="rr-mid">72</td><td class="rr-mid">71</td><td class="rr-mid">67</td><td class="rr-mid">58</td><td class="rr-lo">48</td><td class="rr-lo">38</td><td class="rr-lo">34</td><td class="rr-lo">38</td></tr>
+            <tr><td>CWE-416 &mdash; Use After Free</td><td class="rr-lo">30</td><td class="rr-lo">20</td><td class="rr-lo">18</td><td class="rr-lo">12</td><td class="rr-lo">16</td><td class="rr-lo">7</td><td class="rr-lo">5</td><td class="rr-lo">13</td></tr>
+            <tr><td>CWE-125 &mdash; Out-of-bounds Read</td><td class="rr-lo">45</td><td class="rr-mid">57</td><td class="rr-lo">45</td><td class="rr-lo">30</td><td class="rr-lo">31</td><td class="rr-lo">26</td><td class="rr-lo">17</td><td class="rr-lo">29</td></tr>
+            <tr><td>CWE-78 &mdash; OS Command Injection</td><td class="rr-hi">81</td><td class="rr-mid">72</td><td class="rr-mid">75</td><td class="rr-lo">44</td><td class="rr-lo">36</td><td class="rr-lo">37</td><td class="rr-lo">28</td><td class="rr-lo">39</td></tr>
+            <tr><td>CWE-94 &mdash; Code Injection</td><td class="rr-hi">85</td><td class="rr-mid">79</td><td class="rr-mid">69</td><td class="rr-mid">61</td><td class="rr-lo">38</td><td class="rr-lo">42</td><td class="rr-lo">22</td><td class="rr-lo">49</td></tr>
+            <tr class="overall-row"><td><strong>Overall Average</strong></td><td class="rr-mid"><strong>70</strong></td><td class="rr-mid"><strong>70</strong></td><td class="rr-mid"><strong>60</strong></td><td class="rr-lo"><strong>44</strong></td><td class="rr-lo"><strong>33</strong></td><td class="rr-lo"><strong>33</strong></td><td class="rr-lo"><strong>18</strong></td><td class="rr-lo"><strong>37</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Framing analysis -->
+  <section class="section hero is-light">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">It's Not Just the Code &mdash; It's the Story</h2>
+      <div class="content">
+        <p>
+          Sevra-Bench holds the vulnerable diff fixed and varies only the PR narrative across 15
+          social-engineering framings. Frontier reviewers stay robust regardless of the story:
+          <strong>Claude Opus 4.7 blocks 84&ndash;100%</strong> and <strong>GPT-5.5 75&ndash;100%</strong> across every framing.
+          Open-weight reviewers are far more susceptible &mdash; DeepSeek V4-Flash blocks 100% of PRs that appeal to
+          authority but only 18% of PRs claiming prior approval, an 82-point swing driven purely by how the
+          same change is described.
+        </p>
+      </div>
+      <figure class="image has-text-centered">
+        <img src="static/images/framing_effectiveness.png" alt="Effect of framing strategy on refusal rate by model" loading="lazy" style="max-width:100%;height:auto;">
+      </figure>
+    </div>
+  </section>
+
+  <!-- BibTeX citation -->
   <section class="section" id="BibTeX">
     <div class="container is-max-desktop content">
       <div class="bibtex-header">
@@ -480,255 +358,22 @@
           <span class="copy-text">Copy</span>
         </button>
       </div>
-      <pre id="bibtex-code"><code>@article{YourPaperKey2024,
-  title={Your Paper Title Here},
-  author={First Author and Second Author and Third Author},
-  journal={Conference/Journal Name},
-  year={2024},
-  url={https://your-domain.com/your-project-page}
+      <pre id="bibtex-code"><code>@article{melo2026sevra,
+  title   = {Sevra-Bench: Social Engineering of Vulnerabilities in Review Agents},
+  author  = {Melo, Rui and Fogliato, Riccardo and Zhou, Sean and Thaker, Pratiksha and Wu, Zhiwei Steven},
+  journal = {arXiv preprint arXiv:2606.13757},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2606.13757}
 }</code></pre>
     </div>
-</section>
-<!--End BibTex citation -->
-
-
-  <footer class="footer">
-  <div class="container">
-    <div class="columns is-centered">
-      <div class="column is-8">
-        <div class="content">
-
-          <p>
-            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
-            You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license"  href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<!-- Statcounter tracking code -->
-  
-<!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
-
-    <!-- End of Statcounter Code -->
-
-  
-  <section class="section">
-    <div class="container is-max-desktop has-text-centered has-text-grey-light">
-      <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-04-19 20:38:49 UTC
-      </p>
-    </div>
   </section>
 
-
-  <!-- Filters Section -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <h2 class="title is-4">Filters</h2>
-      <div class="columns">
-        <div class="column">
-          <div class="field">
-            <label class="label">Model</label>
-            <div class="control">
-              <div class="select">
-                <select id="model-filter"></select>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="field">
-            <label class="label">Harness</label>
-            <div class="control">
-              <div class="select">
-                <select id="harness-filter"></select>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="column">
-          <div class="field">
-            <label class="label">CWE Type</label>
-            <div class="control">
-              <div class="select">
-                <select id="cwe-filter"></select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Charts Section -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <div class="tabs">
-        <ul>
-          <li class="is-active"><a onclick="switchChart('timeSeries')">📈 Time Series</a></li>
-          <li><a onclick="switchChart('bar')">📊 Model Comparison</a></li>
-          <li><a onclick="switchChart('axes')">📋 Axis Breakdown</a></li>
-        </ul>
-      </div>
-
-      <div id="timeSeriesContainer" class="chart-container">
-        <h2 class="title is-4">Score Over Time</h2>
-        <canvas id="timeSeriesChart"></canvas>
-      </div>
-
-      <div id="barContainer" class="chart-container" style="display:none;">
-        <h2 class="title is-4">Model Comparison</h2>
-        <canvas id="barChart"></canvas>
-      </div>
-
-      <div id="axisTableContainer" class="chart-container" style="display:none; margin-top: 4rem;">
-        <h2 class="title is-4">Model Performance by Axis</h2>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    function switchChart(chartType) {
-      const containers = {
-        'timeSeries': 'timeSeriesContainer',
-        'bar': 'barContainer',
-        'axes': 'axisTableContainer'
-      };
-
-      // Hide all containers
-      Object.values(containers).forEach(id => {
-        document.getElementById(id).style.display = 'none';
-      });
-
-      // Show selected container
-      document.getElementById(containers[chartType]).style.display = 'block';
-
-      // Update tab styling
-      document.querySelectorAll('.tabs li').forEach(li => li.classList.remove('is-active'));
-      event.target.closest('li').classList.add('is-active');
-    }
-  </script>
-
-  <style>
-    .tabs a { cursor: pointer; }
-    .chart-container { position: relative; height: 400px; margin-bottom: 8rem; }
-    #radarChart { max-width: 500px; margin: 0 auto; }
-    #axisTableContainer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e5e5; }
-  </style>
-
-  <!-- 🔍 Malicious PR Detection Section -->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <h2 class="title is-3">🔍 Malicious PR Detection</h2>
-
-      <div class="table-container">
-        <table class="table is-striped is-hoverable is-fullwidth">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>Harness</th>
-              <th>CWE Type</th>
-              <th>Date</th>
-              <th>Samples</th>
-              <th>Accuracy</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe125</code></td>
-              <td>2026-04-18</td>
-              <td>395</td>
-              <td class="has-text-warning"><strong>77.5%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe22</code></td>
-              <td>2026-04-18</td>
-              <td>349</td>
-              <td class="has-text-warning"><strong>74.5%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe352</code></td>
-              <td>2026-04-18</td>
-              <td>452</td>
-              <td class="has-text-success"><strong>82.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe416</code></td>
-              <td>2026-04-18</td>
-              <td>109</td>
-              <td class="has-text-warning"><strong>74.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe78</code></td>
-              <td>2026-04-18</td>
-              <td>43</td>
-              <td class="has-text-success"><strong>93.0%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe787</code></td>
-              <td>2026-04-18</td>
-              <td>269</td>
-              <td class="has-text-success"><strong>89.6%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe79</code></td>
-              <td>2026-04-18</td>
-              <td>382</td>
-              <td class="has-text-success"><strong>80.4%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe862</code></td>
-              <td>2026-04-18</td>
-              <td>364</td>
-              <td class="has-text-success"><strong>84.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe89</code></td>
-              <td>2026-04-18</td>
-              <td>219</td>
-              <td class="has-text-success"><strong>91.3%</strong></td>
-            </tr>
-            <tr>
-              <td><strong>gpt-5.2</strong></td>
-              <td><code>inspect + gitea</code></td>
-              <td><code>cwe94</code></td>
-              <td>2026-04-18</td>
-              <td>86</td>
-              <td class="has-text-success"><strong>84.9%</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+  </main>
 
   <section class="section">
     <div class="container is-max-desktop has-text-centered has-text-grey-light">
-      <p style="font-size: 0.9rem; margin-top: 2rem;">
-        Last updated: 2026-05-07 18:30:29 UTC
+      <p style="font-size: 0.9rem; margin-top: 1rem;">
+        Last updated: 2026-06-20
       </p>
     </div>
   </section>
@@ -746,8 +391,27 @@
     </div>
   </footer>
 
-  <!-- Chart.js and leaderboard scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="leaderboard.js"></script>
+  <style>
+    .stat-band { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; }
+    .stat-card { flex:1 1 140px; max-width:200px; border:1px solid #e5e5e5; border-radius:10px;
+                 padding:1rem 0.75rem; text-align:center; background:#fff; }
+    .stat-num { font-size:1.9rem; font-weight:800; color:#2563eb; line-height:1.1; }
+    .stat-label { font-size:0.85rem; color:#6b6b6b; margin-top:0.25rem; }
+    .headline-callout { border-left:5px solid #2563eb; background:#f5f8ff; border-radius:8px;
+                        padding:1.25rem 1.5rem; display:flex; gap:1.25rem; align-items:center; flex-wrap:wrap; }
+    .headline-num { font-size:2rem; font-weight:800; color:#2563eb; white-space:nowrap; }
+    .headline-callout p { margin:0; flex:1 1 320px; }
+    .results-table { table-layout:fixed; width:100%; }
+    .results-table th, .results-table td { text-align:center; vertical-align:middle; width:9%;
+                                            padding-left:4px; padding-right:4px; overflow-wrap:anywhere; }
+    .results-table th { vertical-align:bottom; font-size:0.82rem; line-height:1.15; }
+    .results-table th:first-child, .results-table td:first-child { text-align:left; width:28%;
+                                                                   overflow-wrap:normal; }
+    .results-table .overall-row td { border-top:2px solid #b5b5b5; }
+    .rr-hi  { background:#e8f6ec !important; color:#1f7a3d; font-weight:600; }
+    .rr-mid { background:#fdf6e3 !important; color:#9a6b00; font-weight:600; }
+    .rr-lo  { background:#fde8e8 !important; color:#b3261e; font-weight:600; }
+    span.tag.rr-hi { color:#1f7a3d; } span.tag.rr-mid { color:#9a6b00; } span.tag.rr-lo { color:#b3261e; }
+  </style>
 </body>
   </html>
