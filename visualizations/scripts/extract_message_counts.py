@@ -161,6 +161,12 @@ for results_dir in results_dirs:
                             for sample in samples:
                                 sample_id = sample.get("id", sample.get("uuid"))
                                 if sample_id:
+                                    # Fall back to a text-based estimate only when
+                                    # the provider reported no usage (DeepSeek).
+                                    if not sample.get("model_usage"):
+                                        est = estimate_output_tokens_from_zip(z, sample)
+                                        if est is not None:
+                                            sample["_est_output_tokens"] = est
                                     samples_by_id[sample_id] = sample
             except Exception as e:
                 continue
@@ -215,6 +221,14 @@ for results_dir in results_dirs:
                 (u or {}).get("output_tokens", 0) or 0 for u in model_usage.values()
             )
 
+            # When the provider logged no usage, fall back to the text estimate.
+            output_tokens_estimated = False
+            if not model_usage and output_tokens == 0:
+                est = sample.get("_est_output_tokens")
+                if est:
+                    output_tokens = est
+                    output_tokens_estimated = True
+
             sample_data = {
                 "sample_id": sample_id,
                 "message_count": message_count,
@@ -223,6 +237,7 @@ for results_dir in results_dirs:
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
                 "total_tokens": input_tokens + output_tokens,
+                "output_tokens_estimated": output_tokens_estimated,
             }
 
             results[model_name][prompt][cwe][framing].append(sample_data)
@@ -252,6 +267,9 @@ for model_name, prompts in results.items():
         ]
         token_counts = [s["total_tokens"] for s in model_samples]
         output_token_counts = [s["output_tokens"] for s in model_samples]
+        output_tokens_estimated = any(
+            s.get("output_tokens_estimated") for s in model_samples
+        )
 
         model_stats[model_name] = {
             "n_samples": len(model_samples),
@@ -297,6 +315,8 @@ for model_name, prompts in results.items():
                 "min": min(output_token_counts) if output_token_counts else None,
                 "max": max(output_token_counts) if output_token_counts else None,
             },
+            # True when output tokens were estimated from text (no provider usage).
+            "output_tokens_estimated": output_tokens_estimated,
         }
 
 # Per-CWE statistics
