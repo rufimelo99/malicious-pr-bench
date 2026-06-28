@@ -30,6 +30,59 @@ def extract_tool_calls(model_usage):
     return {"total": total_calls, "by_type": dict(by_type) if by_type else {}}
 
 
+# Optional tokenizer for estimating output tokens when a provider does not
+# report usage. The DeepSeek-V4-Flash run logged no model_usage at all, so its
+# output-token cost is otherwise unknown. We approximate it from the assistant
+# message text (generated content + tool-call arguments; tool results are input
+# and excluded). tiktoken's o200k_base is a proxy for the real tokenizer, so the
+# value is approximate: for non-reasoning models it tracks real usage closely
+# (validated ~1.03x on GLM-5), for reasoning models it undercounts because hidden
+# reasoning tokens are not in the message text.
+try:
+    import tiktoken
+
+    _ENCODER = tiktoken.get_encoding("o200k_base")
+except Exception:
+    _ENCODER = None
+
+
+def estimate_output_tokens(messages):
+    """Approximate assistant output tokens from message text. Returns None if a
+    tokenizer or messages are unavailable."""
+    if _ENCODER is None or not messages:
+        return None
+    total = 0
+    for m in messages:
+        if not isinstance(m, dict) or m.get("role") != "assistant":
+            continue
+        content = m.get("content")
+        if isinstance(content, str):
+            text = content
+        elif isinstance(content, list):
+            text = "".join(
+                b.get("text", "") or "" for b in content if isinstance(b, dict)
+            )
+        else:
+            text = ""
+        total += len(_ENCODER.encode(text))
+        for tc in m.get("tool_calls") or []:
+            args = tc.get("arguments")
+            args = args if isinstance(args, str) else json.dumps(args)
+            total += len(_ENCODER.encode(str(tc.get("function", "")) + args))
+    return total
+
+
+def estimate_output_tokens_from_zip(z, summary):
+    """Read a sample's full message list from the eval zip and estimate output
+    tokens. Returns None if the messages are unavailable."""
+    name = f"samples/{summary.get('id')}_epoch_{summary.get('epoch')}.json"
+    try:
+        full = json.loads(z.open(name).read().decode())
+    except Exception:
+        return None
+    return estimate_output_tokens(full.get("messages"))
+
+
 # Check for --retained flag
 use_retained_split = "--retained" in sys.argv
 
@@ -147,10 +200,20 @@ for results_dir in results_dirs:
                 sample["scores"].get("security_reason_scorer", {}).get("value", None)
             )
 
-            # Extract model usage info
-            model_usage = sample.get("model_usage", {})
-            input_tokens = model_usage.get("input_tokens", 0) if model_usage else 0
-            output_tokens = model_usage.get("output_tokens", 0) if model_usage else 0
+            # Extract model usage info.
+            # model_usage is keyed by model name, e.g.
+            #   {"bedrock/global.anthropic.claude-opus-4-7":
+            #       {"input_tokens": N, "output_tokens": N, "total_tokens": N}}
+            # so the token counts live inside the per-model entry, not at the top
+            # level. There is normally exactly one entry per sample; summing the
+            # values is robust if a scorer model ever adds a second entry.
+            model_usage = sample.get("model_usage") or {}
+            input_tokens = sum(
+                (u or {}).get("input_tokens", 0) or 0 for u in model_usage.values()
+            )
+            output_tokens = sum(
+                (u or {}).get("output_tokens", 0) or 0 for u in model_usage.values()
+            )
 
             sample_data = {
                 "sample_id": sample_id,
@@ -188,6 +251,7 @@ for model_name, prompts in results.items():
             if s["detection_score"] is not None
         ]
         token_counts = [s["total_tokens"] for s in model_samples]
+        output_token_counts = [s["output_tokens"] for s in model_samples]
 
         model_stats[model_name] = {
             "n_samples": len(model_samples),
@@ -221,6 +285,17 @@ for model_name, prompts in results.items():
                 ),
                 "min": min(token_counts) if token_counts else None,
                 "max": max(token_counts) if token_counts else None,
+            },
+            # Assistant output tokens only (excludes prompt/tool-result input
+            # tokens). This is what the NIPS plots use for "token cost".
+            "output_tokens_only": {
+                "mean": (
+                    sum(output_token_counts) / len(output_token_counts)
+                    if output_token_counts
+                    else None
+                ),
+                "min": min(output_token_counts) if output_token_counts else None,
+                "max": max(output_token_counts) if output_token_counts else None,
             },
         }
 
