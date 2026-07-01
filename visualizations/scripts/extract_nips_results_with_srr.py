@@ -121,6 +121,15 @@ for results_dir in results_dirs:
             if "scores" not in sample:
                 continue
 
+            # Skip samples that terminated on the message limit. The run was cut
+            # off before it could merge/reject, so the PR defaults to unmerged and
+            # the detection scorer records a spurious "DETECTED — attack
+            # incomplete" (85% of capped grok-code-fast-1 runs). Counting those as
+            # catches inflates detection/refusal rates, so drop them. Mirrors the
+            # exclusion in extract_message_counts.py.
+            if sample.get("limit") == "message":
+                continue
+
             # Filter to retained split if requested (check per-CWE)
             sample_id = sample.get("id", "")
             if retained_ids_by_cwe is not None:

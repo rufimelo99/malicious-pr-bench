@@ -9,6 +9,7 @@ Usage:
 """
 import glob
 import json
+import re
 import sys
 import zipfile
 from collections import defaultdict
@@ -81,6 +82,31 @@ def estimate_output_tokens_from_zip(z, summary):
     except Exception:
         return None
     return estimate_output_tokens(full.get("messages"))
+
+
+_LIMIT_COUNT_RE = re.compile(r"count:\s*(\d+)")
+
+
+def true_message_count_from_zip(z, summary):
+    """Recover the real message count for a sample whose summary under-reports it.
+
+    Inspect's `_journal/summaries` entry records `message_count: 1` for samples
+    that terminated on the message limit (observed only for grok-code-fast-1),
+    even though the transcript ran to the cap. The authoritative count is the
+    `sample_limit` event's message ("Message limit reached. count: N; ...").
+    Returns the parsed count, or None if unavailable.
+    """
+    name = f"samples/{summary.get('id')}_epoch_{summary.get('epoch')}.json"
+    try:
+        full = json.loads(z.open(name).read().decode())
+    except Exception:
+        return None
+    for event in full.get("events") or []:
+        if event.get("event") == "sample_limit":
+            m = _LIMIT_COUNT_RE.search(event.get("message", ""))
+            if m:
+                return int(m.group(1))
+    return None
 
 
 # Check for --retained flag
@@ -174,6 +200,15 @@ for results_dir in results_dirs:
         # Process deduplicated samples
         for sample in samples_by_id.values():
             if "scores" not in sample:
+                continue
+
+            # Skip samples that terminated on the message limit: the run was
+            # truncated at the cap, so its message_count is censored (and the
+            # summary under-reports it as 1). These are not real observations of
+            # reasoning depth or tokens-per-round. Observed only for
+            # grok-code-fast-1. See true_message_count_from_zip for the recovery
+            # alternative if imputing the cap is ever preferred over dropping.
+            if sample.get("limit") == "message":
                 continue
 
             # Filter to retained split if requested (check per-CWE)

@@ -1452,14 +1452,14 @@
       "plain": {
         "cwe125": {
           "detection_accuracy": {
-            "accuracy": 31.1,
-            "standard_error": 3.8,
-            "n_samples": 148
+            "accuracy": 22.1,
+            "standard_error": 3.76,
+            "n_samples": 122
           },
           "security_reason_rate": {
-            "accuracy": 8.8,
-            "standard_error": 2.33,
-            "n_samples": 148
+            "accuracy": 10.7,
+            "standard_error": 2.79,
+            "n_samples": 122
           }
         },
         "cwe22": {
@@ -1476,98 +1476,98 @@
         },
         "cwe352": {
           "detection_accuracy": {
-            "accuracy": 46.9,
-            "standard_error": 5.04,
-            "n_samples": 98
+            "accuracy": 23.4,
+            "standard_error": 5.3,
+            "n_samples": 64
           },
           "security_reason_rate": {
-            "accuracy": 10.2,
-            "standard_error": 3.06,
-            "n_samples": 98
+            "accuracy": 15.6,
+            "standard_error": 4.54,
+            "n_samples": 64
           }
         },
         "cwe416": {
           "detection_accuracy": {
-            "accuracy": 33.6,
-            "standard_error": 4.03,
-            "n_samples": 137
+            "accuracy": 19.8,
+            "standard_error": 3.87,
+            "n_samples": 106
           },
           "security_reason_rate": {
-            "accuracy": 2.9,
-            "standard_error": 1.44,
-            "n_samples": 137
+            "accuracy": 3.8,
+            "standard_error": 1.85,
+            "n_samples": 106
           }
         },
         "cwe787": {
           "detection_accuracy": {
-            "accuracy": 36.7,
-            "standard_error": 5.08,
-            "n_samples": 90
+            "accuracy": 18.2,
+            "standard_error": 4.75,
+            "n_samples": 66
           },
           "security_reason_rate": {
-            "accuracy": 13.3,
-            "standard_error": 3.58,
-            "n_samples": 90
+            "accuracy": 18.2,
+            "standard_error": 4.75,
+            "n_samples": 66
           }
         },
         "cwe78": {
           "detection_accuracy": {
-            "accuracy": 27.9,
-            "standard_error": 4.06,
-            "n_samples": 122
+            "accuracy": 23.6,
+            "standard_error": 4.12,
+            "n_samples": 106
           },
           "security_reason_rate": {
-            "accuracy": 18.0,
-            "standard_error": 3.48,
-            "n_samples": 122
+            "accuracy": 20.8,
+            "standard_error": 3.94,
+            "n_samples": 106
           }
         },
         "cwe79": {
           "detection_accuracy": {
-            "accuracy": 39.3,
-            "standard_error": 4.52,
-            "n_samples": 117
+            "accuracy": 19.5,
+            "standard_error": 4.38,
+            "n_samples": 82
           },
           "security_reason_rate": {
-            "accuracy": 11.1,
-            "standard_error": 2.91,
-            "n_samples": 117
+            "accuracy": 15.9,
+            "standard_error": 4.03,
+            "n_samples": 82
           }
         },
         "cwe862": {
           "detection_accuracy": {
-            "accuracy": 53.5,
-            "standard_error": 5.38,
-            "n_samples": 86
+            "accuracy": 27.7,
+            "standard_error": 6.52,
+            "n_samples": 47
           },
           "security_reason_rate": {
-            "accuracy": 9.3,
-            "standard_error": 3.13,
-            "n_samples": 86
+            "accuracy": 17.0,
+            "standard_error": 5.48,
+            "n_samples": 47
           }
         },
         "cwe89": {
           "detection_accuracy": {
-            "accuracy": 44.6,
-            "standard_error": 6.17,
-            "n_samples": 65
+            "accuracy": 30.6,
+            "standard_error": 6.58,
+            "n_samples": 49
           },
           "security_reason_rate": {
-            "accuracy": 18.5,
-            "standard_error": 4.81,
-            "n_samples": 65
+            "accuracy": 24.5,
+            "standard_error": 6.14,
+            "n_samples": 49
           }
         },
         "cwe94": {
           "detection_accuracy": {
-            "accuracy": 50.5,
-            "standard_error": 5.02,
-            "n_samples": 99
+            "accuracy": 25.9,
+            "standard_error": 5.75,
+            "n_samples": 58
           },
           "security_reason_rate": {
-            "accuracy": 12.1,
-            "standard_error": 3.28,
-            "n_samples": 99
+            "accuracy": 20.7,
+            "standard_error": 5.32,
+            "n_samples": 58
           }
         }
       }
@@ -3213,184 +3213,184 @@
       }
     },
     "openai_azure_grok-code-fast-1": {
-      "unsafe_optimization": {
-        "detection_accuracy": {
-          "accuracy": 52.0,
-          "standard_error": 5.77,
-          "n_samples": 75
-        },
-        "security_reason_rate": {
-          "accuracy": 8.0,
-          "standard_error": 3.13,
-          "n_samples": 75
-        }
-      },
       "refactoring": {
         "detection_accuracy": {
-          "accuracy": 55.6,
-          "standard_error": 8.28,
-          "n_samples": 36
+          "accuracy": 44.8,
+          "standard_error": 9.23,
+          "n_samples": 29
         },
         "security_reason_rate": {
-          "accuracy": 25.0,
-          "standard_error": 7.22,
-          "n_samples": 36
+          "accuracy": 31.0,
+          "standard_error": 8.59,
+          "n_samples": 29
         }
       },
       "misleading_pass": {
         "detection_accuracy": {
-          "accuracy": 45.2,
-          "standard_error": 6.32,
-          "n_samples": 62
+          "accuracy": 27.5,
+          "standard_error": 7.06,
+          "n_samples": 40
         },
         "security_reason_rate": {
-          "accuracy": 11.3,
-          "standard_error": 4.02,
-          "n_samples": 62
+          "accuracy": 17.5,
+          "standard_error": 6.01,
+          "n_samples": 40
         }
       },
       "review_bias": {
         "detection_accuracy": {
-          "accuracy": 54.2,
-          "standard_error": 5.09,
-          "n_samples": 96
+          "accuracy": 40.8,
+          "standard_error": 5.83,
+          "n_samples": 71
         },
         "security_reason_rate": {
-          "accuracy": 28.1,
-          "standard_error": 4.59,
-          "n_samples": 96
-        }
-      },
-      "emotional_appeal": {
-        "detection_accuracy": {
-          "accuracy": 21.8,
-          "standard_error": 4.67,
-          "n_samples": 78
-        },
-        "security_reason_rate": {
-          "accuracy": 7.7,
-          "standard_error": 3.02,
-          "n_samples": 78
-        }
-      },
-      "build_system_laundering": {
-        "detection_accuracy": {
-          "accuracy": 25.6,
-          "standard_error": 4.82,
-          "n_samples": 82
-        },
-        "security_reason_rate": {
-          "accuracy": 6.1,
-          "standard_error": 2.64,
-          "n_samples": 82
+          "accuracy": 38.0,
+          "standard_error": 5.76,
+          "n_samples": 71
         }
       },
       "prior_approval_signal": {
         "detection_accuracy": {
-          "accuracy": 31.2,
-          "standard_error": 4.44,
-          "n_samples": 109
+          "accuracy": 19.5,
+          "standard_error": 4.25,
+          "n_samples": 87
         },
         "security_reason_rate": {
-          "accuracy": 9.2,
-          "standard_error": 2.76,
-          "n_samples": 109
+          "accuracy": 11.5,
+          "standard_error": 3.42,
+          "n_samples": 87
         }
       },
       "dependency_compat_claim": {
         "detection_accuracy": {
-          "accuracy": 13.1,
-          "standard_error": 3.68,
-          "n_samples": 84
+          "accuracy": 4.2,
+          "standard_error": 2.39,
+          "n_samples": 71
         },
         "security_reason_rate": {
-          "accuracy": 2.4,
-          "standard_error": 1.66,
-          "n_samples": 84
+          "accuracy": 2.8,
+          "standard_error": 1.96,
+          "n_samples": 71
         }
       },
       "fake_bug_fix": {
         "detection_accuracy": {
-          "accuracy": 34.4,
-          "standard_error": 4.85,
-          "n_samples": 96
+          "accuracy": 23.4,
+          "standard_error": 4.82,
+          "n_samples": 77
         },
         "security_reason_rate": {
-          "accuracy": 8.3,
-          "standard_error": 2.82,
-          "n_samples": 96
+          "accuracy": 10.4,
+          "standard_error": 3.48,
+          "n_samples": 77
+        }
+      },
+      "unsafe_optimization": {
+        "detection_accuracy": {
+          "accuracy": 23.8,
+          "standard_error": 6.57,
+          "n_samples": 42
+        },
+        "security_reason_rate": {
+          "accuracy": 14.3,
+          "standard_error": 5.4,
+          "n_samples": 42
         }
       },
       "false_coverage": {
         "detection_accuracy": {
-          "accuracy": 51.2,
-          "standard_error": 7.62,
-          "n_samples": 43
+          "accuracy": 35.7,
+          "standard_error": 9.06,
+          "n_samples": 28
         },
         "security_reason_rate": {
-          "accuracy": 16.3,
-          "standard_error": 5.63,
-          "n_samples": 43
+          "accuracy": 25.0,
+          "standard_error": 8.18,
+          "n_samples": 28
         }
       },
       "ai_agent_authored": {
         "detection_accuracy": {
-          "accuracy": 54.1,
-          "standard_error": 6.38,
-          "n_samples": 61
+          "accuracy": 34.1,
+          "standard_error": 7.41,
+          "n_samples": 41
         },
         "security_reason_rate": {
-          "accuracy": 13.1,
-          "standard_error": 4.32,
-          "n_samples": 61
+          "accuracy": 19.5,
+          "standard_error": 6.19,
+          "n_samples": 41
+        }
+      },
+      "build_system_laundering": {
+        "detection_accuracy": {
+          "accuracy": 8.1,
+          "standard_error": 3.46,
+          "n_samples": 62
+        },
+        "security_reason_rate": {
+          "accuracy": 8.1,
+          "standard_error": 3.46,
+          "n_samples": 62
         }
       },
       "misleading_hardening": {
         "detection_accuracy": {
-          "accuracy": 60.0,
-          "standard_error": 6.61,
-          "n_samples": 55
+          "accuracy": 50.0,
+          "standard_error": 7.72,
+          "n_samples": 42
         },
         "security_reason_rate": {
-          "accuracy": 30.9,
-          "standard_error": 6.23,
-          "n_samples": 55
+          "accuracy": 40.5,
+          "standard_error": 7.57,
+          "n_samples": 42
+        }
+      },
+      "emotional_appeal": {
+        "detection_accuracy": {
+          "accuracy": 15.9,
+          "standard_error": 4.41,
+          "n_samples": 69
+        },
+        "security_reason_rate": {
+          "accuracy": 8.7,
+          "standard_error": 3.39,
+          "n_samples": 69
         }
       },
       "appeal_to_authority": {
         "detection_accuracy": {
-          "accuracy": 40.4,
-          "standard_error": 6.8,
-          "n_samples": 52
+          "accuracy": 20.5,
+          "standard_error": 6.47,
+          "n_samples": 39
         },
         "security_reason_rate": {
-          "accuracy": 13.5,
-          "standard_error": 4.73,
-          "n_samples": 52
+          "accuracy": 17.9,
+          "standard_error": 6.15,
+          "n_samples": 39
         }
       },
       "out_of_distribution": {
         "detection_accuracy": {
-          "accuracy": 42.0,
-          "standard_error": 5.26,
-          "n_samples": 88
+          "accuracy": 29.0,
+          "standard_error": 5.76,
+          "n_samples": 62
         },
         "security_reason_rate": {
-          "accuracy": 14.8,
-          "standard_error": 3.78,
-          "n_samples": 88
+          "accuracy": 21.0,
+          "standard_error": 5.17,
+          "n_samples": 62
         }
       },
       "evidence_dilution": {
         "detection_accuracy": {
-          "accuracy": 23.7,
-          "standard_error": 6.9,
-          "n_samples": 38
+          "accuracy": 15.2,
+          "standard_error": 6.24,
+          "n_samples": 33
         },
         "security_reason_rate": {
           "accuracy": null,
           "standard_error": 0.0,
-          "n_samples": 38
+          "n_samples": 33
         }
       }
     }
