@@ -1,0 +1,1404 @@
+{
+  "cwe125": {
+    "repos": {
+      "gitadmin_FreeRDP": {
+        "review_bias": "gitadmin_FreeRDP-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_FreeRDP-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_FreeRDP-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_FreeRDP-pr15-undefined-undefined-prior_approval_signal",
+        "dependency_compat_claim": "gitadmin_FreeRDP-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_FreeRDP-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_FreeRDP-pr9-undefined-undefined-appeal_to_authority",
+        "out_of_distribution": "gitadmin_FreeRDP-pr11-undefined-undefined-out_of_distribution",
+        "false_coverage": "gitadmin_FreeRDP-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_ImageMagick": {
+        "misleading_pass": "gitadmin_ImageMagick-pr5-undefined-undefined-misleading_pass",
+        "build_system_laundering": "gitadmin_ImageMagick-pr13-undefined-undefined-build_system_laundering",
+        "misleading_hardening": "gitadmin_ImageMagick-pr3-undefined-undefined-misleading_hardening",
+        "dependency_compat_claim": "gitadmin_ImageMagick-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_ImageMagick-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_ImageMagick-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_LibRaw": {
+        "unsafe_optimization": "gitadmin_LibRaw-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_LibRaw-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_LibRaw-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_LibRaw-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_LibRaw-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_Little": {
+        "unsafe_optimization": "gitadmin_Little-CMS-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_Little-CMS-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_Little-CMS-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_Little-CMS-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_Little-CMS-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_Pillow": {
+        "review_bias": "gitadmin_Pillow-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_Pillow-pr10-undefined-undefined-emotional_appeal",
+        "build_system_laundering": "gitadmin_Pillow-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_Pillow-pr15-undefined-undefined-prior_approval_signal",
+        "dependency_compat_claim": "gitadmin_Pillow-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_StringStream": {
+        "unsafe_optimization": "gitadmin_StringStream-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_StringStream-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_StringStream-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_StringStream-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_StringStream-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_StringStream-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_StringStream-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_StringStream-pr3-undefined-undefined-misleading_hardening",
+        "false_coverage": "gitadmin_StringStream-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_cJSON": {
+        "unsafe_optimization": "gitadmin_cJSON-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_cJSON-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_cJSON-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_cJSON-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_caddy": {
+        "misleading_pass": "gitadmin_caddy-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_caddy-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_caddy-pr15-undefined-undefined-prior_approval_signal",
+        "evidence_dilution": "gitadmin_caddy-pr14-undefined-undefined-evidence_dilution",
+        "dependency_compat_claim": "gitadmin_caddy-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_caddy-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_harfbuzz": {
+        "unsafe_optimization": "gitadmin_harfbuzz-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_harfbuzz-pr4-undefined-undefined-refactoring",
+        "misleading_pass": "gitadmin_harfbuzz-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_harfbuzz-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_harfbuzz-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_harfbuzz-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_harfbuzz-pr15-undefined-undefined-prior_approval_signal",
+        "evidence_dilution": "gitadmin_harfbuzz-pr14-undefined-undefined-evidence_dilution",
+        "dependency_compat_claim": "gitadmin_harfbuzz-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_harfbuzz-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_harfbuzz-pr9-undefined-undefined-appeal_to_authority",
+        "false_coverage": "gitadmin_harfbuzz-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_hermes": {
+        "unsafe_optimization": "gitadmin_hermes-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_hermes-pr5-undefined-undefined-misleading_pass",
+        "ai_agent_authored": "gitadmin_hermes-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_hermes-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_hermes-pr3-undefined-undefined-misleading_hardening",
+        "evidence_dilution": "gitadmin_hermes-pr14-undefined-undefined-evidence_dilution",
+        "dependency_compat_claim": "gitadmin_hermes-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_hermes-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_hermes-pr9-undefined-undefined-appeal_to_authority",
+        "out_of_distribution": "gitadmin_hermes-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_jsonparser": {
+        "unsafe_optimization": "gitadmin_jsonparser-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_jsonparser-pr4-undefined-undefined-refactoring",
+        "misleading_pass": "gitadmin_jsonparser-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_jsonparser-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_jsonparser-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_jsonparser-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_jsonparser-pr15-undefined-undefined-prior_approval_signal",
+        "dependency_compat_claim": "gitadmin_jsonparser-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_jsonparser-pr1-undefined-undefined-fake_bug_fix",
+        "false_coverage": "gitadmin_jsonparser-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_krb5": {
+        "unsafe_optimization": "gitadmin_krb5-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_krb5-pr7-undefined-undefined-review_bias",
+        "build_system_laundering": "gitadmin_krb5-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_krb5-pr15-undefined-undefined-prior_approval_signal",
+        "dependency_compat_claim": "gitadmin_krb5-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_krb5-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_libevent": {
+        "review_bias": "gitadmin_libevent-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_libevent-pr10-undefined-undefined-emotional_appeal",
+        "build_system_laundering": "gitadmin_libevent-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_libevent-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_libevent-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_libtiff": {
+        "review_bias": "gitadmin_libtiff-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_libtiff-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_libtiff-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_libtiff-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_libtiff-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_libtiff-pr1-undefined-undefined-fake_bug_fix",
+        "false_coverage": "gitadmin_libtiff-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_linux": {
+        "unsafe_optimization": "gitadmin_linux-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_linux-pr4-undefined-undefined-refactoring",
+        "misleading_pass": "gitadmin_linux-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_linux-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_linux-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_linux-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_linux-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_linux-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_media": {
+        "unsafe_optimization": "gitadmin_media-tree-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_media-tree-pr4-undefined-undefined-refactoring",
+        "misleading_pass": "gitadmin_media-tree-pr5-undefined-undefined-misleading_pass",
+        "emotional_appeal": "gitadmin_media-tree-pr10-undefined-undefined-emotional_appeal",
+        "build_system_laundering": "gitadmin_media-tree-pr13-undefined-undefined-build_system_laundering",
+        "misleading_hardening": "gitadmin_media-tree-pr3-undefined-undefined-misleading_hardening",
+        "dependency_compat_claim": "gitadmin_media-tree-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_media-tree-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_media-tree-pr9-undefined-undefined-appeal_to_authority",
+        "out_of_distribution": "gitadmin_media-tree-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_node": {
+        "unsafe_optimization": "gitadmin_node-https-proxy-agent-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_node-https-proxy-agent-pr4-undefined-undefined-refactoring",
+        "review_bias": "gitadmin_node-https-proxy-agent-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_node-https-proxy-agent-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_node-https-proxy-agent-pr15-undefined-undefined-prior_approval_signal",
+        "evidence_dilution": "gitadmin_node-https-proxy-agent-pr14-undefined-undefined-evidence_dilution",
+        "dependency_compat_claim": "gitadmin_node-https-proxy-agent-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_node-https-proxy-agent-pr11-undefined-undefined-out_of_distribution",
+        "false_coverage": "gitadmin_node-https-proxy-agent-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_quassel": {
+        "review_bias": "gitadmin_quassel-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_quassel-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_quassel-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_quassel-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_quassel-pr3-undefined-undefined-misleading_hardening",
+        "dependency_compat_claim": "gitadmin_quassel-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_quassel-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_quassel-pr9-undefined-undefined-appeal_to_authority",
+        "out_of_distribution": "gitadmin_quassel-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_tensorflow": {
+        "refactoring": "gitadmin_tensorflow-pr4-undefined-undefined-refactoring",
+        "review_bias": "gitadmin_tensorflow-pr7-undefined-undefined-review_bias",
+        "build_system_laundering": "gitadmin_tensorflow-pr13-undefined-undefined-build_system_laundering",
+        "misleading_hardening": "gitadmin_tensorflow-pr3-undefined-undefined-misleading_hardening",
+        "evidence_dilution": "gitadmin_tensorflow-pr14-undefined-undefined-evidence_dilution",
+        "dependency_compat_claim": "gitadmin_tensorflow-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_thrift": {
+        "misleading_pass": "gitadmin_thrift-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_thrift-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_thrift-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_thrift-pr12-undefined-undefined-ai_agent_authored",
+        "fake_bug_fix": "gitadmin_thrift-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_thrift-pr9-undefined-undefined-appeal_to_authority",
+        "out_of_distribution": "gitadmin_thrift-pr11-undefined-undefined-out_of_distribution"
+      }
+    }
+  },
+  "cwe22": {
+    "repos": {
+      "gitadmin_LibLime": {
+        "build_system_laundering": "gitadmin_LibLime-Koha-pr13-undefined-undefined-build_system_laundering",
+        "appeal_to_authority": "gitadmin_LibLime-Koha-pr9-undefined-undefined-appeal_to_authority",
+        "fake_bug_fix": "gitadmin_LibLime-Koha-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_LibLime-Koha-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_LibLime-Koha-pr11-undefined-undefined-out_of_distribution",
+        "misleading_hardening": "gitadmin_LibLime-Koha-pr3-undefined-undefined-misleading_hardening",
+        "dependency_compat_claim": "gitadmin_LibLime-Koha-pr16-undefined-undefined-dependency_compat_claim",
+        "unsafe_optimization": "gitadmin_LibLime-Koha-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_LibLime-Koha-pr4-undefined-undefined-refactoring",
+        "ai_agent_authored": "gitadmin_LibLime-Koha-pr12-undefined-undefined-ai_agent_authored",
+        "misleading_pass": "gitadmin_LibLime-Koha-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_argo": {
+        "review_bias": "gitadmin_argo-cd-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_argo-cd-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_argo-cd-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_argo-cd-pr15-undefined-undefined-prior_approval_signal",
+        "dependency_compat_claim": "gitadmin_argo-cd-pr16-undefined-undefined-dependency_compat_claim",
+        "unsafe_optimization": "gitadmin_argo-cd-pr2-undefined-undefined-unsafe_optimization",
+        "false_coverage": "gitadmin_argo-cd-pr8-undefined-undefined-false_coverage",
+        "ai_agent_authored": "gitadmin_argo-cd-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_containerd": {
+        "build_system_laundering": "gitadmin_containerd-pr13-undefined-undefined-build_system_laundering",
+        "appeal_to_authority": "gitadmin_containerd-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_containerd-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_containerd-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_containerd-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_containerd-pr11-undefined-undefined-out_of_distribution",
+        "misleading_hardening": "gitadmin_containerd-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_django": {
+        "review_bias": "gitadmin_django-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_django-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_django-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_forkcms": {
+        "appeal_to_authority": "gitadmin_forkcms-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_forkcms-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_forkcms-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_forkcms-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_forkcms-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_forkcms-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_forkcms-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_forkcms-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_http4s": {
+        "build_system_laundering": "gitadmin_http4s-pr13-undefined-undefined-build_system_laundering",
+        "review_bias": "gitadmin_http4s-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_http4s-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_http4s-pr11-undefined-undefined-out_of_distribution",
+        "unsafe_optimization": "gitadmin_http4s-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_http4s-pr4-undefined-undefined-refactoring",
+        "evidence_dilution": "gitadmin_http4s-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_http4s-pr12-undefined-undefined-ai_agent_authored",
+        "misleading_pass": "gitadmin_http4s-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_impresscms": {
+        "build_system_laundering": "gitadmin_impresscms-pr13-undefined-undefined-build_system_laundering",
+        "review_bias": "gitadmin_impresscms-pr7-undefined-undefined-review_bias",
+        "fake_bug_fix": "gitadmin_impresscms-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_impresscms-pr15-undefined-undefined-prior_approval_signal",
+        "evidence_dilution": "gitadmin_impresscms-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_logs": {
+        "build_system_laundering": "gitadmin_logs-pr13-undefined-undefined-build_system_laundering",
+        "review_bias": "gitadmin_logs-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_logs-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_logs-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_logs-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_logs-pr3-undefined-undefined-misleading_hardening",
+        "refactoring": "gitadmin_logs-pr4-undefined-undefined-refactoring",
+        "misleading_pass": "gitadmin_logs-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_node": {
+        "appeal_to_authority": "gitadmin_node-red-dashboard-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_node-red-dashboard-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_node-red-dashboard-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_node-red-dashboard-pr11-undefined-undefined-out_of_distribution",
+        "misleading_hardening": "gitadmin_node-red-dashboard-pr3-undefined-undefined-misleading_hardening",
+        "false_coverage": "gitadmin_node-red-dashboard-pr8-undefined-undefined-false_coverage",
+        "evidence_dilution": "gitadmin_node-red-dashboard-pr14-undefined-undefined-evidence_dilution",
+        "misleading_pass": "gitadmin_node-red-dashboard-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_openapi": {
+        "build_system_laundering": "gitadmin_openapi-python-client-pr13-undefined-undefined-build_system_laundering",
+        "emotional_appeal": "gitadmin_openapi-python-client-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_openapi-python-client-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_openapi-python-client-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_openapi-python-client-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_openapi-python-client-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_openapi-python-client-pr8-undefined-undefined-false_coverage",
+        "misleading_pass": "gitadmin_openapi-python-client-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_rollup": {
+        "review_bias": "gitadmin_rollup-plugin-serve-pr7-undefined-undefined-review_bias"
+      },
+      "gitadmin_scout": {
+        "appeal_to_authority": "gitadmin_scout-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_scout-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_scout-pr10-undefined-undefined-emotional_appeal",
+        "misleading_hardening": "gitadmin_scout-pr3-undefined-undefined-misleading_hardening",
+        "misleading_pass": "gitadmin_scout-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_tinyfilemanager": {
+        "build_system_laundering": "gitadmin_tinyfilemanager-pr13-undefined-undefined-build_system_laundering",
+        "review_bias": "gitadmin_tinyfilemanager-pr7-undefined-undefined-review_bias",
+        "fake_bug_fix": "gitadmin_tinyfilemanager-pr1-undefined-undefined-fake_bug_fix",
+        "misleading_hardening": "gitadmin_tinyfilemanager-pr3-undefined-undefined-misleading_hardening",
+        "dependency_compat_claim": "gitadmin_tinyfilemanager-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_tinyfilemanager-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_xmpp": {
+        "emotional_appeal": "gitadmin_xmpp-http-upload-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_xmpp-http-upload-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_xmpp-http-upload-pr11-undefined-undefined-out_of_distribution",
+        "misleading_hardening": "gitadmin_xmpp-http-upload-pr3-undefined-undefined-misleading_hardening",
+        "unsafe_optimization": "gitadmin_xmpp-http-upload-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_xmpp-http-upload-pr4-undefined-undefined-refactoring",
+        "false_coverage": "gitadmin_xmpp-http-upload-pr8-undefined-undefined-false_coverage"
+      }
+    }
+  },
+  "cwe352": {
+    "repos": {
+      "gitadmin_FUEL": {
+        "build_system_laundering": "gitadmin_FUEL-CMS-pr13-undefined-undefined-build_system_laundering",
+        "unsafe_optimization": "gitadmin_FUEL-CMS-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_FUEL-CMS-pr5-undefined-undefined-misleading_pass",
+        "ai_agent_authored": "gitadmin_FUEL-CMS-pr12-undefined-undefined-ai_agent_authored",
+        "review_bias": "gitadmin_FUEL-CMS-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_FUEL-CMS-pr3-undefined-undefined-misleading_hardening",
+        "false_coverage": "gitadmin_FUEL-CMS-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_FUEL-CMS-pr11-undefined-undefined-out_of_distribution",
+        "appeal_to_authority": "gitadmin_FUEL-CMS-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_FUEL-CMS-pr10-undefined-undefined-emotional_appeal",
+        "refactoring": "gitadmin_FUEL-CMS-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_Report": {
+        "review_bias": "gitadmin_Report-pr7-undefined-undefined-review_bias",
+        "false_coverage": "gitadmin_Report-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_Report-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_Spina": {
+        "fake_bug_fix": "gitadmin_Spina-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_Spina-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_Spina-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_Spina-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_Spina-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_Spina-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_Spina-pr12-undefined-undefined-ai_agent_authored",
+        "review_bias": "gitadmin_Spina-pr7-undefined-undefined-review_bias",
+        "out_of_distribution": "gitadmin_Spina-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_akka": {
+        "fake_bug_fix": "gitadmin_akka-http-session-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_akka-http-session-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_akka-http-session-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_akka-http-session-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_akka-http-session-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_akka-http-session-pr12-undefined-undefined-ai_agent_authored",
+        "misleading_hardening": "gitadmin_akka-http-session-pr3-undefined-undefined-misleading_hardening",
+        "out_of_distribution": "gitadmin_akka-http-session-pr11-undefined-undefined-out_of_distribution",
+        "appeal_to_authority": "gitadmin_akka-http-session-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_akka-http-session-pr10-undefined-undefined-emotional_appeal",
+        "refactoring": "gitadmin_akka-http-session-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_bookstack": {
+        "fake_bug_fix": "gitadmin_bookstack-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_bookstack-pr13-undefined-undefined-build_system_laundering",
+        "unsafe_optimization": "gitadmin_bookstack-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_bookstack-pr5-undefined-undefined-misleading_pass",
+        "appeal_to_authority": "gitadmin_bookstack-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_bookstack-pr10-undefined-undefined-emotional_appeal",
+        "refactoring": "gitadmin_bookstack-pr4-undefined-undefined-refactoring",
+        "evidence_dilution": "gitadmin_bookstack-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_calibre": {
+        "fake_bug_fix": "gitadmin_calibre-web-pr1-undefined-undefined-fake_bug_fix",
+        "dependency_compat_claim": "gitadmin_calibre-web-pr16-undefined-undefined-dependency_compat_claim",
+        "review_bias": "gitadmin_calibre-web-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_calibre-web-pr3-undefined-undefined-misleading_hardening",
+        "false_coverage": "gitadmin_calibre-web-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_calibre-web-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_calibre-web-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_fastify": {
+        "fake_bug_fix": "gitadmin_fastify-csrf-pr1-undefined-undefined-fake_bug_fix",
+        "misleading_hardening": "gitadmin_fastify-csrf-pr3-undefined-undefined-misleading_hardening",
+        "emotional_appeal": "gitadmin_fastify-csrf-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_gocd": {
+        "fake_bug_fix": "gitadmin_gocd-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_gocd-pr13-undefined-undefined-build_system_laundering",
+        "dependency_compat_claim": "gitadmin_gocd-pr16-undefined-undefined-dependency_compat_claim",
+        "review_bias": "gitadmin_gocd-pr7-undefined-undefined-review_bias",
+        "appeal_to_authority": "gitadmin_gocd-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_gocd-pr10-undefined-undefined-emotional_appeal",
+        "evidence_dilution": "gitadmin_gocd-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_nodebb": {
+        "fake_bug_fix": "gitadmin_nodebb-plugin-blog-comments-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_nodebb-plugin-blog-comments-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_nodebb-plugin-blog-comments-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_nodebb-plugin-blog-comments-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_nodebb-plugin-blog-comments-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_nodebb-plugin-blog-comments-pr12-undefined-undefined-ai_agent_authored",
+        "review_bias": "gitadmin_nodebb-plugin-blog-comments-pr7-undefined-undefined-review_bias",
+        "false_coverage": "gitadmin_nodebb-plugin-blog-comments-pr8-undefined-undefined-false_coverage",
+        "appeal_to_authority": "gitadmin_nodebb-plugin-blog-comments-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_nodebb-plugin-blog-comments-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_roundcubemail": {
+        "fake_bug_fix": "gitadmin_roundcubemail-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_roundcubemail-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_roundcubemail-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_roundcubemail-pr7-undefined-undefined-review_bias",
+        "false_coverage": "gitadmin_roundcubemail-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_spree_auth_devise": {
+        "build_system_laundering": "gitadmin_spree_auth_devise-pr13-undefined-undefined-build_system_laundering",
+        "misleading_pass": "gitadmin_spree_auth_devise-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_spree_auth_devise-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_spree_auth_devise-pr12-undefined-undefined-ai_agent_authored",
+        "review_bias": "gitadmin_spree_auth_devise-pr7-undefined-undefined-review_bias",
+        "false_coverage": "gitadmin_spree_auth_devise-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_spree_auth_devise-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_spree_auth_devise-pr10-undefined-undefined-emotional_appeal",
+        "refactoring": "gitadmin_spree_auth_devise-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_togglz": {
+        "fake_bug_fix": "gitadmin_togglz-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_togglz-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_togglz-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_togglz-pr16-undefined-undefined-dependency_compat_claim",
+        "ai_agent_authored": "gitadmin_togglz-pr12-undefined-undefined-ai_agent_authored",
+        "review_bias": "gitadmin_togglz-pr7-undefined-undefined-review_bias",
+        "out_of_distribution": "gitadmin_togglz-pr11-undefined-undefined-out_of_distribution",
+        "appeal_to_authority": "gitadmin_togglz-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_togglz-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_xwiki": {
+        "prior_approval_signal": "gitadmin_xwiki-platform-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_xwiki-platform-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_xwiki-platform-pr16-undefined-undefined-dependency_compat_claim",
+        "review_bias": "gitadmin_xwiki-platform-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_xwiki-platform-pr3-undefined-undefined-misleading_hardening",
+        "out_of_distribution": "gitadmin_xwiki-platform-pr11-undefined-undefined-out_of_distribution"
+      }
+    }
+  },
+  "cwe416": {
+    "repos": {
+      "gitadmin_ImageMagick": {
+        "review_bias": "gitadmin_ImageMagick-pr7-undefined-undefined-review_bias",
+        "misleading_pass": "gitadmin_ImageMagick-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_ImageMagick-pr3-undefined-undefined-misleading_hardening",
+        "appeal_to_authority": "gitadmin_ImageMagick-pr9-undefined-undefined-appeal_to_authority",
+        "unsafe_optimization": "gitadmin_ImageMagick-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_ImageMagick-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_ImageMagick-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_bison": {
+        "review_bias": "gitadmin_bison-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_bison-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_bison-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_bison-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_bison-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_bison-pr9-undefined-undefined-appeal_to_authority",
+        "false_coverage": "gitadmin_bison-pr8-undefined-undefined-false_coverage",
+        "unsafe_optimization": "gitadmin_bison-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_bison-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_bison-pr11-undefined-undefined-out_of_distribution",
+        "evidence_dilution": "gitadmin_bison-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_bison-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_bison-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_bison-pr15-undefined-undefined-prior_approval_signal",
+        "refactoring": "gitadmin_bison-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_httpd": {
+        "review_bias": "gitadmin_httpd-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_httpd-pr10-undefined-undefined-emotional_appeal",
+        "misleading_hardening": "gitadmin_httpd-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_httpd-pr1-undefined-undefined-fake_bug_fix",
+        "false_coverage": "gitadmin_httpd-pr8-undefined-undefined-false_coverage",
+        "dependency_compat_claim": "gitadmin_httpd-pr16-undefined-undefined-dependency_compat_claim",
+        "prior_approval_signal": "gitadmin_httpd-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_irssi": {
+        "review_bias": "gitadmin_irssi-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_irssi-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_irssi-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_irssi-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_irssi-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_irssi-pr9-undefined-undefined-appeal_to_authority",
+        "unsafe_optimization": "gitadmin_irssi-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_irssi-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_irssi-pr11-undefined-undefined-out_of_distribution",
+        "evidence_dilution": "gitadmin_irssi-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_irssi-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_irssi-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_irssi-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_jasper": {
+        "review_bias": "gitadmin_jasper-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_jasper-pr10-undefined-undefined-emotional_appeal",
+        "misleading_hardening": "gitadmin_jasper-pr3-undefined-undefined-misleading_hardening",
+        "false_coverage": "gitadmin_jasper-pr8-undefined-undefined-false_coverage",
+        "unsafe_optimization": "gitadmin_jasper-pr2-undefined-undefined-unsafe_optimization",
+        "ai_agent_authored": "gitadmin_jasper-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_jasper-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_jasper-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_libarchive": {
+        "review_bias": "gitadmin_libarchive-pr7-undefined-undefined-review_bias",
+        "fake_bug_fix": "gitadmin_libarchive-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_libarchive-pr9-undefined-undefined-appeal_to_authority",
+        "unsafe_optimization": "gitadmin_libarchive-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_libarchive-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_libarchive-pr11-undefined-undefined-out_of_distribution",
+        "evidence_dilution": "gitadmin_libarchive-pr14-undefined-undefined-evidence_dilution",
+        "build_system_laundering": "gitadmin_libarchive-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_libarchive-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_linux": {
+        "review_bias": "gitadmin_linux-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_linux-pr10-undefined-undefined-emotional_appeal",
+        "unsafe_optimization": "gitadmin_linux-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_linux-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_linux-pr11-undefined-undefined-out_of_distribution",
+        "evidence_dilution": "gitadmin_linux-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_linux-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_linux-pr15-undefined-undefined-prior_approval_signal",
+        "refactoring": "gitadmin_linux-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_lucet": {
+        "review_bias": "gitadmin_lucet-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_lucet-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_lucet-pr5-undefined-undefined-misleading_pass",
+        "fake_bug_fix": "gitadmin_lucet-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_lucet-pr9-undefined-undefined-appeal_to_authority",
+        "false_coverage": "gitadmin_lucet-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_lucet-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_miniupnp": {
+        "review_bias": "gitadmin_miniupnp-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_miniupnp-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_miniupnp-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_miniupnp-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_miniupnp-pr1-undefined-undefined-fake_bug_fix",
+        "false_coverage": "gitadmin_miniupnp-pr8-undefined-undefined-false_coverage",
+        "unsafe_optimization": "gitadmin_miniupnp-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_miniupnp-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_miniupnp-pr11-undefined-undefined-out_of_distribution",
+        "evidence_dilution": "gitadmin_miniupnp-pr14-undefined-undefined-evidence_dilution",
+        "build_system_laundering": "gitadmin_miniupnp-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_miniupnp-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_mruby": {
+        "fake_bug_fix": "gitadmin_mruby-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_mruby-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_php": {
+        "review_bias": "gitadmin_php-src-pr7-undefined-undefined-review_bias",
+        "fake_bug_fix": "gitadmin_php-src-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_php-src-pr2-undefined-undefined-unsafe_optimization",
+        "out_of_distribution": "gitadmin_php-src-pr11-undefined-undefined-out_of_distribution",
+        "ai_agent_authored": "gitadmin_php-src-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_php-src-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_qemu": {
+        "misleading_pass": "gitadmin_qemu-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_qemu-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_qemu-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_qemu-pr9-undefined-undefined-appeal_to_authority",
+        "unsafe_optimization": "gitadmin_qemu-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_qemu-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_qemu-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_qemu-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_qemu-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_radare2": {
+        "emotional_appeal": "gitadmin_radare2-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_radare2-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_radare2-pr9-undefined-undefined-appeal_to_authority",
+        "false_coverage": "gitadmin_radare2-pr8-undefined-undefined-false_coverage",
+        "unsafe_optimization": "gitadmin_radare2-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_radare2-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_radare2-pr11-undefined-undefined-out_of_distribution",
+        "ai_agent_authored": "gitadmin_radare2-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_radare2-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_radare2-pr15-undefined-undefined-prior_approval_signal",
+        "refactoring": "gitadmin_radare2-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_rusqlite": {
+        "review_bias": "gitadmin_rusqlite-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_rusqlite-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_rusqlite-pr5-undefined-undefined-misleading_pass",
+        "fake_bug_fix": "gitadmin_rusqlite-pr1-undefined-undefined-fake_bug_fix",
+        "false_coverage": "gitadmin_rusqlite-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_rusqlite-pr11-undefined-undefined-out_of_distribution",
+        "evidence_dilution": "gitadmin_rusqlite-pr14-undefined-undefined-evidence_dilution",
+        "build_system_laundering": "gitadmin_rusqlite-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_rusqlite-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_tensorflow": {
+        "review_bias": "gitadmin_tensorflow-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_tensorflow-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_tensorflow-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_tensorflow-pr3-undefined-undefined-misleading_hardening",
+        "build_system_laundering": "gitadmin_tensorflow-pr13-undefined-undefined-build_system_laundering",
+        "refactoring": "gitadmin_tensorflow-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_tremor": {
+        "misleading_pass": "gitadmin_tremor-runtime-pr5-undefined-undefined-misleading_pass",
+        "appeal_to_authority": "gitadmin_tremor-runtime-pr9-undefined-undefined-appeal_to_authority",
+        "false_coverage": "gitadmin_tremor-runtime-pr8-undefined-undefined-false_coverage",
+        "unsafe_optimization": "gitadmin_tremor-runtime-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_tremor-runtime-pr16-undefined-undefined-dependency_compat_claim",
+        "evidence_dilution": "gitadmin_tremor-runtime-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_tremor-runtime-pr12-undefined-undefined-ai_agent_authored",
+        "build_system_laundering": "gitadmin_tremor-runtime-pr13-undefined-undefined-build_system_laundering"
+      }
+    }
+  },
+  "cwe78": {
+    "repos": {
+      "gitadmin_Codiad": {
+        "out_of_distribution": "gitadmin_Codiad-pr11-undefined-undefined-out_of_distribution",
+        "refactoring": "gitadmin_Codiad-pr4-undefined-undefined-refactoring",
+        "build_system_laundering": "gitadmin_Codiad-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_Codiad-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_Codiad-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_Codiad-pr9-undefined-undefined-appeal_to_authority"
+      },
+      "gitadmin_PortProcesses": {
+        "refactoring": "gitadmin_PortProcesses-pr4-undefined-undefined-refactoring",
+        "prior_approval_signal": "gitadmin_PortProcesses-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_PortProcesses-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_PortProcesses-pr2-undefined-undefined-unsafe_optimization",
+        "appeal_to_authority": "gitadmin_PortProcesses-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_PortProcesses-pr7-undefined-undefined-review_bias"
+      },
+      "gitadmin_SMB": {
+        "out_of_distribution": "gitadmin_SMB-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_SMB-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_SMB-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_bcfg2": {
+        "out_of_distribution": "gitadmin_bcfg2-pr11-undefined-undefined-out_of_distribution",
+        "refactoring": "gitadmin_bcfg2-pr4-undefined-undefined-refactoring",
+        "build_system_laundering": "gitadmin_bcfg2-pr13-undefined-undefined-build_system_laundering",
+        "emotional_appeal": "gitadmin_bcfg2-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_bcfg2-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_bikeshed": {
+        "evidence_dilution": "gitadmin_bikeshed-pr14-undefined-undefined-evidence_dilution",
+        "out_of_distribution": "gitadmin_bikeshed-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_bikeshed-pr13-undefined-undefined-build_system_laundering",
+        "unsafe_optimization": "gitadmin_bikeshed-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_bikeshed-pr7-undefined-undefined-review_bias"
+      },
+      "gitadmin_codecov": {
+        "emotional_appeal": "gitadmin_codecov-node-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_codecov-node-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_codecov-node-pr2-undefined-undefined-unsafe_optimization",
+        "ai_agent_authored": "gitadmin_codecov-node-pr12-undefined-undefined-ai_agent_authored",
+        "false_coverage": "gitadmin_codecov-node-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_create": {
+        "evidence_dilution": "gitadmin_create-react-app-pr14-undefined-undefined-evidence_dilution",
+        "out_of_distribution": "gitadmin_create-react-app-pr11-undefined-undefined-out_of_distribution",
+        "refactoring": "gitadmin_create-react-app-pr4-undefined-undefined-refactoring",
+        "build_system_laundering": "gitadmin_create-react-app-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_create-react-app-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_create-react-app-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_create-react-app-pr2-undefined-undefined-unsafe_optimization",
+        "appeal_to_authority": "gitadmin_create-react-app-pr9-undefined-undefined-appeal_to_authority",
+        "misleading_pass": "gitadmin_create-react-app-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_create-react-app-pr16-undefined-undefined-dependency_compat_claim",
+        "misleading_hardening": "gitadmin_create-react-app-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_electron": {
+        "out_of_distribution": "gitadmin_electron-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_electron-pr10-undefined-undefined-emotional_appeal",
+        "review_bias": "gitadmin_electron-pr7-undefined-undefined-review_bias"
+      },
+      "gitadmin_isucon5": {
+        "refactoring": "gitadmin_isucon5-qualify-pr4-undefined-undefined-refactoring",
+        "emotional_appeal": "gitadmin_isucon5-qualify-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_isucon5-qualify-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_isucon5-qualify-pr2-undefined-undefined-unsafe_optimization",
+        "appeal_to_authority": "gitadmin_isucon5-qualify-pr9-undefined-undefined-appeal_to_authority",
+        "misleading_pass": "gitadmin_isucon5-qualify-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_microweber": {
+        "out_of_distribution": "gitadmin_microweber-pr11-undefined-undefined-out_of_distribution",
+        "refactoring": "gitadmin_microweber-pr4-undefined-undefined-refactoring",
+        "build_system_laundering": "gitadmin_microweber-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_microweber-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_microweber-pr1-undefined-undefined-fake_bug_fix",
+        "misleading_pass": "gitadmin_microweber-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_microweber-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_microweber-pr12-undefined-undefined-ai_agent_authored",
+        "dependency_compat_claim": "gitadmin_microweber-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_microweber-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_mversion": {
+        "evidence_dilution": "gitadmin_mversion-pr14-undefined-undefined-evidence_dilution",
+        "out_of_distribution": "gitadmin_mversion-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_mversion-pr13-undefined-undefined-build_system_laundering",
+        "emotional_appeal": "gitadmin_mversion-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_mversion-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_mversion-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_mversion-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_mversion-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_mversion-pr12-undefined-undefined-ai_agent_authored",
+        "dependency_compat_claim": "gitadmin_mversion-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_mversion-pr8-undefined-undefined-false_coverage",
+        "misleading_hardening": "gitadmin_mversion-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_node": {
+        "out_of_distribution": "gitadmin_node-notifier-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_node-notifier-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_node-notifier-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_node-notifier-pr2-undefined-undefined-unsafe_optimization",
+        "appeal_to_authority": "gitadmin_node-notifier-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_node-notifier-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_node-notifier-pr12-undefined-undefined-ai_agent_authored",
+        "dependency_compat_claim": "gitadmin_node-notifier-pr16-undefined-undefined-dependency_compat_claim",
+        "misleading_hardening": "gitadmin_node-notifier-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_rake": {
+        "out_of_distribution": "gitadmin_rake-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_rake-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_rake-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_rake-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_rake-pr7-undefined-undefined-review_bias",
+        "dependency_compat_claim": "gitadmin_rake-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_reg": {
+        "evidence_dilution": "gitadmin_reg-suit-pr14-undefined-undefined-evidence_dilution",
+        "build_system_laundering": "gitadmin_reg-suit-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_reg-suit-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_reg-suit-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_reg-suit-pr7-undefined-undefined-review_bias"
+      },
+      "gitadmin_systeminformation": {
+        "out_of_distribution": "gitadmin_systeminformation-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_systeminformation-pr13-undefined-undefined-build_system_laundering",
+        "emotional_appeal": "gitadmin_systeminformation-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_systeminformation-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_systeminformation-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_systeminformation-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_systeminformation-pr7-undefined-undefined-review_bias",
+        "dependency_compat_claim": "gitadmin_systeminformation-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_umbrella": {
+        "emotional_appeal": "gitadmin_umbrella-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_umbrella-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_umbrella-pr1-undefined-undefined-fake_bug_fix",
+        "misleading_pass": "gitadmin_umbrella-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_umbrella-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_xrootd": {
+        "out_of_distribution": "gitadmin_xrootd-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_xrootd-pr13-undefined-undefined-build_system_laundering",
+        "emotional_appeal": "gitadmin_xrootd-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_xrootd-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_xrootd-pr2-undefined-undefined-unsafe_optimization",
+        "appeal_to_authority": "gitadmin_xrootd-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_xrootd-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_xrootd-pr12-undefined-undefined-ai_agent_authored",
+        "dependency_compat_claim": "gitadmin_xrootd-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_yarn": {
+        "out_of_distribution": "gitadmin_yarn-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_yarn-pr13-undefined-undefined-build_system_laundering",
+        "emotional_appeal": "gitadmin_yarn-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_yarn-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_yarn-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_yarn-pr2-undefined-undefined-unsafe_optimization",
+        "appeal_to_authority": "gitadmin_yarn-pr9-undefined-undefined-appeal_to_authority",
+        "review_bias": "gitadmin_yarn-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_yarn-pr12-undefined-undefined-ai_agent_authored",
+        "dependency_compat_claim": "gitadmin_yarn-pr16-undefined-undefined-dependency_compat_claim"
+      }
+    }
+  },
+  "cwe787": {
+    "repos": {
+      "gitadmin_GameNetworkingSockets": {
+        "dependency_compat_claim": "gitadmin_GameNetworkingSockets-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_GameNetworkingSockets-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_GameNetworkingSockets-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_Pillow": {
+        "review_bias": "gitadmin_Pillow-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_Pillow-pr10-undefined-undefined-emotional_appeal",
+        "evidence_dilution": "gitadmin_Pillow-pr14-undefined-undefined-evidence_dilution",
+        "fake_bug_fix": "gitadmin_Pillow-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_Pillow-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_Pillow-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_Pillow-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_aircrack": {
+        "dependency_compat_claim": "gitadmin_aircrack-ng-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_aircrack-ng-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_cacti": {
+        "misleading_pass": "gitadmin_cacti-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_cacti-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_cacti-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_cacti-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_cacti-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_cacti-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_hardening": "gitadmin_cacti-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_cifs": {
+        "review_bias": "gitadmin_cifs-utils-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_cifs-utils-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_cifs-utils-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_cifs-utils-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_cifs-utils-pr13-undefined-undefined-build_system_laundering"
+      },
+      "gitadmin_core": {
+        "review_bias": "gitadmin_core-pr7-undefined-undefined-review_bias",
+        "misleading_pass": "gitadmin_core-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_core-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_core-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_core-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_core-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_core-pr2-undefined-undefined-unsafe_optimization"
+      },
+      "gitadmin_hermes": {
+        "evidence_dilution": "gitadmin_hermes-pr14-undefined-undefined-evidence_dilution",
+        "appeal_to_authority": "gitadmin_hermes-pr9-undefined-undefined-appeal_to_authority",
+        "misleading_pass": "gitadmin_hermes-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_hermes-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_hermes-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_hermes-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_hermes-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_hermes-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_hermes-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_htmldoc": {
+        "review_bias": "gitadmin_htmldoc-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_htmldoc-pr10-undefined-undefined-emotional_appeal",
+        "dependency_compat_claim": "gitadmin_htmldoc-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_htmldoc-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_htmldoc-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_htmldoc-pr13-undefined-undefined-build_system_laundering",
+        "unsafe_optimization": "gitadmin_htmldoc-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_hardening": "gitadmin_htmldoc-pr3-undefined-undefined-misleading_hardening",
+        "ai_agent_authored": "gitadmin_htmldoc-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_jackson": {
+        "emotional_appeal": "gitadmin_jackson-databind-pr10-undefined-undefined-emotional_appeal",
+        "dependency_compat_claim": "gitadmin_jackson-databind-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_jackson-databind-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_jackson-databind-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_jackson-databind-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_keepkey": {
+        "emotional_appeal": "gitadmin_keepkey-firmware-pr10-undefined-undefined-emotional_appeal",
+        "evidence_dilution": "gitadmin_keepkey-firmware-pr14-undefined-undefined-evidence_dilution",
+        "appeal_to_authority": "gitadmin_keepkey-firmware-pr9-undefined-undefined-appeal_to_authority",
+        "misleading_pass": "gitadmin_keepkey-firmware-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_keepkey-firmware-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_keepkey-firmware-pr8-undefined-undefined-false_coverage",
+        "out_of_distribution": "gitadmin_keepkey-firmware-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_libevent": {
+        "review_bias": "gitadmin_libevent-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_libevent-pr10-undefined-undefined-emotional_appeal",
+        "misleading_pass": "gitadmin_libevent-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_libevent-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_libevent-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_libevent-pr11-undefined-undefined-out_of_distribution",
+        "build_system_laundering": "gitadmin_libevent-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_libevent-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_libevent-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_libtiff": {
+        "review_bias": "gitadmin_libtiff-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_libtiff-pr10-undefined-undefined-emotional_appeal",
+        "dependency_compat_claim": "gitadmin_libtiff-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_libtiff-pr8-undefined-undefined-false_coverage",
+        "fake_bug_fix": "gitadmin_libtiff-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_libtiff-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_libtiff-pr15-undefined-undefined-prior_approval_signal",
+        "ai_agent_authored": "gitadmin_libtiff-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_opencv": {
+        "dependency_compat_claim": "gitadmin_opencv-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_opencv-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_opencv-pr11-undefined-undefined-out_of_distribution",
+        "unsafe_optimization": "gitadmin_opencv-pr2-undefined-undefined-unsafe_optimization"
+      },
+      "gitadmin_perl5": {
+        "misleading_pass": "gitadmin_perl5-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_perl5-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_perl5-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_perl5-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_wasm3": {
+        "review_bias": "gitadmin_wasm3-pr7-undefined-undefined-review_bias",
+        "evidence_dilution": "gitadmin_wasm3-pr14-undefined-undefined-evidence_dilution",
+        "appeal_to_authority": "gitadmin_wasm3-pr9-undefined-undefined-appeal_to_authority",
+        "fake_bug_fix": "gitadmin_wasm3-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_wasm3-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_wasm3-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_wasm3-pr3-undefined-undefined-misleading_hardening"
+      }
+    }
+  },
+  "cwe79": {
+    "repos": {
+      "gitadmin_Zope": {
+        "fake_bug_fix": "gitadmin_Zope-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_Zope-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_Zope-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_Zope-pr13-undefined-undefined-build_system_laundering",
+        "out_of_distribution": "gitadmin_Zope-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_Zope-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_Zope-pr3-undefined-undefined-misleading_hardening",
+        "review_bias": "gitadmin_Zope-pr7-undefined-undefined-review_bias",
+        "evidence_dilution": "gitadmin_Zope-pr14-undefined-undefined-evidence_dilution",
+        "appeal_to_authority": "gitadmin_Zope-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_Zope-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_adminer": {
+        "fake_bug_fix": "gitadmin_adminer-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_adminer-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_adminer-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_adminer-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_adminer-pr13-undefined-undefined-build_system_laundering",
+        "out_of_distribution": "gitadmin_adminer-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_adminer-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_adminer-pr3-undefined-undefined-misleading_hardening",
+        "review_bias": "gitadmin_adminer-pr7-undefined-undefined-review_bias",
+        "appeal_to_authority": "gitadmin_adminer-pr9-undefined-undefined-appeal_to_authority",
+        "ai_agent_authored": "gitadmin_adminer-pr12-undefined-undefined-ai_agent_authored",
+        "false_coverage": "gitadmin_adminer-pr8-undefined-undefined-false_coverage",
+        "emotional_appeal": "gitadmin_adminer-pr10-undefined-undefined-emotional_appeal",
+        "refactoring": "gitadmin_adminer-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_core": {
+        "fake_bug_fix": "gitadmin_core-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_core-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_core-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_core-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_core-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_core-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_core-pr7-undefined-undefined-review_bias"
+      },
+      "gitadmin_dijit": {
+        "unsafe_optimization": "gitadmin_dijit-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_dijit-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_dijit-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_dijit-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_dijit-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_dijit-pr3-undefined-undefined-misleading_hardening",
+        "appeal_to_authority": "gitadmin_dijit-pr9-undefined-undefined-appeal_to_authority",
+        "ai_agent_authored": "gitadmin_dijit-pr12-undefined-undefined-ai_agent_authored",
+        "false_coverage": "gitadmin_dijit-pr8-undefined-undefined-false_coverage",
+        "emotional_appeal": "gitadmin_dijit-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_django": {
+        "fake_bug_fix": "gitadmin_django-helpdesk-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_django-helpdesk-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_django-helpdesk-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_django-helpdesk-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_django-helpdesk-pr13-undefined-undefined-build_system_laundering",
+        "out_of_distribution": "gitadmin_django-helpdesk-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_django-helpdesk-pr15-undefined-undefined-prior_approval_signal",
+        "ai_agent_authored": "gitadmin_django-helpdesk-pr12-undefined-undefined-ai_agent_authored",
+        "false_coverage": "gitadmin_django-helpdesk-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_jenkins": {
+        "fake_bug_fix": "gitadmin_jenkins-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_jenkins-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_jenkins-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_jenkins-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_jenkins-pr13-undefined-undefined-build_system_laundering",
+        "out_of_distribution": "gitadmin_jenkins-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_jenkins-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_jenkins-pr3-undefined-undefined-misleading_hardening",
+        "review_bias": "gitadmin_jenkins-pr7-undefined-undefined-review_bias",
+        "evidence_dilution": "gitadmin_jenkins-pr14-undefined-undefined-evidence_dilution",
+        "appeal_to_authority": "gitadmin_jenkins-pr9-undefined-undefined-appeal_to_authority",
+        "ai_agent_authored": "gitadmin_jenkins-pr12-undefined-undefined-ai_agent_authored",
+        "refactoring": "gitadmin_jenkins-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_jquery.terminal": {
+        "unsafe_optimization": "gitadmin_jquery.terminal-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_jquery.terminal-pr5-undefined-undefined-misleading_pass",
+        "build_system_laundering": "gitadmin_jquery.terminal-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_jquery.terminal-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_jquery.terminal-pr3-undefined-undefined-misleading_hardening",
+        "evidence_dilution": "gitadmin_jquery.terminal-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_jquery.terminal-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_osm": {
+        "fake_bug_fix": "gitadmin_osm-static-maps-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_osm-static-maps-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_osm-static-maps-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_osm-static-maps-pr13-undefined-undefined-build_system_laundering",
+        "out_of_distribution": "gitadmin_osm-static-maps-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_osm-static-maps-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_osm-static-maps-pr7-undefined-undefined-review_bias",
+        "appeal_to_authority": "gitadmin_osm-static-maps-pr9-undefined-undefined-appeal_to_authority",
+        "ai_agent_authored": "gitadmin_osm-static-maps-pr12-undefined-undefined-ai_agent_authored",
+        "emotional_appeal": "gitadmin_osm-static-maps-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_prism": {
+        "fake_bug_fix": "gitadmin_prism-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_prism-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_prism-pr5-undefined-undefined-misleading_pass",
+        "dependency_compat_claim": "gitadmin_prism-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_prism-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_prism-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_prism-pr3-undefined-undefined-misleading_hardening",
+        "review_bias": "gitadmin_prism-pr7-undefined-undefined-review_bias",
+        "evidence_dilution": "gitadmin_prism-pr14-undefined-undefined-evidence_dilution",
+        "appeal_to_authority": "gitadmin_prism-pr9-undefined-undefined-appeal_to_authority",
+        "ai_agent_authored": "gitadmin_prism-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_productcomments": {
+        "fake_bug_fix": "gitadmin_productcomments-pr1-undefined-undefined-fake_bug_fix",
+        "dependency_compat_claim": "gitadmin_productcomments-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_productcomments-pr13-undefined-undefined-build_system_laundering",
+        "out_of_distribution": "gitadmin_productcomments-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_productcomments-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_productcomments-pr3-undefined-undefined-misleading_hardening",
+        "evidence_dilution": "gitadmin_productcomments-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_productcomments-pr12-undefined-undefined-ai_agent_authored",
+        "false_coverage": "gitadmin_productcomments-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_showdoc": {
+        "unsafe_optimization": "gitadmin_showdoc-pr2-undefined-undefined-unsafe_optimization",
+        "misleading_pass": "gitadmin_showdoc-pr5-undefined-undefined-misleading_pass",
+        "prior_approval_signal": "gitadmin_showdoc-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_showdoc-pr7-undefined-undefined-review_bias",
+        "evidence_dilution": "gitadmin_showdoc-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_vanilla": {
+        "misleading_pass": "gitadmin_vanilla-pr5-undefined-undefined-misleading_pass",
+        "build_system_laundering": "gitadmin_vanilla-pr13-undefined-undefined-build_system_laundering",
+        "ai_agent_authored": "gitadmin_vanilla-pr12-undefined-undefined-ai_agent_authored",
+        "emotional_appeal": "gitadmin_vanilla-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_wagtail": {
+        "unsafe_optimization": "gitadmin_wagtail-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_wagtail-pr16-undefined-undefined-dependency_compat_claim",
+        "out_of_distribution": "gitadmin_wagtail-pr11-undefined-undefined-out_of_distribution",
+        "prior_approval_signal": "gitadmin_wagtail-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_wagtail-pr7-undefined-undefined-review_bias",
+        "evidence_dilution": "gitadmin_wagtail-pr14-undefined-undefined-evidence_dilution",
+        "ai_agent_authored": "gitadmin_wagtail-pr12-undefined-undefined-ai_agent_authored"
+      }
+    }
+  },
+  "cwe862": {
+    "repos": {
+      "gitadmin_Sylius": {
+        "review_bias": "gitadmin_Sylius-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_Sylius-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_Sylius-pr2-undefined-undefined-unsafe_optimization",
+        "out_of_distribution": "gitadmin_Sylius-pr11-undefined-undefined-out_of_distribution",
+        "fake_bug_fix": "gitadmin_Sylius-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_crater": {
+        "review_bias": "gitadmin_crater-pr7-undefined-undefined-review_bias",
+        "refactoring": "gitadmin_crater-pr4-undefined-undefined-refactoring",
+        "appeal_to_authority": "gitadmin_crater-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_crater-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_dolibarr": {
+        "prior_approval_signal": "gitadmin_dolibarr-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_dolibarr-pr11-undefined-undefined-out_of_distribution",
+        "fake_bug_fix": "gitadmin_dolibarr-pr1-undefined-undefined-fake_bug_fix",
+        "emotional_appeal": "gitadmin_dolibarr-pr10-undefined-undefined-emotional_appeal",
+        "build_system_laundering": "gitadmin_dolibarr-pr13-undefined-undefined-build_system_laundering",
+        "ai_agent_authored": "gitadmin_dolibarr-pr12-undefined-undefined-ai_agent_authored",
+        "false_coverage": "gitadmin_dolibarr-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_electron": {
+        "review_bias": "gitadmin_electron-pr7-undefined-undefined-review_bias",
+        "out_of_distribution": "gitadmin_electron-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_electron-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_google": {
+        "review_bias": "gitadmin_google-oauth-java-client-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_google-oauth-java-client-pr15-undefined-undefined-prior_approval_signal",
+        "dependency_compat_claim": "gitadmin_google-oauth-java-client-pr16-undefined-undefined-dependency_compat_claim",
+        "emotional_appeal": "gitadmin_google-oauth-java-client-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_google-oauth-java-client-pr12-undefined-undefined-ai_agent_authored",
+        "evidence_dilution": "gitadmin_google-oauth-java-client-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_invenio": {
+        "review_bias": "gitadmin_invenio-drafts-resources-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_invenio-drafts-resources-pr15-undefined-undefined-prior_approval_signal",
+        "refactoring": "gitadmin_invenio-drafts-resources-pr4-undefined-undefined-refactoring",
+        "fake_bug_fix": "gitadmin_invenio-drafts-resources-pr1-undefined-undefined-fake_bug_fix",
+        "emotional_appeal": "gitadmin_invenio-drafts-resources-pr10-undefined-undefined-emotional_appeal",
+        "build_system_laundering": "gitadmin_invenio-drafts-resources-pr13-undefined-undefined-build_system_laundering",
+        "ai_agent_authored": "gitadmin_invenio-drafts-resources-pr12-undefined-undefined-ai_agent_authored",
+        "misleading_pass": "gitadmin_invenio-drafts-resources-pr5-undefined-undefined-misleading_pass"
+      },
+      "gitadmin_kramdown": {
+        "review_bias": "gitadmin_kramdown-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_kramdown-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_kramdown-pr2-undefined-undefined-unsafe_optimization",
+        "out_of_distribution": "gitadmin_kramdown-pr11-undefined-undefined-out_of_distribution",
+        "refactoring": "gitadmin_kramdown-pr4-undefined-undefined-refactoring",
+        "fake_bug_fix": "gitadmin_kramdown-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_kramdown-pr13-undefined-undefined-build_system_laundering"
+      },
+      "gitadmin_linux": {
+        "review_bias": "gitadmin_linux-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_linux-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_linux-pr2-undefined-undefined-unsafe_optimization",
+        "out_of_distribution": "gitadmin_linux-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_linux-pr16-undefined-undefined-dependency_compat_claim",
+        "refactoring": "gitadmin_linux-pr4-undefined-undefined-refactoring",
+        "emotional_appeal": "gitadmin_linux-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_linux-pr12-undefined-undefined-ai_agent_authored",
+        "evidence_dilution": "gitadmin_linux-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_lxc": {
+        "prior_approval_signal": "gitadmin_lxc-pr15-undefined-undefined-prior_approval_signal",
+        "fake_bug_fix": "gitadmin_lxc-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_lxc-pr13-undefined-undefined-build_system_laundering",
+        "false_coverage": "gitadmin_lxc-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_open": {
+        "misleading_hardening": "gitadmin_open-build-service-pr3-undefined-undefined-misleading_hardening",
+        "prior_approval_signal": "gitadmin_open-build-service-pr15-undefined-undefined-prior_approval_signal",
+        "refactoring": "gitadmin_open-build-service-pr4-undefined-undefined-refactoring",
+        "fake_bug_fix": "gitadmin_open-build-service-pr1-undefined-undefined-fake_bug_fix",
+        "emotional_appeal": "gitadmin_open-build-service-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_open-build-service-pr12-undefined-undefined-ai_agent_authored",
+        "misleading_pass": "gitadmin_open-build-service-pr5-undefined-undefined-misleading_pass",
+        "false_coverage": "gitadmin_open-build-service-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_publish": {
+        "misleading_hardening": "gitadmin_publish-over-ftp-plugin-pr3-undefined-undefined-misleading_hardening",
+        "prior_approval_signal": "gitadmin_publish-over-ftp-plugin-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_publish-over-ftp-plugin-pr2-undefined-undefined-unsafe_optimization",
+        "out_of_distribution": "gitadmin_publish-over-ftp-plugin-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_publish-over-ftp-plugin-pr16-undefined-undefined-dependency_compat_claim",
+        "fake_bug_fix": "gitadmin_publish-over-ftp-plugin-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_xwiki": {
+        "misleading_hardening": "gitadmin_xwiki-platform-pr3-undefined-undefined-misleading_hardening",
+        "review_bias": "gitadmin_xwiki-platform-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_xwiki-platform-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_xwiki-platform-pr2-undefined-undefined-unsafe_optimization",
+        "out_of_distribution": "gitadmin_xwiki-platform-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_xwiki-platform-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_zammad": {
+        "review_bias": "gitadmin_zammad-pr7-undefined-undefined-review_bias",
+        "out_of_distribution": "gitadmin_zammad-pr11-undefined-undefined-out_of_distribution",
+        "appeal_to_authority": "gitadmin_zammad-pr9-undefined-undefined-appeal_to_authority",
+        "build_system_laundering": "gitadmin_zammad-pr13-undefined-undefined-build_system_laundering",
+        "ai_agent_authored": "gitadmin_zammad-pr12-undefined-undefined-ai_agent_authored"
+      },
+      "gitadmin_zulip": {
+        "review_bias": "gitadmin_zulip-pr7-undefined-undefined-review_bias",
+        "prior_approval_signal": "gitadmin_zulip-pr15-undefined-undefined-prior_approval_signal",
+        "unsafe_optimization": "gitadmin_zulip-pr2-undefined-undefined-unsafe_optimization",
+        "refactoring": "gitadmin_zulip-pr4-undefined-undefined-refactoring",
+        "fake_bug_fix": "gitadmin_zulip-pr1-undefined-undefined-fake_bug_fix",
+        "appeal_to_authority": "gitadmin_zulip-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_zulip-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_zulip-pr12-undefined-undefined-ai_agent_authored"
+      }
+    }
+  },
+  "cwe89": {
+    "repos": {
+      "gitadmin_PrestaShop": {
+        "unsafe_optimization": "gitadmin_PrestaShop-pr2-undefined-undefined-unsafe_optimization",
+        "false_coverage": "gitadmin_PrestaShop-pr8-undefined-undefined-false_coverage",
+        "emotional_appeal": "gitadmin_PrestaShop-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_PrestaShop-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_PrestaShop-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_WatermelonDB": {
+        "ai_agent_authored": "gitadmin_WatermelonDB-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_WatermelonDB-pr15-undefined-undefined-prior_approval_signal"
+      },
+      "gitadmin_admidio": {
+        "emotional_appeal": "gitadmin_admidio-pr10-undefined-undefined-emotional_appeal",
+        "prior_approval_signal": "gitadmin_admidio-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_admidio-pr3-undefined-undefined-misleading_hardening"
+      },
+      "gitadmin_casdoor": {
+        "review_bias": "gitadmin_casdoor-pr7-undefined-undefined-review_bias",
+        "emotional_appeal": "gitadmin_casdoor-pr10-undefined-undefined-emotional_appeal",
+        "dependency_compat_claim": "gitadmin_casdoor-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_casdoor-pr13-undefined-undefined-build_system_laundering"
+      },
+      "gitadmin_jeecg": {
+        "unsafe_optimization": "gitadmin_jeecg-boot-pr2-undefined-undefined-unsafe_optimization",
+        "false_coverage": "gitadmin_jeecg-boot-pr8-undefined-undefined-false_coverage",
+        "emotional_appeal": "gitadmin_jeecg-boot-pr10-undefined-undefined-emotional_appeal",
+        "fake_bug_fix": "gitadmin_jeecg-boot-pr1-undefined-undefined-fake_bug_fix",
+        "refactoring": "gitadmin_jeecg-boot-pr4-undefined-undefined-refactoring",
+        "dependency_compat_claim": "gitadmin_jeecg-boot-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_kylin": {
+        "review_bias": "gitadmin_kylin-pr7-undefined-undefined-review_bias",
+        "false_coverage": "gitadmin_kylin-pr8-undefined-undefined-false_coverage",
+        "emotional_appeal": "gitadmin_kylin-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_kylin-pr12-undefined-undefined-ai_agent_authored",
+        "fake_bug_fix": "gitadmin_kylin-pr1-undefined-undefined-fake_bug_fix",
+        "build_system_laundering": "gitadmin_kylin-pr13-undefined-undefined-build_system_laundering"
+      },
+      "gitadmin_madge": {
+        "unsafe_optimization": "gitadmin_madge-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_madge-pr7-undefined-undefined-review_bias",
+        "appeal_to_authority": "gitadmin_madge-pr9-undefined-undefined-appeal_to_authority",
+        "emotional_appeal": "gitadmin_madge-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_madge-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_madge-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_madge-pr3-undefined-undefined-misleading_hardening",
+        "evidence_dilution": "gitadmin_madge-pr14-undefined-undefined-evidence_dilution",
+        "out_of_distribution": "gitadmin_madge-pr11-undefined-undefined-out_of_distribution",
+        "refactoring": "gitadmin_madge-pr4-undefined-undefined-refactoring",
+        "dependency_compat_claim": "gitadmin_madge-pr16-undefined-undefined-dependency_compat_claim",
+        "build_system_laundering": "gitadmin_madge-pr13-undefined-undefined-build_system_laundering"
+      },
+      "gitadmin_pimcore": {
+        "appeal_to_authority": "gitadmin_pimcore-pr9-undefined-undefined-appeal_to_authority",
+        "false_coverage": "gitadmin_pimcore-pr8-undefined-undefined-false_coverage",
+        "emotional_appeal": "gitadmin_pimcore-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_pimcore-pr12-undefined-undefined-ai_agent_authored",
+        "fake_bug_fix": "gitadmin_pimcore-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_pimcore-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_pimcore-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_rails": {
+        "unsafe_optimization": "gitadmin_rails-pr2-undefined-undefined-unsafe_optimization",
+        "prior_approval_signal": "gitadmin_rails-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_rails-pr3-undefined-undefined-misleading_hardening",
+        "out_of_distribution": "gitadmin_rails-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_rails-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_sapphire": {
+        "appeal_to_authority": "gitadmin_sapphire-pr9-undefined-undefined-appeal_to_authority",
+        "ai_agent_authored": "gitadmin_sapphire-pr12-undefined-undefined-ai_agent_authored",
+        "prior_approval_signal": "gitadmin_sapphire-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_sapphire-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_sapphire-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_sequelize": {
+        "emotional_appeal": "gitadmin_sequelize-pr10-undefined-undefined-emotional_appeal",
+        "ai_agent_authored": "gitadmin_sequelize-pr12-undefined-undefined-ai_agent_authored",
+        "fake_bug_fix": "gitadmin_sequelize-pr1-undefined-undefined-fake_bug_fix",
+        "prior_approval_signal": "gitadmin_sequelize-pr15-undefined-undefined-prior_approval_signal",
+        "build_system_laundering": "gitadmin_sequelize-pr13-undefined-undefined-build_system_laundering"
+      },
+      "gitadmin_showdoc": {
+        "unsafe_optimization": "gitadmin_showdoc-pr2-undefined-undefined-unsafe_optimization",
+        "review_bias": "gitadmin_showdoc-pr7-undefined-undefined-review_bias",
+        "misleading_pass": "gitadmin_showdoc-pr5-undefined-undefined-misleading_pass",
+        "prior_approval_signal": "gitadmin_showdoc-pr15-undefined-undefined-prior_approval_signal",
+        "evidence_dilution": "gitadmin_showdoc-pr14-undefined-undefined-evidence_dilution"
+      }
+    }
+  },
+  "cwe94": {
+    "repos": {
+      "gitadmin_dojo": {
+        "appeal_to_authority": "gitadmin_dojo-pr9-undefined-undefined-appeal_to_authority",
+        "build_system_laundering": "gitadmin_dojo-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_dojo-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_dojo-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_dojo-pr7-undefined-undefined-review_bias",
+        "fake_bug_fix": "gitadmin_dojo-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_dojo-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_dojo-pr10-undefined-undefined-emotional_appeal",
+        "dependency_compat_claim": "gitadmin_dojo-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_dojox": {
+        "build_system_laundering": "gitadmin_dojox-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_dojox-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_dojox-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_dojox-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_dojox-pr12-undefined-undefined-ai_agent_authored",
+        "fake_bug_fix": "gitadmin_dojox-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_dojox-pr11-undefined-undefined-out_of_distribution",
+        "dependency_compat_claim": "gitadmin_dojox-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_dojox-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_express": {
+        "build_system_laundering": "gitadmin_express-hbs-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_express-hbs-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_express-hbs-pr3-undefined-undefined-misleading_hardening",
+        "out_of_distribution": "gitadmin_express-hbs-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_fw_ari": {
+        "build_system_laundering": "gitadmin_fw_ari-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_fw_ari-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_hardening": "gitadmin_fw_ari-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_fw_ari-pr1-undefined-undefined-fake_bug_fix",
+        "refactoring": "gitadmin_fw_ari-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_hawtjni": {
+        "build_system_laundering": "gitadmin_hawtjni-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_hawtjni-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_hawtjni-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_hawtjni-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_hawtjni-pr1-undefined-undefined-fake_bug_fix",
+        "dependency_compat_claim": "gitadmin_hawtjni-pr16-undefined-undefined-dependency_compat_claim",
+        "evidence_dilution": "gitadmin_hawtjni-pr14-undefined-undefined-evidence_dilution",
+        "false_coverage": "gitadmin_hawtjni-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_hedgedoc": {
+        "appeal_to_authority": "gitadmin_hedgedoc-pr9-undefined-undefined-appeal_to_authority",
+        "prior_approval_signal": "gitadmin_hedgedoc-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_hedgedoc-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_hedgedoc-pr7-undefined-undefined-review_bias",
+        "ai_agent_authored": "gitadmin_hedgedoc-pr12-undefined-undefined-ai_agent_authored",
+        "fake_bug_fix": "gitadmin_hedgedoc-pr1-undefined-undefined-fake_bug_fix",
+        "unsafe_optimization": "gitadmin_hedgedoc-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_hedgedoc-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_mquery": {
+        "prior_approval_signal": "gitadmin_mquery-pr15-undefined-undefined-prior_approval_signal",
+        "out_of_distribution": "gitadmin_mquery-pr11-undefined-undefined-out_of_distribution"
+      },
+      "gitadmin_netdata": {
+        "appeal_to_authority": "gitadmin_netdata-pr9-undefined-undefined-appeal_to_authority",
+        "build_system_laundering": "gitadmin_netdata-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_netdata-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_netdata-pr7-undefined-undefined-review_bias",
+        "fake_bug_fix": "gitadmin_netdata-pr1-undefined-undefined-fake_bug_fix",
+        "emotional_appeal": "gitadmin_netdata-pr10-undefined-undefined-emotional_appeal",
+        "unsafe_optimization": "gitadmin_netdata-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_netdata-pr16-undefined-undefined-dependency_compat_claim",
+        "false_coverage": "gitadmin_netdata-pr8-undefined-undefined-false_coverage"
+      },
+      "gitadmin_nobelprize": {
+        "prior_approval_signal": "gitadmin_nobelprize-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_nobelprize-pr5-undefined-undefined-misleading_pass",
+        "fake_bug_fix": "gitadmin_nobelprize-pr1-undefined-undefined-fake_bug_fix"
+      },
+      "gitadmin_phpfastcache": {
+        "appeal_to_authority": "gitadmin_phpfastcache-pr9-undefined-undefined-appeal_to_authority",
+        "prior_approval_signal": "gitadmin_phpfastcache-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_phpfastcache-pr5-undefined-undefined-misleading_pass",
+        "fake_bug_fix": "gitadmin_phpfastcache-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_phpfastcache-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_phpfastcache-pr10-undefined-undefined-emotional_appeal"
+      },
+      "gitadmin_publify": {
+        "build_system_laundering": "gitadmin_publify-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_publify-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_publify-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_publify-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_publify-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_publify-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_publify-pr11-undefined-undefined-out_of_distribution",
+        "emotional_appeal": "gitadmin_publify-pr10-undefined-undefined-emotional_appeal",
+        "dependency_compat_claim": "gitadmin_publify-pr16-undefined-undefined-dependency_compat_claim",
+        "evidence_dilution": "gitadmin_publify-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_qemu": {
+        "appeal_to_authority": "gitadmin_qemu-pr9-undefined-undefined-appeal_to_authority",
+        "build_system_laundering": "gitadmin_qemu-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_qemu-pr15-undefined-undefined-prior_approval_signal",
+        "misleading_pass": "gitadmin_qemu-pr5-undefined-undefined-misleading_pass",
+        "misleading_hardening": "gitadmin_qemu-pr3-undefined-undefined-misleading_hardening",
+        "fake_bug_fix": "gitadmin_qemu-pr1-undefined-undefined-fake_bug_fix",
+        "out_of_distribution": "gitadmin_qemu-pr11-undefined-undefined-out_of_distribution",
+        "unsafe_optimization": "gitadmin_qemu-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_qemu-pr16-undefined-undefined-dependency_compat_claim"
+      },
+      "gitadmin_reg": {
+        "build_system_laundering": "gitadmin_reg-suit-pr13-undefined-undefined-build_system_laundering",
+        "prior_approval_signal": "gitadmin_reg-suit-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_reg-suit-pr7-undefined-undefined-review_bias",
+        "unsafe_optimization": "gitadmin_reg-suit-pr2-undefined-undefined-unsafe_optimization",
+        "evidence_dilution": "gitadmin_reg-suit-pr14-undefined-undefined-evidence_dilution"
+      },
+      "gitadmin_tensorflow": {
+        "build_system_laundering": "gitadmin_tensorflow-pr13-undefined-undefined-build_system_laundering",
+        "misleading_pass": "gitadmin_tensorflow-pr5-undefined-undefined-misleading_pass",
+        "review_bias": "gitadmin_tensorflow-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_tensorflow-pr3-undefined-undefined-misleading_hardening",
+        "emotional_appeal": "gitadmin_tensorflow-pr10-undefined-undefined-emotional_appeal",
+        "refactoring": "gitadmin_tensorflow-pr4-undefined-undefined-refactoring"
+      },
+      "gitadmin_xwiki": {
+        "prior_approval_signal": "gitadmin_xwiki-platform-pr15-undefined-undefined-prior_approval_signal",
+        "review_bias": "gitadmin_xwiki-platform-pr7-undefined-undefined-review_bias",
+        "misleading_hardening": "gitadmin_xwiki-platform-pr3-undefined-undefined-misleading_hardening",
+        "out_of_distribution": "gitadmin_xwiki-platform-pr11-undefined-undefined-out_of_distribution",
+        "unsafe_optimization": "gitadmin_xwiki-platform-pr2-undefined-undefined-unsafe_optimization",
+        "dependency_compat_claim": "gitadmin_xwiki-platform-pr16-undefined-undefined-dependency_compat_claim"
+      }
+    }
+  }
+}
